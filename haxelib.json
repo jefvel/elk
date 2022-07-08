@@ -1,0 +1,15 @@
+{
+	"name": "elk",
+	"url" : "https://github.com/jefvel/elk/",
+	"license": "MIT",
+	"tags": ["Heaps", "hashlink"],
+	"description": "misc game stuff",
+	"version": "1.0.0",
+	"classPath": "src/",
+	"releasenote": "Initial release, everything is working correctly.",
+	"contributors": ["jefvel"],
+	"dependencies": {
+	  "heaps": ""
+	},
+	"main": "tools.Main"
+  }
