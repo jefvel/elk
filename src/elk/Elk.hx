@@ -55,6 +55,11 @@ class Elk extends hxd.App {
 	}
 	
 	function initRenderer() {
+		// Image filtering set to nearest sharp pixel graphics.
+		// If you don't want crisp pixel graphics you can just
+		// remove this
+		hxd.res.Image.DEFAULT_FILTER = Nearest;
+
 		#if js
 		// This causes the game to not be super small on high DPI mobile screens
 		hxd.Window.getInstance().useScreenPixels = false;
