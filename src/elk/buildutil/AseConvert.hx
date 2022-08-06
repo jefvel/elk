@@ -103,7 +103,7 @@ class AseConvert extends hxd.fs.Convert {
 			'-b',
 			srcPath,
 			'--data', '$dstPath',
-			'--sheet', '$srcDir/.generated/$imageName',
+			'--sheet', '$srcDir/generated/$imageName',
 			'--format', 'json-array',
         	'--list-tags',
 			'--shape-padding', '$spacing',

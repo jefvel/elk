@@ -6,7 +6,7 @@ class AsepriteRes extends hxd.res.Resource {
 	var imgPath: String;
 	public function new(entry) {
 		super(entry);
-		imgPath = haxe.io.Path.directory(entry.path) + '/.generated/' + haxe.io.Path.withExtension(entry.name, 'png');
+		imgPath = haxe.io.Path.directory(entry.path) + '/generated/' + haxe.io.Path.withExtension(entry.name, 'png');
 	}
 
 	function toImage(): hxd.res.Image {

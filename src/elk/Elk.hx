@@ -36,6 +36,7 @@ class Elk extends hxd.App {
 		hxd.Timer.reset();
 		
 		initResources();
+		initRenderer();
 
 		states = new GameStateHandler();
 		entities = new EntityManager();
@@ -50,6 +51,13 @@ class Elk extends hxd.App {
 		hxd.res.Resource.LIVE_UPDATE = true;
 		#else
 		hxd.Res.initEmbed();
+		#end
+	}
+	
+	function initRenderer() {
+		#if js
+		// This causes the game to not be super small on high DPI mobile screens
+		hxd.Window.getInstance().useScreenPixels = false;
 		#end
 	}
 	
