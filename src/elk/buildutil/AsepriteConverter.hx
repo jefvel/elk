@@ -1,7 +1,10 @@
 package elk.buildutil;
 
+#if sys
 import sys.io.File;
 import sys.FileSystem;
+#end
+
 import haxe.io.Path;
 
 typedef AseLayerInfo = {
@@ -26,10 +29,9 @@ class AsepriteConverter {
     }
 
     public static function doNothing() {}
-
-    public static function exportTileSheets() {
-        Sys.println("Generating assets...");
-        var startTime = Sys.time();
+    
+    static function getAsepritePath() {
+        #if sys
         #if macro
         var def = haxe.macro.Context.definedValue("asepritePath");
         #else
@@ -46,15 +48,25 @@ class AsepriteConverter {
                 default: asePath = defaultAsePath;
             }
         }
+        #end
+    }
+
+    public static function exportTileSheets() {
+        #if sys
+        Sys.println("Generating assets...");
+        var startTime = Sys.time();
+        getAsepritePath();
 
         recursiveLook("res/");
 
         var duration = ("" + (Sys.time() - startTime)).substr(0, 4);
 
         Sys.println('\u001b[1A\u001b[2K\u001b[32mFinished\u001b[0m [${duration}s]');
+        #end
     }
 
     static function recursiveLook(directory) {
+        #if sys
         if (sys.FileSystem.exists(directory)) {
             var files = sys.FileSystem.readDirectory(directory);
             for (file in files) {
@@ -76,29 +88,40 @@ class AsepriteConverter {
                 }
             }
         }
+        #end
     }
 
     static function generateNormalAseFile(aseFilePath : String, destPath : String) {
+      #if sys
       var bytes = new haxe.io.BytesInput(sys.io.File.getBytes(aseFilePath));
 
       var size = bytes.readInt32();
       var num = bytes.readUInt16() == 0xA5E0;
       var frames = bytes.readUInt16();
 
+      bytes.close();
+
       if (frames == 1) {
         convertAseFile(aseFilePath, destPath, { sheet: false });
       } else {
         convertAseFile(aseFilePath, destPath);
       }
+      #end
     }
 
     static var l = 0;
+    
+    public static function convertAsepriteFile(aseFilePath: String, destPath: String) {
+        getAsepritePath();
+        return convertAseFile(aseFilePath, destPath);
+    }
 
     static function convertAseFile(filePath : String, destPath : String, ?options : AseOptions = null) {
+        #if sys
         var spacing = 1;
 
         var input = '-b $filePath';
-        var jsonOutput = '--data $destPath.tilesheet';
+        var jsonOutput = '--data $destPath';
         var pngOutput = '--sheet $destPath.png';
         var format = '--format json-array';
         var type = '--sheet-type packed';
@@ -141,9 +164,12 @@ class AsepriteConverter {
 
         l = ++l % loaders.length;
         Sys.println('\u001b[1A\u001b[2K\u001b[35m${loaders.charAt(l)}\u001b[0m Generating $destPath');
-        Sys.command(cmd);
+        trace(cmd);
+        trace(Sys.command(cmd));
+        #end
     }
 
+/*
     static function getAsepriteLayerData(aseFilePath : String) {
         var tmpFile = Sys.getCwd() + "tmp.tmp";
         var cmd = '"$asePath" -b --list-layers --all-layers $aseFilePath --data $tmpFile';
@@ -153,4 +179,5 @@ class AsepriteConverter {
         //FileSystem.deleteFile(tmpFile);
         //return c.meta.layers;
     }
+    */
 }

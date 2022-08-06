@@ -1,5 +1,7 @@
 package elk;
 
+import elk.buildutil.AseConvert;
+
 import elk.gamestate.GameStateHandler;
 import elk.entity.EntityManager;
 import elk.sound.SoundHandler;
