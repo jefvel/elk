@@ -1,10 +1,19 @@
-package elk.buildutil;
+package elk.aseprite;
+
 import elk.aseprite.AsepriteData;
+
+private typedef AsepriteBounds = {
+	var x: Int;
+	var y: Int;
+	var w: Int;
+	var h: Int;
+}
 
 private typedef AsepriteFrame = {
 	var duration: Int;
 	var sourceSize: { w: Int, h: Int };
-	var frame: { x: Int, y: Int, w: Int, h: Int };
+	var frame: AsepriteBounds;
+	var spriteSourceSize: AsepriteBounds;
 }
 
 private typedef AsepriteFrameTag = {
@@ -16,7 +25,7 @@ private typedef AsepriteFrameTag = {
 
 private typedef AsepriteSliceKey = {
 	var frame:Int;
-	var bounds: { x: Int, y: Int, w: Int, h: Int};
+	var bounds: AsepriteBounds;
 }
 
 private typedef AsepriteSlice = {
@@ -37,7 +46,7 @@ private typedef AsepriteJsonFile = {
 }
 
 #if (sys || nodejs)
-class AseConvert extends hxd.fs.Convert {
+class AsepriteConvert extends hxd.fs.Convert {
 	static var asepritePath: String = null;
     function new() {
         super("aseprite,ase","asedata"); // converts .aseprite files to .asedata
@@ -69,7 +78,6 @@ class AseConvert extends hxd.fs.Convert {
     }
 
     override function convert() {
-		//AsepriteConverter.convertAsepriteFile(srcPath, dstPath);
 		getAsepritePath();
 
         var spacing = 1;
@@ -149,6 +157,8 @@ class AseConvert extends hxd.fs.Convert {
 				y: frame.y,
 				w: frame.w,
 				h: frame.h,
+				dx: f.spriteSourceSize.x,
+				dy: f.spriteSourceSize.y,
 				duration: f.duration,
 			});
 		}
@@ -214,6 +224,6 @@ class AseConvert extends hxd.fs.Convert {
 	}
 
     // register the convert so it can be found
-    static var _ = hxd.fs.Convert.register(new AseConvert());
+    static var _ = hxd.fs.Convert.register(new AsepriteConvert());
 }
 #end

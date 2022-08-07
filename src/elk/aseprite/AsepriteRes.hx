@@ -4,9 +4,19 @@ import h3d.mat.Texture;
 
 class AsepriteRes extends hxd.res.Resource {
 	var imgPath: String;
+	var rootTile: h2d.Tile;
+	var aseData: AsepriteData;
+	var tiles: Array<h2d.Tile>;
+
 	public function new(entry) {
 		super(entry);
 		imgPath = haxe.io.Path.directory(entry.path) + '/generated/' + haxe.io.Path.withExtension(entry.name, 'png');
+		tiles = [];
+	}
+	
+	public function replaceTile(rootTile: h2d.Tile) {
+		this.rootTile = rootTile;
+		generateFrameTiles();
 	}
 
 	function toImage(): hxd.res.Image {
@@ -14,8 +24,47 @@ class AsepriteRes extends hxd.res.Resource {
 	}
 	
 	public function toAseData() {
-		var res: AsepriteData = haxe.Unserializer.run(entry.getText());
-		return res;
+		if (aseData != null) {
+			return aseData;
+		}
+
+		aseData = haxe.Unserializer.run(entry.getText());
+		if (rootTile == null) {
+			replaceTile(toTile());
+		}
+		
+		aseData.rootTile = rootTile;
+
+		return aseData;
+	}
+	
+	function generateFrameTiles() {
+		for (i in 0...aseData.frames.length) {
+			var frame = aseData.frames[i];
+			var dx = frame.dx;
+			var dy = frame.dy;
+			var tile = rootTile.sub(frame.x, frame.y, frame.w, frame.h, dx, dy);
+			frame.tile = tile;
+			frame.slices = getSlicesForFrame(i);
+		}
+	}
+	
+	function getSlicesForFrame(frame: Int) {
+		var slices = new Map<String, elk.aseprite.AsepriteData.AseDataSliceKey>();
+		var empty = true;
+		for (name => slice in aseData.slices) {
+			for (s in slice.keys) {
+				if (s.frame == frame) {
+					slices[name] = s;
+					empty = false;
+					break;
+				}
+			}
+		}
+		
+		if (empty) return null;
+		
+		return slices;
 	}
 	
 	public function toTile(): h2d.Tile {

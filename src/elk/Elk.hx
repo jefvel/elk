@@ -1,6 +1,6 @@
 package elk;
 
-import elk.buildutil.AseConvert;
+import elk.aseprite.AsepriteConvert;
 
 import elk.gamestate.GameStateHandler;
 import elk.entity.EntityManager;

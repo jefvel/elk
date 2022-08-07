@@ -1,6 +1,6 @@
 package elk.buildutil;
 
-import elk.buildutil.AseConvert;
+import elk.aseprite.AsepriteConvert;
 
 class Config {
 	static function initConfig() {

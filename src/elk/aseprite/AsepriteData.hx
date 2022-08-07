@@ -12,7 +12,14 @@ class AseDataFrame {
 	public var y:Int;
 	public var w:Int;
 	public var h:Int;
+	
+	public var dx: Int;
+	public var dy: Int;
+
 	public var duration:Int;
+
+	public var tile: h2d.Tile = null;
+	public var slices: Map<String, AseDataSliceKey> = null;
 }
 
 @:structInit
@@ -50,6 +57,8 @@ class AsepriteData {
 	public var slices: Map<String, AseDataSlice>;
 	
 	public var totalDuration: Float = 0.;
+	
+	public var rootTile:h2d.Tile;
 
 	public function new() {
 		
