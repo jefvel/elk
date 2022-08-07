@@ -297,11 +297,14 @@ class RetroShader extends ScreenShader {
 
 			pixelColor = vec4(color.rgb * mix(vec3(1), mask, maskPower), 1.0) + vec4(0.03, 0.03, 0.04, 0);
 
-			var noisePos = pos * windowRes.xy;
-			var t = fract(time * 100) * windowRes.y;
-			noisePos.y += t;
-			var noise = 0.015 * vec3(noise(noisePos / 3.0), noise(noisePos / 3.0 + 100), noise(noisePos / 3.0 + 400));
-			pixelColor.rgb -= noise * noisePower;
+
+			if (noisePower > 0) {
+				var noisePos = pos * windowRes.xy;
+				var t = fract(time * 100) * windowRes.y;
+				noisePos.y += t;
+				var noise = 0.015 * vec3(noise(noisePos / 3.0), noise(noisePos / 3.0 + 100), noise(noisePos / 3.0 + 400));
+				pixelColor.rgb -= noise * noisePower;
+			}
 
 			pixelColor.rgb *= s;
 		}

@@ -47,6 +47,10 @@ class RetroFilter extends Filter {
 		super();
 		smooth = true;
 		pass = new RetroPass(radius, gain, linear, quality);
+		useScreenResolution = true;
+		pass.radius = 0;
+		pass.linear = 0;
+		pass.sharpness = 0.1;
 	}
 
 	inline function get_quality() return pass.quality;

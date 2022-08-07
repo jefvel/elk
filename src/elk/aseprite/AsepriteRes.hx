@@ -17,6 +17,7 @@ class AsepriteRes extends hxd.res.Resource {
 	
 	public function replaceTile(rootTile: h2d.Tile) {
 		this.rootTile = rootTile;
+		aseData.rootTile = rootTile;
 		generateFrameTiles();
 	}
 
@@ -34,9 +35,15 @@ class AsepriteRes extends hxd.res.Resource {
 			replaceTile(toTile());
 		}
 		
-		aseData.rootTile = rootTile;
+		if (hxd.res.Resource.LIVE_UPDATE) {
+			watch(refresh);
+		}
 
 		return aseData;
+	}
+	
+	function refresh() {
+		replaceTile(toTile());
 	}
 	
 	public function toAnimation() {
