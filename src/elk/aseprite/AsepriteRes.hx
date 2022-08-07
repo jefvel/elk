@@ -1,5 +1,6 @@
 package elk.aseprite;
 
+import elk.graphics.Animation;
 import h3d.mat.Texture;
 
 class AsepriteRes extends hxd.res.Resource {
@@ -36,6 +37,15 @@ class AsepriteRes extends hxd.res.Resource {
 		aseData.rootTile = rootTile;
 
 		return aseData;
+	}
+	
+	public function toAnimation() {
+		var data = toAseData();
+		return new Animation(data);
+	}
+	
+	public function toSprite(?p: h2d.Object) {
+		return new elk.graphics.Sprite(toAnimation(), p);
 	}
 	
 	function generateFrameTiles() {

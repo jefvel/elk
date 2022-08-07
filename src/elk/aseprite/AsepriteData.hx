@@ -61,6 +61,5 @@ class AsepriteData {
 	public var rootTile:h2d.Tile;
 
 	public function new() {
-		
 	}
 }

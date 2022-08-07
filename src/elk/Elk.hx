@@ -11,7 +11,7 @@ import h3d.Engine;
 class Elk extends hxd.App {
 	public static var instance: Elk = null;
 	
-	public var pixelSize = 2;
+	public var pixelSize(default, set) = 2;
 
 	public var time = 0.; 
 	public var tickRate(default, set) = 60;
@@ -26,21 +26,29 @@ class Elk extends hxd.App {
 	public var entities: EntityManager;
 	public var states: GameStateHandler;
 	public var sounds: SoundHandler;
+	
+	public var windowWidth = 0;
+	public var windowHeight = 0;
 
 	public function new(tickRate = 60) {
 		super();
 		instance = this;
-
 		this.tickRate = tickRate;
+
+		initRenderer();
+		initResources();
+	}
+	
+	override function init() {
+		super.init();
 
 		hxd.Timer.reset();
 		
-		initResources();
-		initRenderer();
-
 		states = new GameStateHandler();
 		entities = new EntityManager();
 		sounds = new SoundHandler();
+		
+		onResize();
 	}
 	
 	static function initResources() {
@@ -52,6 +60,20 @@ class Elk extends hxd.App {
 		#else
 		hxd.Res.initEmbed();
 		#end
+	}
+	
+	override function onResize() {
+		super.onResize();
+		
+		var s = hxd.Window.getInstance();
+		
+		var w = Std.int(s.width / pixelSize);
+		var h = Std.int(s.height / pixelSize);
+
+		this.windowWidth = w;
+		this.windowHeight = h;
+
+		s2d.scaleMode = ScaleMode.Stretch(w, h);
 	}
 	
 	function initRenderer() {
@@ -97,5 +119,9 @@ class Elk extends hxd.App {
 		rate = hxd.Math.iclamp(rate, 1, 999);
 		frameTime = 1 / rate;
 		return tickRate = rate;
+	}
+	
+	function set_pixelSize(size: Int) {
+		return pixelSize = size;
 	}
 }
