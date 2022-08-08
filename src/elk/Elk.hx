@@ -16,7 +16,7 @@ class Elk extends hxd.App {
 	public var time = 0.; 
 	public var tickRate(default, set) = 60;
 	public var currentTickElapsed = 0.;
-	public var timeScale = 1.0;
+	public var timeScale(get, set): Float;
 
 	var frameTime = 0.;
 
@@ -93,23 +93,9 @@ class Elk extends hxd.App {
 	
 	public override function update(dt: Float) {
 		super.update(dt);
-
-		var scaledDt = dt * timeScale;
 		
-		time += scaledDt;
-		accumulatedTime += scaledDt;
+		Process._runUpdate(dt);
 
-		currentTickElapsed = hxd.Math.clamp(accumulatedTime / frameTime);
-
-		while (accumulatedTime >= frameTime) {
-			accumulatedTime -= frameTime;
-			entities.tick(frameTime);
-			states.tick(frameTime);
-		}
-
-		currentTickElapsed = hxd.Math.clamp(accumulatedTime / frameTime);
-
-		states.update(dt);
 	}
 
 	override function render(e:Engine) {
@@ -126,5 +112,13 @@ class Elk extends hxd.App {
 	
 	function set_pixelSize(size: Int) {
 		return pixelSize = size;
+	}
+	
+	function get_timeScale() {
+		return Process.timeScale;
+	}
+
+	function set_timeScale(s) {
+		return Process.timeScale = s;
 	}
 }

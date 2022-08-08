@@ -15,10 +15,10 @@ class AsepriteRes extends hxd.res.Resource {
 		tiles = [];
 	}
 	
-	public function replaceTile(rootTile: h2d.Tile) {
+	public function replaceTile(rootTile: h2d.Tile, data: AsepriteData) {
 		this.rootTile = rootTile;
-		aseData.rootTile = rootTile;
-		generateFrameTiles();
+		data.rootTile = rootTile;
+		generateFrameTiles(data);
 	}
 
 	function toImage(): hxd.res.Image {
@@ -32,7 +32,7 @@ class AsepriteRes extends hxd.res.Resource {
 
 		aseData = haxe.Unserializer.run(entry.getText());
 		if (rootTile == null) {
-			replaceTile(toTile());
+			replaceTile(toTile(), aseData);
 		}
 		
 		if (hxd.res.Resource.LIVE_UPDATE) {
@@ -43,7 +43,11 @@ class AsepriteRes extends hxd.res.Resource {
 	}
 	
 	function refresh() {
-		replaceTile(toTile());
+		haxe.Timer.delay(() -> {
+			var newData: AsepriteData = haxe.Unserializer.run(entry.getText());
+			replaceTile(toTile(), newData);
+			aseData.copyFrom(newData);
+		}, 100);
 	}
 	
 	public function toAnimation() {
@@ -55,9 +59,9 @@ class AsepriteRes extends hxd.res.Resource {
 		return new elk.graphics.Sprite(toAnimation(), p);
 	}
 	
-	function generateFrameTiles() {
-		for (i in 0...aseData.frames.length) {
-			var frame = aseData.frames[i];
+	function generateFrameTiles(data: AsepriteData) {
+		for (i in 0...data.frames.length) {
+			var frame = data.frames[i];
 			var dx = frame.dx;
 			var dy = frame.dy;
 			var tile = rootTile.sub(frame.x, frame.y, frame.w, frame.h, dx, dy);

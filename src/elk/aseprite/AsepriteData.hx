@@ -69,5 +69,31 @@ class AsepriteData {
 		
 		totalDuration = data.totalDuration;
 		rootTile = data.rootTile;
+
+		for (i in 0...data.frames.length) {
+			var oldFrame = frames[i];
+			var newFrame = data.frames[i];
+			if (oldFrame == null) {
+				 frames.push(newFrame);
+			} else {
+				oldFrame.x = newFrame.x;
+				oldFrame.y = newFrame.y;
+				oldFrame.duration = newFrame.duration;
+				oldFrame.dx = newFrame.dx;
+				oldFrame.dy = newFrame.dy;
+				oldFrame.slices = newFrame.slices;
+				oldFrame.tile = newFrame.tile;
+				oldFrame.w = newFrame.w;
+				oldFrame.h = newFrame.h;
+			}
+		}
+
+		if (data.frames.length < frames.length) {
+			frames.splice(data.frames.length, -1);
+		}
+		
+		tags = data.tags;
+		slices = data.slices;
+		
 	}
 }

@@ -3,7 +3,7 @@ package elk.entity;
 class EntityManager extends elk.Process {
 	public var entities: Array<Entity> = [];
 	public function new() {
-		
+		super();
 	}
 	
 	public function add(e:Entity) {

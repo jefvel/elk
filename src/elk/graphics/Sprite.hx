@@ -6,6 +6,8 @@ import h2d.Bitmap;
 
 class Sprite extends Bitmap {
 	public var animation: Animation;
+	
+	public var useGlobalTimeScale = true;
 
 	var lastTile: Tile = null;
 	var dirty = false;
@@ -37,7 +39,12 @@ class Sprite extends Bitmap {
 	}
 	
 	override function sync(ctx:RenderContext) {
-		animation.update(ctx.elapsedTime);
+		var dt = ctx.elapsedTime;
+		if (useGlobalTimeScale) {
+			dt *= elk.Process.timeScale;
+		}
+
+		animation.update(dt);
 
 		if (parent == null) {
 			return;

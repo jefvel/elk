@@ -41,12 +41,12 @@ class Entity {
 	}
 	
 	inline function get_interpX() {
-		var g = elk.Elk.instance.currentTickElapsed;
+		var g = elk.Process.currentTickElapsed;
 		return hxd.Math.lerp(_prevX, x, g);
 	}
 
 	inline function get_interpY() {
-		var g = elk.Elk.instance.currentTickElapsed;
+		var g = elk.Process.currentTickElapsed;
 		return hxd.Math.lerp(_prevY, y, g);
 	}
 

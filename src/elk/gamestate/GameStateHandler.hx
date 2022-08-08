@@ -1,16 +1,18 @@
 package elk.gamestate;
 
-class GameStateHandler {
+class GameStateHandler extends elk.Process {
 	public var current(default, set):GameState = null;
 
-	public function new() {}
+	public function new() {
+		super();
+	}
 
-	public function tick(dt:Float) {
+	public override function tick(dt:Float) {
 		if (current != null)
 			current.tick(dt);
 	}
 
-	public function update(dt:Float) {
+	public override function update(dt:Float) {
 		if (current != null)
 			current.update(dt);
 	}
