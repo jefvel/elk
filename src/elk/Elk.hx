@@ -29,6 +29,8 @@ class Elk extends hxd.App {
 	
 	public var windowWidth = 0;
 	public var windowHeight = 0;
+	
+	public var drawCalls = 0;
 
 	public function new(tickRate = 60) {
 		super();
@@ -113,6 +115,7 @@ class Elk extends hxd.App {
 	override function render(e:Engine) {
 		super.render(e);
 		entities.render();
+		drawCalls = e.drawCalls;
 	}
 	
 	function set_tickRate(rate: Int) {

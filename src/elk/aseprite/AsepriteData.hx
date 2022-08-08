@@ -62,4 +62,12 @@ class AsepriteData {
 
 	public function new() {
 	}
+	
+	public function copyFrom(data: AsepriteData) {
+		width = data.width;
+		height = data.height;
+		
+		totalDuration = data.totalDuration;
+		rootTile = data.rootTile;
+	}
 }
