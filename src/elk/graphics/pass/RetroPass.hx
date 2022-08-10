@@ -440,7 +440,7 @@ class RetroPass extends ScreenFx<RetroShader> {
 			if( output != null ) h3d.pass.Copy.run(src, output);
 			return;
 		}
-
+		
 		if( output == null ) output = src;
 		if( values == null ) calcValues();
 

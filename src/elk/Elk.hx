@@ -13,15 +13,8 @@ class Elk extends hxd.App {
 	
 	public var pixelSize(default, set) = 2;
 
-	public var time = 0.; 
-	public var tickRate(default, set) = 60;
-	public var currentTickElapsed = 0.;
+	public var tickRate(get, set): Int;
 	public var timeScale(get, set): Float;
-
-	var frameTime = 0.;
-
-	var accumulatedTime = 0.;
-	var maxAccumulatedTime = 2.;
 
 	public var entities: EntityManager;
 	public var states: GameStateHandler;
@@ -32,10 +25,12 @@ class Elk extends hxd.App {
 	
 	public var drawCalls = 0;
 
-	public function new(tickRate = 60) {
+	public function new(tickRate = 60, pixelSize = 2) {
 		super();
 		instance = this;
-		this.tickRate = tickRate;
+
+		Process.tickRate = tickRate;
+		this.pixelSize = pixelSize;
 
 		initRenderer();
 		initResources();
@@ -66,6 +61,9 @@ class Elk extends hxd.App {
 	
 	override function onResize() {
 		super.onResize();
+		if (s2d == null) {
+			return;
+		}
 		
 		var s = hxd.Window.getInstance();
 		
@@ -104,21 +102,24 @@ class Elk extends hxd.App {
 		drawCalls = e.drawCalls;
 	}
 	
-	function set_tickRate(rate: Int) {
-		rate = hxd.Math.iclamp(rate, 1, 999);
-		frameTime = 1 / rate;
-		return tickRate = rate;
-	}
-	
 	function set_pixelSize(size: Int) {
+		this.pixelSize = size;
+		onResize();
+
 		return pixelSize = size;
 	}
 	
 	function get_timeScale() {
 		return Process.timeScale;
 	}
-
 	function set_timeScale(s) {
 		return Process.timeScale = s;
+	}
+
+	function get_tickRate() {
+		return Process.tickRate;
+	}
+	function set_tickRate(s) {
+		return Process.tickRate = s;
 	}
 }
