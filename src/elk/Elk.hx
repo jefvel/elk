@@ -81,6 +81,14 @@ class Elk extends hxd.App {
 		// If you don't want crisp pixel graphics you can just
 		// remove this
 		hxd.res.Image.DEFAULT_FILTER = Nearest;
+		
+		
+		var bgColorString = haxe.macro.Compiler.getDefine("backgroundColor");
+		if (bgColorString != null) {
+			bgColorString = StringTools.replace(bgColorString, "#", "0x");
+			var color = Std.parseInt(bgColorString);
+			engine.backgroundColor = color;
+		}
 
 		#if js
 		// This causes the game to not be super small on high DPI mobile screens
