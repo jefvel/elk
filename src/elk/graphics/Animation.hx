@@ -24,6 +24,8 @@ class Animation {
 
 	public var tile(get, null): Tile;
 	
+	public var onEnterFrame: Int -> Void = null;
+	
 	public dynamic function onEnd(anim: AseDataTag) {}
 
 	public function new(data: AsepriteData) {
@@ -33,6 +35,12 @@ class Animation {
 	}
 	
 	public function play(animationName: String = null, loop = true, force = false, percentage = 0.) {
+		if (currentAnimation != null) {
+			if(animationName == currentAnimation.name && !force) {
+				return false;
+			}
+		}
+
 		currentAnimation = data.tags.get(animationName);
 
 		elapsedTime = elapsedFrameTime = 0;
@@ -63,6 +71,7 @@ class Animation {
 		}
 
 		currentFrame = data.frames[currentFrameIndex];
+		return true;
 	}
 	
 	public function update(dt: Float) {
@@ -83,11 +92,17 @@ class Animation {
 				if (currentFrameIndex > to) {
 					currentFrameIndex = from;
 				}
+				if (onEnterFrame != null) {
+					onEnterFrame(currentFrameIndex);
+				}
 			} else {
 				if (currentFrameIndex > to) {
 					currentFrameIndex = to;
 					if (!finished) {
 						finished = true;
+						if (onEnterFrame != null) {
+							onEnterFrame(currentFrameIndex);
+						}
 						onEnd(currentAnimation);
 					}
 				}

@@ -4,7 +4,7 @@ class EasedFloat {
 	public var value(get, set): Float;
 
 	public var easeTime = 0.3;
-	public var easeFunction: (Float) -> Float = T.expoOut;
+	public var easeFunction: (Float) -> Float = M.expoOut;
 
 	public var targetValue = 0.;
 	var from = 0.;

@@ -247,28 +247,30 @@ class RetroShader extends ScreenShader {
 			var green = vec4(0, blur, 0., 0);
 			var norm = vec4(1, 1 - blur, 1., 1);
 			
+			var newUv = input.uv;
+			
 			// Sharpness
 			var sharpnessCol = vec4(0);
-			sharpnessCol += texture.get(Warp(input.uv, 1.0)) * (8 + 1);
+			sharpnessCol += texture.get(Warp(newUv, 1.0)) * (8 + 1);
 			
 			var neighbors = vec4(0);
 			var neighborCoeff = -1;
 
-			neighbors += texture.get(Warp(input.uv + sPerPixel * vec2( 1, 0), 1));
-			neighbors += texture.get(Warp(input.uv + sPerPixel * vec2(-1, 0), 1));
-			neighbors += texture.get(Warp(input.uv + sPerPixel * vec2( 0, 1), 1));
-			neighbors += texture.get(Warp(input.uv + sPerPixel * vec2( 0,-1), 1));
+			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 1, 0), 1));
+			neighbors += texture.get(Warp(newUv + sPerPixel * vec2(-1, 0), 1));
+			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 0, 1), 1));
+			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 0,-1), 1));
 
-			neighbors += texture.get(Warp(input.uv + sPerPixel * vec2(-1,-1), 1));
-			neighbors += texture.get(Warp(input.uv + sPerPixel * vec2( 1,-1), 1));
-			neighbors += texture.get(Warp(input.uv + sPerPixel * vec2(-1, 1), 1));
-			neighbors += texture.get(Warp(input.uv + sPerPixel * vec2( 1, 1), 1));
+			neighbors += texture.get(Warp(newUv + sPerPixel * vec2(-1,-1), 1));
+			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 1,-1), 1));
+			neighbors += texture.get(Warp(newUv + sPerPixel * vec2(-1, 1), 1));
+			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 1, 1), 1));
 
 			sharpnessCol += neighbors * neighborCoeff;
 			sharpnessCol.a = 1.0;
 
 			@unroll for( i in -Quality + 1...Quality){
-				var tUv = mix(input.uv, Warp(input.uv, 1.0), 1 - maskPower) + pixel * offsets[i < 0 ? -i : i] * i;
+				var tUv = mix(newUv, Warp(newUv, 1.0), 1 - maskPower) + pixel * offsets[i < 0 ? -i : i] * i;
 				var modUv = mod(tUv, sPerPixel);
 
 				// Uncomment to fix pixels
@@ -281,9 +283,10 @@ class RetroShader extends ScreenShader {
 				color += texture.get(tUv + sPerPixel * 0.5 * maskPower + vy) * values[i < 0 ? -i : i] * green;
 			}
 			
+			
 			color = mix(color, sharpnessCol, sharpness);
 
-			var pos = Warp(input.uv, 0.);
+			var pos = Warp(newUv, 0.);
 			var mask = Mask(pos * windowRes.xy);
 			//var color = Tri(pos);
 			
