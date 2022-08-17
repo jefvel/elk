@@ -41,12 +41,9 @@ class BillboardShader extends hxsl.Shader {
 @:access(h2d.Tile)
 class Billboard extends h3d.scene.Mesh {
 	public var tile(default, set): h2d.Tile = null;
-
-	public var flipX = false;
-	public var flipY = false;
 	
-	public var originX = 0.;
-	public var originY = 0.;
+	public var originX(default, set) = 0.;
+	public var originY(default, set) = 0.;
 	
 	var lastTile: h2d.Tile = null;
 
@@ -124,5 +121,15 @@ class Billboard extends h3d.scene.Mesh {
 
 	function set_tile(t) {
 		return this.tile = t;
+	}
+	
+	function set_originX(originX) {
+		dirty = true;
+		return this.originX = originX;
+	}
+
+	function set_originY(originY) {
+		dirty = true;
+		return this.originY = originY;
 	}
 }
