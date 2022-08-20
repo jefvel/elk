@@ -5,6 +5,8 @@ class EasedFloat {
 
 	public var easeTime = 0.3;
 	public var easeFunction: (Float) -> Float = M.expoOut;
+	
+	public var timeScale = 1.0;
 
 	public var targetValue = 0.;
 	var from = 0.;
@@ -38,6 +40,7 @@ class EasedFloat {
 
 	function get_value() {
 		var t = hxd.Timer.lastTimeStamp - changeTime;
+		t *= timeScale;
 
 		if (t > easeTime) {
 			return targetValue;
