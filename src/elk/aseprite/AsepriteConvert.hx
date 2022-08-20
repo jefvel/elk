@@ -78,6 +78,10 @@ class AsepriteConvert extends hxd.fs.Convert {
     }
 
     override function convert() {
+		exportAsepriteFile(srcPath, dstPath);
+	}
+
+	static function exportAsepriteFile(srcPath:String, dstPath: String) {
 		getAsepritePath();
 
         var spacing = 1;
@@ -86,7 +90,6 @@ class AsepriteConvert extends hxd.fs.Convert {
 
         var input = '-b $srcPath';
         var jsonOutput = '--data $dstPath';
-        var pngOutput = '--sheet $dstPath.png';
         var format = '--format json-array';
         var type = '--sheet-type packed';
         var pack = '--sheet-pack';
@@ -97,9 +100,9 @@ class AsepriteConvert extends hxd.fs.Convert {
 		
         var ignoreLayers = '';
         var layers = '';
-
+		
 		var srcDir = haxe.io.Path.directory(srcPath);
-		var imageName = StringTools.replace(originalFilename, "aseprite", "png");
+		var imageName = haxe.io.Path.withoutExtension(haxe.io.Path.withoutDirectory(srcPath));
 
 		var bytes = new haxe.io.BytesInput(sys.io.File.getBytes(srcPath));
 		var size = bytes.readInt32();
@@ -111,7 +114,7 @@ class AsepriteConvert extends hxd.fs.Convert {
 			'-b',
 			srcPath,
 			'--data', '$dstPath',
-			'--sheet', '$srcDir/generated/$imageName',
+			'--sheet', '$srcDir/generated/$imageName.png',
 			'--format', 'json-array',
         	'--list-tags',
 			'--shape-padding', '$spacing',
@@ -130,12 +133,16 @@ class AsepriteConvert extends hxd.fs.Convert {
 			addArg('--sheet-type', 'packed');
 		}
 		
-		command(asepritePath, args);
+		#if (sys || nodejs)
+		var code = Sys.command(asepritePath, args);
+		if( code != 0 )
+			throw "Command '" + asepritePath + (args.length == 0 ? "" : " " + args.join(" ")) + "' failed with exit code " + code;
+		#end
 
 		convertAsepriteJsonToAseData(dstPath);
     }
 	
-	function convertAsepriteJsonToAseData(jsonPath: String) {
+	static function convertAsepriteJsonToAseData(jsonPath: String) {
 		var data:AsepriteJsonFile  = haxe.Json.parse(sys.io.File.getContent(jsonPath));
 		var res = new AsepriteData();
 		var frames: Array<AseDataFrame> = [];
@@ -220,8 +227,61 @@ class AsepriteConvert extends hxd.fs.Convert {
 		res.slices = slices;
 		res.tags = tags;
 		
-		save(haxe.io.Bytes.ofString(haxe.Serializer.run(res)));
+		var bytes = haxe.io.Bytes.ofString(haxe.Serializer.run(res));
+		hxd.File.saveBytes(jsonPath, bytes);
 	}
+	
+	public static function exportAllTileSheets() {
+        trace("Exporting Aseprite Files...");
+        var startTime = Sys.time();
+		
+		var resDir = 'res/';
+		var tmpDir = sys.FileSystem.absolutePath(resDir) + '/.tmp/';
+
+        recursiveLook(resDir, tmpDir);
+
+        var duration = ("" + (Sys.time() - startTime)).substr(0, 4);
+        trace('Finished export [${duration}s]');
+    }
+
+    static function recursiveLook(dir: String, tmpDir: String) {
+		var extensions = ['aseprite', 'ase'];
+        if (sys.FileSystem.exists(dir)) {
+            var files = sys.FileSystem.readDirectory(dir);
+            for (file in files) {
+                if (file == ".tmp") continue;
+                var path = haxe.io.Path.join([dir, file]);
+                if (!sys.FileSystem.isDirectory(path)) {
+					var extension: String = null;
+					for (ext in extensions) {
+						if (StringTools.endsWith(path, ext)) {
+							extension = ext;
+							break;
+						}
+					}
+
+                    if (extension != null) {
+                        var output = haxe.io.Path.withoutExtension(path);
+						output = output.substring('res/'.length);
+
+						trace(path);
+
+						var inputFile = sys.FileSystem.absolutePath(path);
+						var outputFile = haxe.io.Path.withExtension(tmpDir + output, 'asedata');
+
+                        exportAsepriteFile(inputFile, outputFile);
+                    }
+                } else {
+					if (file == 'generated') {
+						continue;
+					}
+
+                    var dir = haxe.io.Path.addTrailingSlash(path);
+                    recursiveLook(dir, tmpDir);
+                }
+            }
+        }
+    }
 
     // register the convert so it can be found
     static var _ = hxd.fs.Convert.register(new AsepriteConvert());
