@@ -17,6 +17,8 @@ class RetroShader extends ScreenShader {
 		@param var waviness: Float = 0.;
 		
 		@param var time: Float;
+		
+		@param var perlinTex: Sampler2D;
 
 		@param var texture : Sampler2D;
 		@param var depthTexture : Sampler2D;
@@ -242,6 +244,7 @@ class RetroShader extends ScreenShader {
 		function fragment() {
 			var color = vec4(0, 0, 0, 0);
 			var sPerPixel = 1 / res.xy;
+			var sPerWindowPixel = 1 / windowRes.xy;
 			var vy = vec2(0, -sPerPixel.y * 0.7);
 			var blur = 0.1;
 			var green = vec4(0, blur, 0., 0);
@@ -256,33 +259,36 @@ class RetroShader extends ScreenShader {
 			var neighbors = vec4(0);
 			var neighborCoeff = -1;
 
-			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 1, 0), 1));
-			neighbors += texture.get(Warp(newUv + sPerPixel * vec2(-1, 0), 1));
-			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 0, 1), 1));
-			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 0,-1), 1));
+			neighbors += texture.get(Warp(newUv + sPerWindowPixel * vec2( 1, 0), 1));
+			neighbors += texture.get(Warp(newUv + sPerWindowPixel * vec2(-1, 0), 1));
+			neighbors += texture.get(Warp(newUv + sPerWindowPixel * vec2( 0, 1), 1));
+			neighbors += texture.get(Warp(newUv + sPerWindowPixel * vec2( 0,-1), 1));
 
-			neighbors += texture.get(Warp(newUv + sPerPixel * vec2(-1,-1), 1));
-			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 1,-1), 1));
-			neighbors += texture.get(Warp(newUv + sPerPixel * vec2(-1, 1), 1));
-			neighbors += texture.get(Warp(newUv + sPerPixel * vec2( 1, 1), 1));
+			neighbors += texture.get(Warp(newUv + sPerWindowPixel * vec2(-1,-1), 1));
+			neighbors += texture.get(Warp(newUv + sPerWindowPixel * vec2( 1,-1), 1));
+			neighbors += texture.get(Warp(newUv + sPerWindowPixel * vec2(-1, 1), 1));
+			neighbors += texture.get(Warp(newUv + sPerWindowPixel * vec2( 1, 1), 1));
 
 			sharpnessCol += neighbors * neighborCoeff;
 			sharpnessCol.a = 1.0;
+			
+			newUv += (perlinTex.get(mod(newUv * sPerPixel * 1024, vec2(1))).rr - vec2(0.5)) * sPerPixel * 0.5;
 
+			// Blur
 			@unroll for( i in -Quality + 1...Quality){
 				var tUv = mix(newUv, Warp(newUv, 1.0), 1 - maskPower) + pixel * offsets[i < 0 ? -i : i] * i;
-				var modUv = mod(tUv, sPerPixel);
+				var modUv = mod(tUv, sPerWindowPixel);
 
 				// Uncomment to fix pixels
 				// tUv -= modUv * maskPower;
 
 				//tUv = Warp(tUv);
-				//color.rgb = vec3(distance(modUv, sPerPixel * 0.5) / length(sPerPixel));
+				//color.rgb = vec3(distance(modUv, sPerWindowPixel * 0.5) / length(sPerWindowPixel));
 				//color.rgb = texture.get(tUv).rgbv;
-				color += texture.get(tUv + sPerPixel * 0.5 * maskPower) * values[i < 0 ? -i : i] * norm;
-				color += texture.get(tUv + sPerPixel * 0.5 * maskPower + vy) * values[i < 0 ? -i : i] * green;
+				color += texture.get(tUv + sPerWindowPixel * 0.5 * maskPower) * values[i < 0 ? -i : i] * norm;
+				color += texture.get(tUv + sPerWindowPixel * 0.5 * maskPower + vy) * values[i < 0 ? -i : i] * green;
 			}
-			
+
 			
 			color = mix(color, sharpnessCol, sharpness);
 
@@ -348,7 +354,13 @@ class RetroPass extends ScreenFx<RetroShader> {
 	function get_noise() return shader.noisePower;
 
 	public function new( radius = 1., gain = 1., linear = 0., quality = 1. ) {
-		super(new RetroShader());
+		var shader = new RetroShader();
+
+		var tex = hxd.Res.img.proc.perlin.toTexture();
+		shader.perlinTex = tex;
+
+		super(shader);
+
 		this.radius = radius;
 		this.quality = quality;
 		this.gain = gain;
@@ -448,22 +460,25 @@ class RetroPass extends ScreenFx<RetroShader> {
 		if( values == null ) calcValues();
 
 		//src.filter = Nearest;
-
+		
 		var tmp = ctx.textures.allocTarget(src.name+"RetroTmp", src.width, src.height, false, src.format);
 		
 		shader.waviness = 0;
 		shader.sharpness = 0;
+		
+		var w = engine.width;
+		var h = engine.height;
 
 		shader.windowRes.set(
-			ctx.engine.width,
-			ctx.engine.height
+			w,
+			h
 		);
 		
 		var pixelSize = Elk.instance.pixelSize;
 
 		shader.res.set(
-			ctx.engine.width / pixelSize,
-			ctx.engine.height / pixelSize
+			w / pixelSize,
+			h / pixelSize
 		);
 
 		shader.pixelSize = pixelSize;
