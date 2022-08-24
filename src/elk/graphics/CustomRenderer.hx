@@ -39,7 +39,10 @@ class CustomRenderer extends h3d.scene.fwd.Renderer {
 			clear(h3d.Engine.getCurrent().backgroundColor, 1, 0);
 		}
 		*/
-
+		
+		//var hehe = allocTarget("tempcool");
+		//ctx.engine.pushTarget(hehe);
+		//ctx.engine.popTarget();
 		if( has("shadow") )
 			renderPass(shadow,get("shadow"));
 

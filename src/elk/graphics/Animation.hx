@@ -112,6 +112,15 @@ class Animation {
 		}
 	}
 	
+	public function getSlice(name: String) {
+		var f = currentFrame;
+		if (f.slices == null) {
+			return null;
+		}
+		
+		return f.slices.get(name);
+	}
+	
 	function get_tile() {
 		return currentFrame.tile;
 	}

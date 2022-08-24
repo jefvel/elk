@@ -245,8 +245,8 @@ class RetroShader extends ScreenShader {
 			var color = vec4(0, 0, 0, 0);
 			var sPerPixel = 1 / res.xy;
 			var sPerWindowPixel = 1 / windowRes.xy;
-			var vy = vec2(0, -sPerPixel.y * 0.7);
-			var blur = 0.1;
+			var vy = vec2(0, -sPerWindowPixel.y * 1.0);
+			var blur = 0.2;
 			var green = vec4(0, blur, 0., 0);
 			var norm = vec4(1, 1 - blur, 1., 1);
 			
@@ -272,7 +272,7 @@ class RetroShader extends ScreenShader {
 			sharpnessCol += neighbors * neighborCoeff;
 			sharpnessCol.a = 1.0;
 			
-			newUv += (perlinTex.get(mod(newUv * sPerPixel * 1024, vec2(1))).rr - vec2(0.5)) * sPerPixel * 0.5;
+			newUv += (perlinTex.get(mod(newUv * sPerWindowPixel * 1024, vec2(1))).rr - vec2(0.5)) * sPerPixel * 0.5;
 
 			// Blur
 			@unroll for( i in -Quality + 1...Quality){

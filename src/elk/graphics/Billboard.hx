@@ -42,8 +42,8 @@ class BillboardShader extends hxsl.Shader {
 class Billboard extends h3d.scene.Mesh {
 	public var tile(default, set): h2d.Tile = null;
 	
-	public var originX(default, set) = 0.;
-	public var originY(default, set) = 0.;
+	public var originX(default, set) = 0;
+	public var originY(default, set) = 0;
 	
 	var lastTile: h2d.Tile = null;
 
@@ -94,12 +94,12 @@ class Billboard extends h3d.scene.Mesh {
 		@:privateAccess
 		var tileSheet = animation.data;
 
-		var ox:Float = f.dx - originX * tileSheet.width;
-		var oy:Float = (tileSheet.height * (1 - originY)) - t.height - f.dy;
+		var ox:Float = f.dx - originX;
+		var oy:Float = (tileSheet.height  - originY) - t.height - f.dy;
 
 		var s = shader;
 		s.uvs.set(u, v, u2, v2);
-		s.offset.set((originX) * ppu, (tileSheet.height - originY) * ppu, // Origin X and Y
+		s.offset.set(0, 0, // Origin X and Y
 			ox * ppu, oy * ppu);
 
 		s.spriteSize.set(tileSheet.width * ppu, tileSheet.height * ppu);
@@ -131,5 +131,25 @@ class Billboard extends h3d.scene.Mesh {
 	function set_originY(originY) {
 		dirty = true;
 		return this.originY = originY;
+	}
+	
+	public function localXtoGlobal(lx: Float) {
+		var lx = - originX * scaleX + x + lx * scaleX;
+		return lx;
+	}
+
+	public function localYtoGlobal(ly: Float) {
+		@:privateAccess
+		var tileSheet = animation.data;
+		var ly = - (originY) * scaleZ + z + (tileSheet.height - ly) * scaleZ;
+		return ly;
+	}
+	
+	public function setCenter(x: Float = 0.5, y: Float = 0.5) {
+		@:privateAccess
+		var tileSheet = animation.data;
+		
+		this.originX = Math.round(tileSheet.width * x);
+		this.originY = Math.round(tileSheet.height * y);
 	}
 }

@@ -71,8 +71,8 @@ class Elk extends hxd.App {
 			return;
 		}
 		
-		var w = Math.round(engine.width / pixelSize);
-		var h = Math.round(engine.height / pixelSize);
+		var w = Std.int(engine.width / pixelSize);
+		var h = Std.int(engine.height / pixelSize);
 
 		this.windowWidth = w;
 		this.windowHeight = h;
@@ -85,7 +85,7 @@ class Elk extends hxd.App {
 			s3dBitmap.width = buf.width;
 			s3dBitmap.height = buf.height;
 		} else {
-			buf = new Texture(engine.width, engine.height, [Target]);
+			buf = new Texture(w, h, [Target]);
 			buf.setName("s3dbuffer");
 			s3dBitmap = new Bitmap(h2d.Tile.fromTexture(buf), s2d);
 		}
