@@ -272,7 +272,7 @@ class RetroShader extends ScreenShader {
 			sharpnessCol += neighbors * neighborCoeff;
 			sharpnessCol.a = 1.0;
 			
-			newUv += (perlinTex.get(mod(newUv * sPerWindowPixel * 1024, vec2(1))).rr - vec2(0.5)) * sPerPixel * 0.5;
+			newUv += (perlinTex.get(mod(newUv * sPerWindowPixel * 1024, vec2(1))).rr - vec2(0.5)) * sPerWindowPixel * 2;
 
 			// Blur
 			@unroll for( i in -Quality + 1...Quality){

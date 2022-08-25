@@ -80,7 +80,7 @@ class Elk extends hxd.App {
 		s2d.scaleMode = ScaleMode.Stretch(w, h);
 
 		if (buf != null) {
-			buf.resize(engine.width, engine.height);
+			buf.resize(w, h);
 			buf.depthBuffer.dispose();
 			s3dBitmap.width = buf.width;
 			s3dBitmap.height = buf.height;
