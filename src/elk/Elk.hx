@@ -105,7 +105,7 @@ class Elk extends hxd.App {
 		if (bgColorString != null) {
 			bgColorString = StringTools.replace(bgColorString, "#", "0x");
 			var color = Std.parseInt(bgColorString);
-			engine.backgroundColor = color;
+			engine.backgroundColor = 0xff000000 | color;
 		}
 		
 		renderer = new elk.graphics.CustomRenderer();
@@ -134,7 +134,7 @@ class Elk extends hxd.App {
 
 	override function render(e:Engine) {
 		e.pushTarget(buf);
-		e.clear(0, 1);
+		e.clear(e.backgroundColor, 1);
 		s3d.render(e);
 		e.popTarget();
 		

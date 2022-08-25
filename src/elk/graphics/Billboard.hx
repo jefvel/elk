@@ -47,7 +47,7 @@ class Billboard extends h3d.scene.Mesh {
 	
 	var lastTile: h2d.Tile = null;
 
-	var quad: Quad;
+	var quad: PrimitiveQuad;
 	
 	public var animation: elk.graphics.Animation;
 	
@@ -55,7 +55,7 @@ class Billboard extends h3d.scene.Mesh {
 	public function new(animation: elk.graphics.Animation, ?p) {
 		this.animation = animation;
 
-		quad = Quad.defaultQuad();
+		quad = PrimitiveQuad.defaultQuad();
 
 		material = Material.create(animation.tile.getTexture());
 		material.textureShader.killAlpha = true;

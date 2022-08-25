@@ -1,3 +1,4 @@
+
 package elk.graphics;
 
 import h3d.prim.UV;
@@ -6,55 +7,17 @@ import h3d.prim.Polygon;
 import h3d.prim.MeshPrimitive;
 import h3d.col.Bounds;
 
-class Quad extends h3d.prim.Polygon {
+class PrimitiveQuad extends h3d.prim.Primitive {
 	var width:Float = 1.0;
 	var height:Float = 1.0;
 	var centered = true;
 
 	public function new(width = 1.0, height = 1.0, centered = false) {
-		var negativeScale = 0.;
-		var positiveScale = 1.;
-
-		if (centered) {
-			negativeScale = 0.5;
-			positiveScale = 0.5;
-		}
-
-		var points = [
-			new Point(-width * negativeScale, 0, -height * negativeScale),
-			new Point(-width * negativeScale, 0,  height * positiveScale),
-			new Point( width * positiveScale, 0, -height * negativeScale),
-			new Point( width * positiveScale, 0,  height * positiveScale)
-		];
-		
-		var ids = [
-			1, 3, 0,
-			0, 3, 2,
-		];
-
-		var idx = new hxd.IndexBuffer(6);
-		for (id in ids) idx.push(id);
-
 		this.centered = centered;
 		this.width = width;
 		this.height = height;
-
-		super(points, idx);
-		uvs = [
-			new UV(0, 1),
-			new UV(0, 0),
-			new UV(1, 1),
-			new UV(1, 0)
-		];
-
-		var n = new Point(0, 1, 0);
-		normals = [];
-		for (_ in points) {
-			normals.push(n);
-		}
 	}
 
-/*
 	override function triCount() {
 		return 2;
 	}
@@ -137,14 +100,13 @@ class Quad extends h3d.prim.Polygon {
 		}
 		return b;
 	}
-	*/
 
 	public static function defaultQuad() {
 		var engine = h3d.Engine.getCurrent();
-		var inst = @:privateAccess engine.resCache.get(Quad);
+		var inst = @:privateAccess engine.resCache.get(PrimitiveQuad);
 		if (inst == null) {
-			inst = new Quad();
-			@:privateAccess engine.resCache.set(Quad, inst);
+			inst = new PrimitiveQuad();
+			@:privateAccess engine.resCache.set(PrimitiveQuad, inst);
 		}
 		return inst;
 	}
