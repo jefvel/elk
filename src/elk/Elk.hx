@@ -110,14 +110,14 @@ class Elk extends hxd.App {
 		
 		renderer = new elk.graphics.CustomRenderer();
 		s3d.renderer = renderer;
-		renderer.uiScene = s2d;
 
 		#if js
 		// This causes the game to not be super small on high DPI mobile screens
 		hxd.Window.getInstance().useScreenPixels = false;
 		#end
 
-		s2d.filter = new RetroFilter();
+		var f = new RetroFilter(1., 0.2, 0.5);
+		s2d.filter = f;
 
 		onResize();
 	}
@@ -133,23 +133,17 @@ class Elk extends hxd.App {
 	}
 
 	override function render(e:Engine) {
+		@:privateAccess s3d.ctx.elapsedTime *= timeScale;
+
 		e.pushTarget(buf);
 		e.clear(e.backgroundColor, 1);
 		s3d.render(e);
 		e.popTarget();
 		
-		//h3d.pass.Copy.run(buf, null);
-		//e.pushTarget(buf);
-		//buf.depthBuffer = DepthBuffer.getDefault();
-		//buf.clear(e.backgroundColor, 1);
 		s2d.render(e);
 
 		entities.render();
 		drawCalls = e.drawCalls;
-
-		//e.popTarget();
-		//pass.apply(ctx, buf);
-		//h3d.pass.Copy.run(buf, null, Add);
 	}
 	
 	function set_pixelSize(size: Int) {

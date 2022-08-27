@@ -8,8 +8,6 @@ class CustomRenderer extends h3d.scene.fwd.Renderer {
 	
 	public var enableRetroFilter = true;
 	
-	public var uiScene: h2d.Scene = null;
-
 	public function new() {
 		super();
 		retroPass = new RetroPass();
@@ -22,27 +20,6 @@ class CustomRenderer extends h3d.scene.fwd.Renderer {
 	}
 	
 	override function render() {
-		/*
-		var ui : h3d.mat.Texture = null;
-		if (uiScene != null) {
-			ui = allocTarget("uiLayer", false, 1, RGBA);
-			ui.clear(ctx.engine.backgroundColor, 0);
-			ctx.engine.pushTarget(ui);
-			uiScene.render(ctx.engine);
-			ctx.engine.popTarget();
-		}
-		
-		var output: h3d.mat.Texture = null;
-		if (enableRetroFilter) {
-			output = allocTarget("pixelOutput");
-			setTarget(output);
-			clear(h3d.Engine.getCurrent().backgroundColor, 1, 0);
-		}
-		*/
-		
-		//var hehe = allocTarget("tempcool");
-		//ctx.engine.pushTarget(hehe);
-		//ctx.engine.popTarget();
 		if( has("shadow") )
 			renderPass(shadow,get("shadow"));
 
@@ -57,18 +34,5 @@ class CustomRenderer extends h3d.scene.fwd.Renderer {
 		renderPass(defaultPass, get("additive") );
 
 		resetTarget();
-
-		//colorPass.apply(output, output);
-		
-		/*
-		if (uiScene != null) {
-			h3d.pass.Copy.run(ui, output, Alpha);
-		}
-
-		if (enableRetroFilter) {
-			retroPass.apply(ctx, output);
-			h3d.pass.Copy.run(output, null);
-		}
-		*/
 	}
 }

@@ -43,14 +43,15 @@ class RetroFilter extends Filter {
 		@param quality The sample count on each pixel as a tradeoff of speed/quality.
 		@param linear Linear blur power. Set to 0 for gaussian blur.
 	**/
-	public function new( radius = 1., gain = 1., quality = 1., linear = 0. ) {
+	public function new( radius = 1., sharpness = 0.1, noise = 0.5, gain = 1., quality = 1., linear = 0.) {
 		super();
 		smooth = true;
 		pass = new RetroPass(radius, gain, linear, quality);
 		useScreenResolution = true;
-		pass.radius = 0;
-		pass.linear = 0;
-		pass.sharpness = 0.1;
+		pass.noise = noise;
+		pass.radius = radius;
+		pass.linear = linear;
+		pass.sharpness = sharpness;
 	}
 
 	inline function get_quality() return pass.quality;

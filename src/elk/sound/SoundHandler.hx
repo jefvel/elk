@@ -29,8 +29,8 @@ class SoundHandler {
 	 * @param snd
 	 * @param volume = 0.3
 	 */
-	 public function playWobble(snd:hxd.res.Sound, volume = 0.3, wobbleAmount = 0.1, loop = false) {
-		var sound = snd.play(loop, volume, sfxChannel);
+	 public function playWobble(snd:hxd.res.Sound, volume = 0.3, wobbleAmount = 0.1, loop = false, soundGroup: SoundGroup = null) {
+		var sound = snd.play(loop, volume, sfxChannel, soundGroup);
 		sound.addEffect(new hxd.snd.effect.Pitch(1 - wobbleAmount + Math.random() * (wobbleAmount * 2)));
 		return sound;
 	}

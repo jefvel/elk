@@ -183,23 +183,31 @@ class RetroShader extends ScreenShader {
 
 			return a*wa + b*wb + c*wc;
 		}
-		function random (st:Vec2): Float {
-			return fract(sin(dot(st.xy,
-								 vec2(12.9898,78.233)))
-						 * 43758.5453123);
+		function hash (st:Vec2): Float {
+			var p  = 50.0*fract( st*0.3183099 + vec2(0.71,0.113));
+    		return -1.0+2.0*fract( p.x*p.y*(p.x+p.y) );
 		}
 		
 		// 2D Noise based on Morgan McGuire @morgan3d
 		// https://www.shadertoy.com/view/4dS3Wd
-		function noise (st:Vec2): Float {
-			var i = floor(st);
-			var f = fract(st);
+		function noise (p:Vec2): Float {
+			var i = floor(p);
+			var f = fract(p);
+			
+			
+			var u = f * f * (3.0 - 2.0 * f);
+			
+			return mix( mix( hash( i + vec2(0.0,0.0) ), 
+						     hash( i + vec2(1.0,0.0) ), u.x),
+	   					mix( hash( i + vec2(0.0,1.0) ), 
+							 hash( i + vec2(1.0,1.0) ), u.x), u.y);
 		
 			// Four corners in 2D of a tile
-			var a = random(i);
-			var b = random(i + vec2(1.0, 0.0));
-			var c = random(i + vec2(0.0, 1.0));
-			var d = random(i + vec2(1.0, 1.0));
+			/*
+			var a = hash(i);
+			var b = hash(i + vec2(1.0, 0.0));
+			var c = hash(i + vec2(0.0, 1.0));
+			var d = hash(i + vec2(1.0, 1.0));
 		
 			// Smooth Interpolation
 		
@@ -211,6 +219,18 @@ class RetroShader extends ScreenShader {
 			return mix(a, b, u.x) +
 					(c - a)* u.y * (1.0 - u.x) +
 					(d - b) * u.x * u.y;
+					*/
+		}
+		
+		function perlinNoise(st: Vec2): Float {
+			var uv = st;
+			var m = mat2(1.6, 1.2, -1.2, 1.6);
+			var f = 0.;
+			f += 0.5000 * noise(uv); uv = uv * m;
+			f += 0.2500 * noise(uv); uv = uv * m;
+			f += 0.1250 * noise(uv); uv = uv * m;
+			f += 0.0625 * noise(uv); uv = uv * m;
+			return  0.5 + 0.5 * f;
 		}
 
 
@@ -296,7 +316,7 @@ class RetroShader extends ScreenShader {
 			var mask = Mask(pos * windowRes.xy);
 			//var color = Tri(pos);
 			
-			var scale = smoothstep(0.999, 1, abs(pos - vec2(0.5)) * 2);
+			var scale = smoothstep(0.996, 1, abs(pos - vec2(0.5)) * 2);
 			var s = 1 - (1 - maskPower) * max(scale.x, scale.y);
 			//if (pos.y > 1) s = 0;
 			
@@ -306,15 +326,31 @@ class RetroShader extends ScreenShader {
 
 			pixelColor = vec4(color.rgb * mix(vec3(1), mask, maskPower), 1.0) + vec4(0.03, 0.03, 0.04, 0);
 
+			var noisePos = pos * windowRes.xy;
+			noisePos -= fract(noisePos / sPerPixel) * sPerPixel;
+			var t = fract(time * 100);
+			var npos = noisePos - fract(noisePos / 3) * 3;
+			npos /= res.x;
+			npos *= 10;
 
-			if (noisePower > 0) {
-				var noisePos = pos * windowRes.xy;
-				var t = fract(time * 100) * windowRes.y;
-				noisePos.y += t;
-				var noise = 0.015 * vec3(noise(noisePos / 3.0), noise(noisePos / 3.0 + 100), noise(noisePos / 3.0 + 400));
-				pixelColor.rgb -= noise * noisePower;
-			}
+			//npos += vec2(0.1, 0.05) * time * 20;
 
+			var sos = perlinNoise(npos + 10+0);
+			noisePos.y += t * 1000;
+
+			var noise = 0.10 * vec3(
+				0.5 + 0.5 * noise(noisePos / 3.0),
+				0.5 + 0.5 * noise(noisePos / 3.0 + 100),
+				0.5 + 0.5 * noise(noisePos / 3.0 + 400)
+			);
+
+			//fog
+			//pixelColor *= 1 + sos * 0.3;
+
+			// noise fade out
+			//if (sos < sin(time * 0.5)) pixelColor *= 0;
+
+			pixelColor.rgb -= noise * noisePower;
 			pixelColor.rgb *= s;
 		}
 	}
