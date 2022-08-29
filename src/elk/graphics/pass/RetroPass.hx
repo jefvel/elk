@@ -38,6 +38,8 @@ class RetroShader extends ScreenShader {
 		@param @const var hasNormal : Bool;
 		@param var normalTexture : Sampler2D;
 
+		@param var backgroundColor: Vec3;
+
 		@param var pixelSize: Float = 2.0;
 
 		// Hardness of scanline.
@@ -72,117 +74,14 @@ class RetroShader extends ScreenShader {
 		@param var maskDark: Float=0.98;
 		@param var maskLight: Float=1.;
 		
-		function ToSrgb1(c: Float): Float {return(c<0.0031308?c*12.92:1.055*pow(c,0.41666)-0.055);}
-		function ToSrgb(c:Vec3): Vec3{return vec3(ToSrgb1(c.r),ToSrgb1(c.g),ToSrgb1(c.b));}
-
-
-		function ToLinear1(c: Float): Float {
-			return (c <= 0.04045) ? c/12.92 : pow((c+0.055)/1.055,2.4);
-		}
-
-		function ToLinear(c: Vec3): Vec3{
-			return vec3(ToLinear1(c.r),ToLinear1(c.g),ToLinear1(c.b));
-		}
-
-		// Nearest emulated sample given floating point position and texel offset.
-		// Also zero's off screen.
-		function Fetch(pos: Vec2, off: Vec2): Vec3 {
-			var resPos = floor(pos*res+off)/res;
-			return (max(abs(resPos.x-0.5),abs(resPos.y-0.5))>0.5) ? vec3(0, 0, 0) : ToLinear(texture.get(resPos.xy).rgb);
-		}
+		@param var transition: Float = 0.;
 
 		// Distance in emulated pixels to nearest texel.
 		function Dist(pos: Vec2): Vec2{
 			var resPos = pos*res;
 			return -((resPos-floor(resPos))-vec2(0.5));
 		}
-			
-		// 1D Gaussian.
-		function Gaus(pos: Float, scale: Float):Float {
-			return exp2(scale*pos*pos);
-		}
 
-		// 3-tap Gaussian filter along horz line.
-		function Horz3(pos: Vec2, off: Float): Vec3{
-			var b = Fetch(pos, vec2(-1.0,off));
-			var c=Fetch(pos,vec2( 0.0,off));
-			var d=Fetch(pos,vec2( 1.0,off));
-			var dst=Dist(pos).x;
-			// Convert distance to weight.
-			var scale=hardPix;
-			var wb=Gaus(dst-1.0,scale);
-			var wc=Gaus(dst+0.0,scale);
-			var wd=Gaus(dst+1.0,scale);
-			// Return filtered sample.
-			return (b*wb+c*wc+d*wd)/(wb+wc+wd);
-		}
-
-		// 5-tap Gaussian filter along horz line.
-		function Horz5(pos: Vec2, off: Float): Vec3{
-			var a=Fetch(pos,vec2(-2.0,off));
-			var b=Fetch(pos,vec2(-1.0,off));
-			var c=Fetch(pos,vec2( 0.0,off));
-			var d=Fetch(pos,vec2( 1.0,off));
-			var e=Fetch(pos,vec2( 2.0,off));
-			var dst=Dist(pos).x;
-			// Convert distance to weight.
-			var scale=hardPix;
-			var wa=Gaus(dst-2.0,scale);
-			var wb=Gaus(dst-1.0,scale);
-			var wc=Gaus(dst+0.0,scale);
-			var wd=Gaus(dst+1.0,scale);
-			var we=Gaus(dst+2.0,scale);
-			// Return filtered sample.
-			return (a*wa+b*wb+c*wc+d*wd+e*we)/(wa+wb+wc+wd+we);
-		}
-
-		// 7-tap Gaussian filter along horz line.
-		function Horz7(pos: Vec2, off: Float): Vec3{
-			var a=Fetch(pos,vec2(-3.0,off));
-			var b=Fetch(pos,vec2(-2.0,off));
-			var c=Fetch(pos,vec2(-1.0,off));
-			var d=Fetch(pos,vec2( 0.0,off));
-			var e=Fetch(pos,vec2( 1.0,off));
-			var f=Fetch(pos,vec2( 2.0,off));
-			var g=Fetch(pos,vec2( 3.0,off));
-			var dst=Dist(pos).x;
-			// Convert distance to weight.
-			var scale=hardBloomPix;
-			var wa=Gaus(dst-3.0,scale);
-			var wb=Gaus(dst-2.0,scale);
-			var wc=Gaus(dst-1.0,scale);
-			var wd=Gaus(dst+0.0,scale);
-			var we=Gaus(dst+1.0,scale);
-			var wf=Gaus(dst+2.0,scale);
-			var wg=Gaus(dst+3.0,scale);
-			// Return filtered sample.
-			return (a*wa+b*wb+c*wc+d*wd+e*we+f*wf+g*wg)/(wa+wb+wc+wd+we+wf+wg);
-		}
-
-		// Return scanline weight.
-		function Scan(pos: Vec2, off: Float): Float {
-			var dst=Dist(pos).y;
-			return Gaus(dst+off,hardScan);
-		}
-
-		// Return scanline weight for bloom.
-		function BloomScan(pos:Vec2,off: Float): Float {
-			var dst=Dist(pos).y;
-			return Gaus(dst+off,hardBloomScan);
-		}
-
-		// Allow nearest three lines to effect pixel.
-		function Tri(pos:Vec2): Vec3{
-			var a=Horz3(pos,-1.0);
-			var b=Horz5(pos, 0.0);
-			var c=Horz3(pos, 1.0);
-
-			var wa=Scan(pos,-1.0);
-			var wb=Scan(pos, 0.0);
-			var wc=Scan(pos, 1.0);
-
-			return a*wa + b*wb + c*wc;
-		}
 		function hash (st:Vec2): Float {
 			var p  = 50.0*fract( st*0.3183099 + vec2(0.71,0.113));
     		return -1.0+2.0*fract( p.x*p.y*(p.x+p.y) );
@@ -201,25 +100,6 @@ class RetroShader extends ScreenShader {
 						     hash( i + vec2(1.0,0.0) ), u.x),
 	   					mix( hash( i + vec2(0.0,1.0) ), 
 							 hash( i + vec2(1.0,1.0) ), u.x), u.y);
-		
-			// Four corners in 2D of a tile
-			/*
-			var a = hash(i);
-			var b = hash(i + vec2(1.0, 0.0));
-			var c = hash(i + vec2(0.0, 1.0));
-			var d = hash(i + vec2(1.0, 1.0));
-		
-			// Smooth Interpolation
-		
-			// Cubic Hermine Curve.  Same as SmoothStep()
-			var u = f*f*(3.0-2.0*f);
-			// u = smoothstep(0.,1.,f);
-		
-			// Mix 4 coorners percentages
-			return mix(a, b, u.x) +
-					(c - a)* u.y * (1.0 - u.x) +
-					(d - b) * u.x * u.y;
-					*/
 		}
 		
 		function perlinNoise(st: Vec2): Float {
@@ -232,7 +112,6 @@ class RetroShader extends ScreenShader {
 			f += 0.0625 * noise(uv); uv = uv * m;
 			return  0.5 + 0.5 * f;
 		}
-
 
 		function Warp(p: Vec2, waveScale: Float): Vec2 {
 			var s = 1.1;
@@ -260,6 +139,10 @@ class RetroShader extends ScreenShader {
 
 			return mask;
 		} 
+		
+		function getTexColor(uv: Vec2): Vec4 {
+
+		}
 
 		function fragment() {
 			var color = vec4(0, 0, 0, 0);
@@ -314,7 +197,6 @@ class RetroShader extends ScreenShader {
 
 			var pos = Warp(newUv, 0.);
 			var mask = Mask(pos * windowRes.xy);
-			//var color = Tri(pos);
 			
 			var scale = smoothstep(0.996, 1, abs(pos - vec2(0.5)) * 2);
 			var s = 1 - (1 - maskPower) * max(scale.x, scale.y);
@@ -338,19 +220,21 @@ class RetroShader extends ScreenShader {
 			var sos = perlinNoise(npos + 10+0);
 			noisePos.y += t * 1000;
 
+			//fog
+			//pixelColor *= 1 + sos * 0.3;
+
+			// noise fade out
+			if (sos * (1 + input.uv.x) < transition) {
+				pixelColor.rgb = mix(pixelColor.rgb, backgroundColor * 7 * 2, 1 - maskPower);
+			}
+
 			var noise = 0.10 * vec3(
 				0.5 + 0.5 * noise(noisePos / 3.0),
 				0.5 + 0.5 * noise(noisePos / 3.0 + 100),
 				0.5 + 0.5 * noise(noisePos / 3.0 + 400)
 			);
 
-			//fog
-			//pixelColor *= 1 + sos * 0.3;
-
-			// noise fade out
-			//if (sos < sin(time * 0.5)) pixelColor *= 0;
-
-			pixelColor.rgb -= noise * noisePower;
+			pixelColor.rgb -= noise * noisePower * (maskPower - 1);
 			pixelColor.rgb *= s;
 		}
 	}
@@ -501,6 +385,7 @@ class RetroPass extends ScreenFx<RetroShader> {
 		
 		shader.waviness = 0;
 		shader.sharpness = 0;
+		shader.backgroundColor = h3d.Vector.fromColor(ctx.engine.backgroundColor);
 		
 		var w = engine.width;
 		var h = engine.height;

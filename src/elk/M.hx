@@ -41,6 +41,11 @@ class M {
 		var d = to - from;
 		return clamp(start / d, 0, 1);
 	}
+	
+	public static inline function mix(a: Float, b: Float, x: Float) {
+		var p = clamp(x);
+		return a * (1 - p) + b * p;
+	}
 
 	public static inline function smootherstep(from:Float, to:Float, x:Float) {
 		x = clamp((x - from) / (to - from), 0., 1.);
@@ -56,7 +61,7 @@ class M {
 		return from + d * s;
 	}
 
-	public static inline function clamp(x:Float, lower, upper) {
+	public static inline function clamp(x:Float, lower = 0., upper = 1.) {
 		if (x < lower)
 			return lower;
 		if (x > upper)

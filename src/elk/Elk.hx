@@ -116,7 +116,7 @@ class Elk extends hxd.App {
 		hxd.Window.getInstance().useScreenPixels = false;
 		#end
 
-		var f = new RetroFilter(1., 0.2, 0.5);
+		var f = new RetroFilter(1., 0.2, 0.2);
 		s2d.filter = f;
 
 		onResize();
