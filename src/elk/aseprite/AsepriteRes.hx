@@ -22,6 +22,9 @@ class AsepriteRes extends hxd.res.Resource {
 	}
 
 	function toImage(): hxd.res.Image {
+		#if debug
+		toAseData();
+		#end
 		return hxd.res.Loader.currentInstance.loadCache(imgPath, hxd.res.Image);
 	}
 	
