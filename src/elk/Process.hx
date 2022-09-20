@@ -39,6 +39,8 @@ class Process {
 	}
 	
 	public static var tickRate(default, set) = 60;
+	public static var currentTick = 0;
+
 	static var accumulatedTime = 0.;
 	static var frameTime = 1 / 60;
 	static var maxAccumulatedTime = 2.;
@@ -60,6 +62,9 @@ class Process {
 		currentTickElapsed = hxd.Math.clamp(accumulatedTime / frameTime);
 
 		while (accumulatedTime >= frameTime) {
+			currentTick ++;
+			hxd.Timer.frameCount = currentTick;
+
 			accumulatedTime -= frameTime;
 			for (p in PROCESSES) {
 				if (!p._paused) {

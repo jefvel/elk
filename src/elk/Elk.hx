@@ -47,7 +47,7 @@ class Elk extends hxd.App {
 
 		initRenderer();
 
-		hxd.Timer.reset();
+		hxd.Timer.useManualFrameCount = true;
 		
 		states = new GameStateHandler();
 		entities = new EntityManager();
@@ -55,8 +55,8 @@ class Elk extends hxd.App {
 	}
 	
 	static function initResources() {
-		#if usepak
-		hxd.Res.initPak("data");
+		#if usePak
+		hxd.Res.initPak();
 		#elseif (debug && hl)
 		hxd.Res.initLocal();
 		hxd.res.Resource.LIVE_UPDATE = true;
