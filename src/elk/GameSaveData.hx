@@ -3,12 +3,23 @@ package elk;
 import hxd.Save;
 
 /**
- * you can extend and fill this with whatever data needs saving,
- * then you can just use GameSaveData.getCurrent() to get an instance of save data
- * and save it using save()
- */
+ 	you can extend and fill this with whatever data needs saving.
+
+	**Example:**
+	```haxe
+	class SaveData extends GameSaveData {
+		public var value = 0;
+	}
+	
+	var data = SaveData.getCurrent();
+	data.value = 1000;
+
+	data.save();
+	```
+**/
+@:autoBuild(elk.macro.SaveDataMacro.build())
 class GameSaveData {
-	static var SALT = "S!!!A***L*TTT";
+	static var SALT:String = "S!!!A***L*TTT";
 
 	public function new() {}
 	
@@ -46,7 +57,11 @@ class GameSaveData {
 
 	public function load(defVal: Dynamic = null, saveSlot = 0) {
 		this.saveSlot = saveSlot;
-		return try deserialize(Save.readSaveData(saveName), defVal) catch( e : Dynamic ) defVal;
+		try {
+			return deserialize(Save.readSaveData(saveName), defVal);
+		} catch( e : Dynamic ) {
+			return defVal;
+		}
 	}
 
 
