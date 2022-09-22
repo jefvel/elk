@@ -1,4 +1,4 @@
-package elk;
+package elk.newgrounds;
 
 import hxd.Save;
 import haxe.Timer;
