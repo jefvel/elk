@@ -225,7 +225,7 @@ class RetroShader extends ScreenShader {
 
 			// noise fade out
 			if (sos * (1 + input.uv.x) < transition) {
-				pixelColor.rgb = mix(pixelColor.rgb, backgroundColor * 7 * 2, 1 - maskPower);
+				pixelColor.rgb = mix(pixelColor.rgb, backgroundColor, 1 - maskPower);
 			}
 
 			var noise = 0.10 * vec3(
@@ -262,6 +262,8 @@ class RetroPass extends ScreenFx<RetroShader> {
 		Adjust how much quality/speed tradeoff we want (default = 1)
 	**/
 	public var quality(default,set) : Float;
+	
+	public var transition(get, set): Float;
 
 	var values : Array<Float>;
 	var offsets : Array<Float>;
@@ -313,6 +315,14 @@ class RetroPass extends ScreenFx<RetroShader> {
 			return b;
 		values = null;
 		return linear = b;
+	}
+
+	function set_transition(b) {
+		return shader.transition = b;
+	}
+
+	function get_transition() {
+		return shader.transition;
 	}
 
 	function gauss( x:Float, s:Float ) : Float {

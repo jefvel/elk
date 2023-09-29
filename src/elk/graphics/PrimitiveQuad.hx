@@ -86,7 +86,7 @@ class PrimitiveQuad extends h3d.prim.Primitive {
 		v.push(1);
 		v.push(0);
 
-		buffer = h3d.Buffer.ofFloats(v, 8, [Quads, RawFormat]);
+		buffer = h3d.Buffer.ofFloats(v, hxd.BufferFormat.POS3D_NORMAL_UV);//[Quads, RawFormat]);
 	}
 
 	override function getBounds():Bounds {

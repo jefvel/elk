@@ -64,6 +64,7 @@ class Billboard extends h3d.scene.Mesh {
 		shadow.culling = None;
 		shader = new BillboardShader();
 		material.mainPass.addShader(shader);
+		// material.mainPass.addShader(new elk.graphics.shader.DitherShader());
 		
 		dirty = true;
 		refreshTile();

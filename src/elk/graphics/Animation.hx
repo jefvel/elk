@@ -11,7 +11,7 @@ class Animation {
 	
 	public var timeScale = 1.0;
 	
-	var currentFrameIndex = 0;
+	public var currentFrameIndex = 0;
 	var from = 0;
 	var to = 0;
 	var finished = false;
@@ -26,7 +26,7 @@ class Animation {
 	
 	public var onEnterFrame: Int -> Void = null;
 	
-	public dynamic function onEnd(anim: AseDataTag) {}
+	public dynamic function onEnd(anim: String) {}
 
 	public function new(data: AsepriteData) {
 		this.data = data;
@@ -96,14 +96,16 @@ class Animation {
 					onEnterFrame(currentFrameIndex);
 				}
 			} else {
+				if (onEnterFrame != null) {
+					onEnterFrame(currentFrameIndex);
+				}
 				if (currentFrameIndex > to) {
 					currentFrameIndex = to;
 					if (!finished) {
 						finished = true;
-						if (onEnterFrame != null) {
-							onEnterFrame(currentFrameIndex);
+						if (currentAnimation != null && onEnd != null) {
+							onEnd(currentAnimation.name);
 						}
-						onEnd(currentAnimation);
 					}
 				}
 			}

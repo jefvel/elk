@@ -2,7 +2,6 @@ package elk;
 
 import elk.graphics.filter.RetroFilter;
 import h2d.Bitmap;
-import h3d.mat.DepthBuffer;
 import h3d.scene.RenderContext;
 import h3d.mat.Texture;
 import elk.aseprite.AsepriteConvert;
@@ -24,6 +23,10 @@ class Elk extends hxd.App {
 	public var entities: EntityManager;
 	public var states: GameStateHandler;
 	public var sounds: SoundHandler;
+	/**
+	 * automatically sets scalemode
+	 */
+	public var autoResize = true;
 	
 	public var windowWidth = 0;
 	public var windowHeight = 0;
@@ -47,7 +50,7 @@ class Elk extends hxd.App {
 
 		initRenderer();
 
-		hxd.Timer.useManualFrameCount = true;
+		// hxd.Timer.useManualFrameCount = true;
 		
 		states = new GameStateHandler();
 		entities = new EntityManager();
@@ -77,7 +80,6 @@ class Elk extends hxd.App {
 		this.windowWidth = w;
 		this.windowHeight = h;
 
-		s2d.scaleMode = ScaleMode.Stretch(w, h);
 
 		if (buf != null) {
 			buf.resize(w, h);
@@ -90,7 +92,7 @@ class Elk extends hxd.App {
 			s3dBitmap = new Bitmap(h2d.Tile.fromTexture(buf), s2d);
 		}
 
-		buf.depthBuffer = new DepthBuffer(buf.width, buf.height);
+		buf.depthBuffer = new Texture(buf.width, buf.height);
 		var scale = s2d.width / buf.width;
 		s3dBitmap.setScale(scale);
 	}
@@ -116,8 +118,6 @@ class Elk extends hxd.App {
 		hxd.Window.getInstance().useScreenPixels = false;
 		#end
 
-		var f = new RetroFilter(1., 0.2, 0.2);
-		s2d.filter = f;
 
 		onResize();
 	}

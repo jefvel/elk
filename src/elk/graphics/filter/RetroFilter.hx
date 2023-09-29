@@ -33,6 +33,7 @@ class RetroFilter extends Filter {
 	public var waviness(get, set): Float;
 	public var sharpness(get, set): Float;
 	public var noise(get, set): Float;
+	public var transition(get, set) : Float;
 
 	var pass : RetroPass;
 
@@ -70,6 +71,9 @@ class RetroFilter extends Filter {
 
 	inline function get_noise() return pass.noise;
 	inline function set_noise(v) return pass.noise = v;
+
+	inline function get_transition() return pass.transition;
+	inline function set_transition(v) return pass.transition = v;
 
 	override function sync( ctx : RenderContext, s : Object ) {
 		boundsExtend = radius * 2;
