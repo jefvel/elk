@@ -1,13 +1,12 @@
 package elk.entity;
 
-class Entity {
-	public var x: Float = 0.;
+class Entity extends h2d.Object {
+	// public var x: Float = 0.;
 	var _prevX = 0.;
-	public var y: Float = 0.;
+	// public var y: Float = 0.;
 	var _prevY = 0.;
 	public var z: Float = 0.;
 	var _prevZ = 0.;
-	
 
 	public var interpX(get, null): Float;
 	public var interpY(get, null): Float;
@@ -20,6 +19,16 @@ class Entity {
 	public var vx = 0.;
 	public var vy = 0.;
 	public var vz = 0.;
+	
+	override function onAdd() {
+		Elk.instance.entities.add(this);
+		super.onAdd();
+	}
+	
+	override function onRemove() {
+		Elk.instance.entities.remove(this);
+		super.onRemove();
+	}
 	
 	public var friction(default, set) = 1.01;
 	var frictionDirty = true;

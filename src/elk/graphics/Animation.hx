@@ -75,11 +75,15 @@ class Animation {
 	}
 	
 	public function update(dt: Float) {
+		var frame = data.frames[currentFrameIndex];
+		if (pause && currentFrame != frame) {
+			currentFrame = frame;
+			return;
+		}
+
 		if (pause || finished) return;
 
 		dt *= timeScale;
-		
-		var frame = data.frames[currentFrameIndex];
 
 		elapsedFrameTime += dt;
 		elapsedTime += dt;

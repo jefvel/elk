@@ -19,6 +19,11 @@ class SoundHandler {
 	public function playSound(sound: hxd.res.Sound, volume = 0.5, loop = false, soundGroup: SoundGroup = null) {
 		return sound.play(loop, volume, sfxChannel, soundGroup);
 	}
+	public function playSoundPitch(snd: hxd.res.Sound, volume = 0.5, pitch = 1.0, loop = false, soundGroup: SoundGroup = null) {
+		var sound = snd.play(loop, volume, sfxChannel, soundGroup);
+		sound.addEffect(new hxd.snd.effect.Pitch(pitch));
+		return sound;
+	}
 
 	public function playMusic(sound: hxd.res.Sound, volume = 0.5, loop = true, soundGroup: SoundGroup = null) {
 		return sound.play(loop, volume, musicChannel, soundGroup);

@@ -36,7 +36,7 @@ class M {
 		return x * x * (3. - 2. * x);
 	}
 	
-	public static inline function linear(from: Float, to: Float, x: Float) {
+	public static inline function linear(from: Float, to: Float, x: Float):Float {
 		var start =  (x - from);
 		var d = to - from;
 		return clamp(start / d, 0, 1);

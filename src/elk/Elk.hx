@@ -74,12 +74,14 @@ class Elk extends hxd.App {
 			return;
 		}
 		
+		
 		var w = Std.int(engine.width / pixelSize);
 		var h = Std.int(engine.height / pixelSize);
 
+		s2d.scaleMode = ScaleMode.Stretch(w, h);
+
 		this.windowWidth = w;
 		this.windowHeight = h;
-
 
 		if (buf != null) {
 			buf.resize(w, h);
