@@ -109,7 +109,7 @@ class GameSaveData {
 		#if sys
 		sys.io.File.saveContent(saveName+".sav", data);
 		#elseif js
-		js.Browser.window.localStorage.setItem(name, data);
+		js.Browser.window.localStorage.setItem(saveName, data);
 		#else
 		throw "Not implemented";
 		#end

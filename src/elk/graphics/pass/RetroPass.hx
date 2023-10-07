@@ -71,7 +71,7 @@ class RetroShader extends ScreenShader {
 		@param var bloomAmount: Float = 1.0;
 
 		// Amount of shadow mask.
-		@param var maskDark: Float=0.98;
+		@param var maskDark: Float=0.98;//0.99;
 		@param var maskLight: Float=1.;
 		
 		@param var transition: Float = 0.;
@@ -149,7 +149,7 @@ class RetroShader extends ScreenShader {
 			var sPerPixel = 1 / res.xy;
 			var sPerWindowPixel = 1 / windowRes.xy;
 			var vy = vec2(0, -sPerWindowPixel.y * 1.0);
-			var blur = 0.2;
+			var blur = 0.3;
 			var green = vec4(0, blur, 0., 0);
 			var norm = vec4(1, 1 - blur, 1., 1);
 			
@@ -191,6 +191,7 @@ class RetroShader extends ScreenShader {
 				color += texture.get(tUv + sPerWindowPixel * 0.5 * maskPower) * values[i < 0 ? -i : i] * norm;
 				color += texture.get(tUv + sPerWindowPixel * 0.5 * maskPower + vy) * values[i < 0 ? -i : i] * green;
 			}
+			//color = texture.get(newUv);
 
 			
 			color = mix(color, sharpnessCol, sharpness);
@@ -206,7 +207,8 @@ class RetroShader extends ScreenShader {
 
 			//pixelColor.rgb = color.rgb * mask;
 
-			pixelColor = vec4(color.rgb * mix(vec3(1), mask, maskPower), 1.0) + vec4(0.03, 0.03, 0.04, 0);
+			pixelColor = vec4(color.rgb * mix(vec3(1), mask, maskPower), 1.0);// + vec4(0.03, 0.03, 0.04, 0);
+			// pixelColor = color;
 
 			var noisePos = pos * windowRes.xy;
 			noisePos -= fract(noisePos / sPerPixel) * sPerPixel;
@@ -224,9 +226,9 @@ class RetroShader extends ScreenShader {
 			//pixelColor *= 1 + sos * 0.3;
 
 			// noise fade out
-			if (sos * (1 + input.uv.x) < transition) {
-				pixelColor.rgb = mix(pixelColor.rgb, backgroundColor, 1 - maskPower);
-			}
+			//if (sos * (1 + input.uv.x) < transition) {
+				//pixelColor.rgb = mix(pixelColor.rgb, backgroundColor, 1 - maskPower);
+			//}
 
 			var noise = 0.10 * vec3(
 				0.5 + 0.5 * noise(noisePos / 3.0),

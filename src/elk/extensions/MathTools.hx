@@ -10,12 +10,18 @@ class MathTools {
 		}
 		return a;
 	}
+	
+	
+	static inline function mod(a: Float, n: Float) {
+		return  a - Math.floor(a/n) * n;
+	}
 
 	static public function angleBetween(radian: Float, toRadian: Float): Float {
-		var diff = ( toRadian - radian + Math.PI ) % (Math.PI * 2) - Math.PI;
-		diff = diff < -Math.PI ? diff + Math.PI * 2 : diff;
-		diff *= 0.5;
-		return diff;
+		var tau = Math.PI * 2;
+		var a = mod(radian - toRadian, tau);
+		var b = mod(toRadian - radian, tau);
+		
+		return a < b ? -a : b;
 	}
 
 	public static function toFixed(number:Float, ?precision=2): Float {
