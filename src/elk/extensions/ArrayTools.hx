@@ -7,4 +7,13 @@ class ArrayTools {
 		}
 		return a[Std.int(Math.random() * a.length)];
 	}
+
+	static public function find<T>(a:Array<T>, search:(T) -> Bool):T {
+		for (i in a) {
+			if (search(i))
+				return i;
+		}
+
+		return null;
+	}
 }

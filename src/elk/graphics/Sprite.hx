@@ -5,21 +5,21 @@ import h2d.RenderContext;
 import h2d.Bitmap;
 
 class Sprite extends Bitmap {
-	public var animation: Animation;
-	
+	public var animation:Animation;
+
 	public var useGlobalTimeScale = true;
 
-	var lastTile: Tile = null;
+	var lastTile:Tile = null;
 	var dirty = false;
-	
+
 	public var originX(default, set) = 0;
 	public var originY(default, set) = 0;
 
-	public function new(animation: Animation, ?p) {
+	public function new(animation:Animation, ?p) {
 		super(null, p);
 		this.animation = animation;
 	}
-	
+
 	function refreshTile() {
 		var frame = animation.currentFrame;
 		var t = frame.tile;
@@ -37,7 +37,7 @@ class Sprite extends Bitmap {
 			t.dy = frame.dy - originY;
 		}
 	}
-	
+
 	override function sync(ctx:RenderContext) {
 		var dt = ctx.elapsedTime;
 		if (useGlobalTimeScale) {
@@ -53,7 +53,7 @@ class Sprite extends Bitmap {
 		refreshTile();
 		super.sync(ctx);
 	}
-	
+
 	inline function set_originX(o:Int) {
 		if (o != originX)
 			dirty = true;
@@ -64,5 +64,10 @@ class Sprite extends Bitmap {
 		if (o != originY)
 			dirty = true;
 		return originY = o;
+	}
+
+	public function center_origin() {
+		originX = Std.int(animation.width >> 1);
+		originY = Std.int(animation.height >> 1);
 	}
 }
