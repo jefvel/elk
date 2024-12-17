@@ -108,7 +108,7 @@ class WebGenerator {
 
 		Sys.println('Generated web files');
 
-		#if closure
+		#if (closure && !closure_disabled)
 		Sys.println('Running code minification...');
 		#end
 
