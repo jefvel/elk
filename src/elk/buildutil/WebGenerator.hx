@@ -1,8 +1,18 @@
 package elk.buildutil;
 
+import haxe.macro.Context;
+
 class WebGenerator {
-	#if hscript
 	static macro function generate() {
+		Context.onAfterGenerate(generate_web_files);
+		return null;
+	}
+
+	static function val(name:String) {
+		return Context.definedValue(name);
+	}
+
+	static function generate_web_files() {
 		var templates = [];
 		function getRec(path) {
 			for (f in sys.FileSystem.readDirectory(path)) {
@@ -17,16 +27,14 @@ class WebGenerator {
 		}
 		getRec("templates");
 
-		function val(name) {
-			return haxe.macro.Context.definedValue(name);
-		}
+		final build_dir = "build";
 
-		final windowTitle = haxe.macro.Context.definedValue("windowTitle");
-		final name = "web";
+		final windowTitle = val("windowTitle");
+		final name = "html5";
 
 		var context = {
 			windowTitle: val("windowTitle"),
-			gameFile: "game.js",
+			gameFile: 'game.js?h=${Date.now()}',
 			additionalCss: "",
 			twitterSite: val("twitterSite"),
 			twitterCreator: val("twitterCreator"),
@@ -36,10 +44,10 @@ class WebGenerator {
 			backgroundColor: val("backgroundColor"),
 		};
 
-		final fixedWindow = haxe.macro.Context.definedValue("windowFixed");
+		final fixedWindow = val("windowFixed");
 
 		if (fixedWindow != null) {
-			final sizes = haxe.macro.Context.definedValue("windowSize");
+			final sizes = val("windowSize");
 			if (sizes == null) {
 				throw "windowFixed defined without setting windowSize";
 			}
@@ -50,10 +58,10 @@ class WebGenerator {
 
 			context.additionalCss += '
 			<style>
-                canvas#webgl { width: ${width}px !important; height: ${height}px !important; }
+        canvas#webgl { width: ${width}px !important; height: ${height}px !important; }
 				body { display: flex; justify-content: center; align-items: center; }
 			</style>
-            ';
+      ';
 		}
 
 		var templateableFiles = [".hx", ".html", ".css", ".js", ".json", ".txt"];
@@ -93,12 +101,17 @@ class WebGenerator {
 			var dir = file.split("/");
 			dir.pop();
 			try
-				sys.FileSystem.createDirectory("build/" + name + "/" + dir.join("/"))
+				sys.FileSystem.createDirectory('$build_dir/$name/${dir.join("/")}')
 			catch (e:Dynamic) {};
-			sys.io.File.saveContent("build/" + name + "/" + file, data);
+			sys.io.File.saveContent('$build_dir/$name/$file', data);
 		}
+
+		Sys.println('Generated web files');
+
+		#if closure
+		Sys.println('Running code minification...');
+		#end
 
 		return null;
 	}
-	#end
 }

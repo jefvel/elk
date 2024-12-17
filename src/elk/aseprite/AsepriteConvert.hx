@@ -247,7 +247,11 @@ class AsepriteConvert extends hxd.fs.Convert {
 	}
 
 	public static function exportAllTileSheets() {
-		trace("Exporting Aseprite Files...");
+		if (haxe.macro.Context.defined("display")) {
+			return null;
+		}
+
+		Sys.println("Exporting Aseprite Files...");
 		var startTime = Sys.time();
 
 		var resDir = 'res/';
@@ -256,7 +260,9 @@ class AsepriteConvert extends hxd.fs.Convert {
 		recursiveLook(resDir, tmpDir);
 
 		var duration = ("" + (Sys.time() - startTime)).substr(0, 4);
-		trace('Finished export [${duration}s]');
+		Sys.println('Finished export [${duration}s]');
+
+		return null;
 	}
 
 	static function recursiveLook(dir:String, tmpDir:String) {
@@ -280,7 +286,7 @@ class AsepriteConvert extends hxd.fs.Convert {
 						var output = haxe.io.Path.withoutExtension(path);
 						output = output.substring('res/'.length);
 
-						trace(path);
+						Sys.println(path);
 
 						var inputFile = sys.FileSystem.absolutePath(path);
 						var outputFile = haxe.io.Path.withExtension(tmpDir + output, 'asedata');

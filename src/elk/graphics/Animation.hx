@@ -24,6 +24,9 @@ class Animation {
 	var elapsedTime = 0.;
 	var elapsedFrameTime = 0.;
 
+	// Current progress of the animation, from 0 to 1
+	public var progress(null, set):Float;
+
 	/**
 	 * returns the width of the frame of the animation
 	 */
@@ -34,6 +37,9 @@ class Animation {
 	 */
 	public var height(get, null):Int;
 
+	/**
+	 * returns the current tile of the animation
+	 */
 	public var tile(get, null):Tile;
 
 	public var onEnterFrame:Int->Void = null;
@@ -149,4 +155,12 @@ class Animation {
 
 	function get_height()
 		return data.height;
+
+	function set_progress(p:Float) {
+		currentFrameIndex = 0;
+		elapsedTime = 0.0;
+		var total_duration = currentAnimation != null ? (currentAnimation.duration * 0.001) : data.totalDuration;
+		elapsedFrameTime = p * total_duration;
+		return p;
+	}
 }

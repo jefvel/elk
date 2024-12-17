@@ -1,9 +1,9 @@
 package elk;
 
-import elk.graphics.filter.RetroFilter;
+import elk.util.ResTools;
 import h2d.Bitmap;
 import h3d.scene.RenderContext;
-import h3d.mat.Texture;
+// import h3d.mat.Texture;
 import elk.aseprite.AsepriteConvert;
 import elk.gamestate.GameStateHandler;
 import elk.entity.EntityManager;
@@ -34,67 +34,88 @@ class Elk extends hxd.App {
 
 	public var renderer:elk.graphics.CustomRenderer;
 
+	var loaded_assets:Bool = false;
+
+	public var is_ready(get, null):Bool;
+
+	function get_is_ready()
+		return loaded_assets;
+
 	public function new(tickRate = 60, pixelSize = 2) {
 		super();
 		instance = this;
 
 		Process.tickRate = tickRate;
 		this.pixelSize = pixelSize;
+	}
 
-		initResources();
+	public function on_ready() {
+		loaded_assets = true;
+
+		// hxd.Timer.useManualFrameCount = true;
+		onResize();
 	}
 
 	override function init() {
 		super.init();
-
-		initRenderer();
-
-		// hxd.Timer.useManualFrameCount = true;
+		initResources();
 
 		states = new GameStateHandler();
 		entities = new EntityManager();
 		sounds = new SoundHandler();
+
+		initRenderer();
 	}
 
-	static function initResources() {
-		#if usePak
-		hxd.Res.initPak();
-		#elseif (debug && hl)
+	public function on_load_progress(progress:Float) {}
+
+	function initResources() {
+		#if (debug && hl)
 		hxd.Res.initLocal();
+		#if live_reload
 		hxd.res.Resource.LIVE_UPDATE = true;
+		#end
+		#elseif (use_pak)
+		ResTools.initPakAuto(null, on_ready, on_load_progress);
+		return;
 		#else
 		hxd.Res.initEmbed();
 		#end
+
+		on_ready();
 	}
 
 	override function onResize() {
 		super.onResize();
-		if (s2d == null) {
-			return;
-		}
 
 		var w = Std.int(engine.width / pixelSize);
 		var h = Std.int(engine.height / pixelSize);
+
+		if (s2d == null) {
+			return;
+		}
 
 		s2d.scaleMode = ScaleMode.Stretch(w, h);
 
 		this.windowWidth = w;
 		this.windowHeight = h;
 
-		if (buf != null) {
-			buf.resize(w, h);
-			buf.depthBuffer.dispose();
-			s3dBitmap.width = buf.width;
-			s3dBitmap.height = buf.height;
-		} else {
-			buf = new Texture(w, h, [Target]);
-			buf.setName("s3dbuffer");
-			s3dBitmap = new Bitmap(h2d.Tile.fromTexture(buf), s2d);
-		}
+		/*
+			if (buf != null) {
+				buf.resize(w, h);
+				buf.depthBuffer.dispose();
+				s3dBitmap.width = buf.width;
+				s3dBitmap.height = buf.height;
+			} else {
+				buf = new Texture(w, h, [Target]);
+				buf.setName("s3dbuffer");
+				s3dBitmap = new Bitmap(h2d.Tile.fromTexture(buf), s2d);
+			}
 
-		buf.depthBuffer = new Texture(buf.width, buf.height);
-		var scale = s2d.width / buf.width;
-		s3dBitmap.setScale(scale);
+			buf.depthBuffer = new Texture(buf.width, buf.height);
+			var scale = s2d.width / buf.width;
+			s3dBitmap.setScale(scale);
+		 */
 	}
 
 	function initRenderer() {
@@ -110,8 +131,8 @@ class Elk extends hxd.App {
 			engine.backgroundColor = 0xff000000 | color;
 		}
 
-		renderer = new elk.graphics.CustomRenderer();
-		s3d.renderer = renderer;
+		// renderer = new elk.graphics.CustomRenderer();
+		// s3d.renderer = renderer;
 
 		#if js
 		// This causes the game to not be super small on high DPI mobile screens
@@ -128,7 +149,9 @@ class Elk extends hxd.App {
 
 	public override function update(dt:Float) {
 		super.update(dt);
+
 		Process._runUpdate(dt);
+
 		#if hot_reload
 		hl.Api.checkReload();
 		#end
@@ -144,7 +167,8 @@ class Elk extends hxd.App {
 
 		s2d.render(e);
 
-		entities.render();
+		if (entities != null)
+			entities.render();
 		drawCalls = e.drawCalls;
 	}
 
