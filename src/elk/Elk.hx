@@ -58,12 +58,12 @@ class Elk extends hxd.App {
 
 	override function init() {
 		super.init();
-		initResources();
 
 		states = new GameStateHandler();
 		entities = new EntityManager();
 		sounds = new SoundHandler();
 
+		initResources();
 		initRenderer();
 	}
 
