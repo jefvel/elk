@@ -121,7 +121,7 @@ class ResTools {
 		}
 	}
 
-	#if sys
+	#if (sys && macro)
 	public static function generate_pak_hashes() {
 		var pak_hashes = new Map<String, {
 			hash:String,

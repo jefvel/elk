@@ -246,6 +246,7 @@ class AsepriteConvert extends hxd.fs.Convert {
 		hxd.File.saveBytes(jsonPath, bytes);
 	}
 
+	#if macro
 	public static function exportAllTileSheets() {
 		if (haxe.macro.Context.defined("display")) {
 			return null;
@@ -264,6 +265,7 @@ class AsepriteConvert extends hxd.fs.Convert {
 
 		return null;
 	}
+	#end
 
 	static function recursiveLook(dir:String, tmpDir:String) {
 		var extensions = ['aseprite', 'ase'];
