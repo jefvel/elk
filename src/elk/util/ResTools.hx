@@ -115,15 +115,29 @@ class ResTools {
 			}
 		} else {
 			return macro {
+				var embedded_fs = hxd.fs.EmbedFileSystem.create(null, {includedPaths: $v{options?.embedded_paths}});
+				hxd.Res.loader = new hxd.res.Loader(embedded_fs);
+
 				var file = $v{file};
 
+				var root_dir = $v{root_dir};
+
+				inline function get_file_path(file:String) {
+					#if debug
+					return '$root_dir/$file.pak';
+					#else
+					return '$file.pak';
+					#end
+				}
+
 				var pak = new hxd.fmt.pak.FileSystem();
-				pak.loadPak(file + ".pak");
+				pak.loadPak(get_file_path(file));
 				var i = 1;
 				while (true) {
-					if (!hxd.File.exists(file + i + ".pak"))
+					var path = get_file_path(file + i);
+					if (!hxd.File.exists(path))
 						break;
-					pak.loadPak(file + i + ".pak");
+					pak.loadPak(path);
 					i++;
 				}
 

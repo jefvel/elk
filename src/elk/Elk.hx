@@ -87,17 +87,21 @@ class Elk extends hxd.App {
 
 	function init_local_fs() {}
 
+	var inited_resources = false;
+
 	function initResources() {
-		#if (debug && hl)
+		var mark_ready = () -> inited_resources = true;
+
+		#if (use_pak)
+		ResTools.initPakAuto(null, mark_ready, on_load_progress, {
+			embedded_paths: ['preloader', 'data.cdb'],
+		});
+		return;
+		#elseif (debug && hl)
 		hxd.Res.initLocal();
 		#if live_reload
 		hxd.res.Resource.LIVE_UPDATE = true;
 		#end
-		#elseif (use_pak)
-		ResTools.initPakAuto(null, on_ready, on_load_progress, {
-			embedded_paths: ['preloader', 'data.cdb'],
-		});
-		return;
 		#else
 		hxd.Res.initEmbed();
 		#end
@@ -109,7 +113,7 @@ class Elk extends hxd.App {
 			#end
 		 */
 
-		on_ready();
+		mark_ready();
 	}
 
 	override function onResize() {
@@ -176,6 +180,8 @@ class Elk extends hxd.App {
 
 	public override function update(dt:Float) {
 		super.update(dt);
+		if (inited_resources && !is_ready)
+			on_ready();
 
 		Process._runUpdate(dt);
 
