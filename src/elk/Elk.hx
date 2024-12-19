@@ -6,7 +6,6 @@ import hxd.Window;
 import elk.util.ResTools;
 import h2d.Bitmap;
 import h3d.scene.RenderContext;
-// import h3d.mat.Texture;
 import elk.aseprite.AsepriteConvert;
 import elk.gamestate.GameStateHandler;
 import elk.entity.EntityManager;
@@ -80,22 +79,24 @@ class Elk extends hxd.App {
 		sounds = new SoundHandler();
 
 		initResources();
+		elk.castle.CastleDB.init();
+
 		initRenderer();
 	}
 
 	public function on_load_progress(progress:Float) {}
 
-	function init_local_fs() {}
-
-	var inited_resources = false;
-
 	function initResources() {
-		var mark_ready = () -> inited_resources = true;
+		var mark_ready = () -> haxe.Timer.delay(on_ready, 0);
 
 		#if (use_pak)
-		ResTools.initPakAuto(null, mark_ready, on_load_progress, {
-			embedded_paths: ['preloader', 'data.cdb'],
-		});
+		ResTools.initPakAuto( //
+			null, //
+			mark_ready, //
+			on_load_progress, //
+			{
+				res_configuration: 'web',
+			});
 		return;
 		#elseif (debug && hl)
 		hxd.Res.initLocal();
@@ -180,9 +181,6 @@ class Elk extends hxd.App {
 
 	public override function update(dt:Float) {
 		super.update(dt);
-		if (inited_resources && !is_ready)
-			on_ready();
-
 		Process._runUpdate(dt);
 
 		#if hot_reload

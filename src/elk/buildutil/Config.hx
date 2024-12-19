@@ -1,6 +1,7 @@
 package elk.buildutil;
 
 import elk.aseprite.AsepriteConvert;
+import elk.res.ConvertBinJSON;
 
 class Config {
 	static function initConfig() {
