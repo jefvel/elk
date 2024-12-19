@@ -3,8 +3,11 @@ package elk.gamestate;
 class GameStateHandler extends elk.Process {
 	public var current(default, set):GameState = null;
 
-	public function new() {
+	var elk:Elk;
+
+	public function new(elk:Elk) {
 		super();
+		this.elk = elk;
 	}
 
 	public override function tick(dt:Float) {
@@ -19,11 +22,13 @@ class GameStateHandler extends elk.Process {
 
 	function set_current(newState:GameState) {
 		if (current != null) {
-			current.onRemove();
+			elk.s2d.removeChild(current);
+			current.onLeave();
 			current = null;
 		}
 
-		newState.game = elk.Elk.instance;
+		newState.game = elk;
+		elk.s2d.addChild(newState);
 		newState.onEnter();
 
 		return current = newState;

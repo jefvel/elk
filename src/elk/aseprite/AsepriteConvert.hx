@@ -1,5 +1,6 @@
 package elk.aseprite;
 
+import haxe.io.Path;
 import elk.aseprite.AsepriteData;
 
 private typedef AsepriteBounds = {
@@ -247,15 +248,16 @@ class AsepriteConvert extends hxd.fs.Convert {
 	}
 
 	#if macro
-	public static function exportAllTileSheets() {
+	public static function exportAllTileSheets(?res_dir:String = 'res') {
 		if (haxe.macro.Context.defined("display")) {
 			return null;
 		}
 
-		Sys.println("Exporting Aseprite Files...");
+		Sys.println('Exporting Aseprite Files in $res_dir...');
 		var startTime = Sys.time();
 
-		var resDir = 'res/';
+		var resDir = Path.addTrailingSlash(res_dir);
+
 		var tmpDir = sys.FileSystem.absolutePath(resDir) + '/.tmp/';
 
 		recursiveLook(resDir, tmpDir);

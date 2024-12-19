@@ -6,6 +6,10 @@ import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.crypto.Base64;
 
+typedef PakOptions = {
+	?embedded_paths:Array<String>,
+}
+
 class ResTools {
 	/**
 		Equivalent to `Res.initPak` but also works with JS.
@@ -26,7 +30,7 @@ class ResTools {
 		@param onProgress `Float->Void` Optional callback for loading progress. Passed value is a percentile from 0 to 1.
 		Never called on non-JS target.
 	**/
-	public static macro function initPakAuto(?file:String, onReady:ExprOf<Void->Void>, ?onProgress:ExprOf<Float->Void>) {
+	public static macro function initPakAuto(?file:String, onReady:ExprOf<Void->Void>, ?onProgress:ExprOf<Float->Void>, ?options:PakOptions) {
 		if (file == null)
 			file = haxe.macro.Context.definedValue("resourcesPath");
 		if (file == null)
@@ -42,7 +46,10 @@ class ResTools {
 		}>();
 
 		#if (!display || use_pak)
-		hxd.fmt.pak.Build.make(sys.FileSystem.fullPath(file), '$root_dir$file', true);
+		sys.FileSystem.createDirectory('$root_dir');
+		hxd.fmt.pak.Build.make(sys.FileSystem.fullPath(file), '$root_dir$file', true, {
+			excludedPaths: options.embedded_paths
+		});
 		pak_infos = generate_pak_hashes();
 		#end
 
@@ -56,6 +63,9 @@ class ResTools {
 			}
 
 			return macro {
+				var embedded_fs = hxd.fs.EmbedFileSystem.create(null, {includedPaths: $v{options?.embedded_paths}});
+				hxd.Res.loader = new hxd.res.Loader(embedded_fs);
+
 				var file = $v{file};
 				var pak_infos = $v{pak_infos};
 				var pak = new hxd.fmt.pak.FileSystem();
@@ -86,7 +96,7 @@ class ResTools {
 					total_loaded += data.length;
 					pak.addPak(new hxd.fmt.pak.FileSystem.FileInput(data));
 					if (++pak_index == $v{maxPaks}) {
-						hxd.Res.loader = new hxd.res.Loader(pak);
+						hxd.Res.loader = new hxd.res.Loader(new MultiFileSystem([pak, embedded_fs]));
 						${onReady}();
 					} else {
 						@:privateAccess loader.url = get_url('$file$pak_index');
@@ -106,6 +116,7 @@ class ResTools {
 		} else {
 			return macro {
 				var file = $v{file};
+
 				var pak = new hxd.fmt.pak.FileSystem();
 				pak.loadPak(file + ".pak");
 				var i = 1;
@@ -115,7 +126,9 @@ class ResTools {
 					pak.loadPak(file + i + ".pak");
 					i++;
 				}
-				hxd.Res.loader = new hxd.res.Loader(pak);
+
+				hxd.Res.loader = new hxd.res.Loader(new MultiFileSystem([pak, embedded_fs]));
+
 				${onReady}();
 			}
 		}

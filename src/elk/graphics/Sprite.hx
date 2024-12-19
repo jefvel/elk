@@ -66,8 +66,12 @@ class Sprite extends Bitmap {
 		return originY = o;
 	}
 
+	public function set_origin(x:Float, y:Float) {
+		originX = Std.int(animation.width * x);
+		originY = Std.int(animation.height * y);
+	}
+
 	public function center_origin() {
-		originX = Std.int(animation.width >> 1);
-		originY = Std.int(animation.height >> 1);
+		set_origin(0.5, 0.5);
 	}
 }

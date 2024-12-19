@@ -1,5 +1,8 @@
 package elk;
 
+import hxd.fs.MultiFileSystem;
+import hxd.fs.EmbedFileSystem;
+import hxd.Window;
 import elk.util.ResTools;
 import h2d.Bitmap;
 import h3d.scene.RenderContext;
@@ -14,6 +17,8 @@ class Elk extends hxd.App {
 	public static var instance:Elk = null;
 
 	public var pixelSize(default, set) = 2;
+
+	public var window_scale(default, set) = #if js 1.0 #else 1.5 #end;
 
 	public var tickRate(get, set):Int;
 	public var timeScale(get, set):Float;
@@ -49,17 +54,28 @@ class Elk extends hxd.App {
 		this.pixelSize = pixelSize;
 	}
 
+	function set_window_scale(s:Float) {
+		window_scale = s;
+		onResize();
+		return window_scale;
+	}
+
 	public function on_ready() {
 		loaded_assets = true;
 
 		// hxd.Timer.useManualFrameCount = true;
 		onResize();
+
+		#if hl
+		var win = Window.getInstance();
+		win.resize(Std.int(win.width * window_scale), Std.int(win.height * window_scale));
+		#end
 	}
 
 	override function init() {
 		super.init();
 
-		states = new GameStateHandler();
+		states = new GameStateHandler(this);
 		entities = new EntityManager();
 		sounds = new SoundHandler();
 
@@ -69,6 +85,8 @@ class Elk extends hxd.App {
 
 	public function on_load_progress(progress:Float) {}
 
+	function init_local_fs() {}
+
 	function initResources() {
 		#if (debug && hl)
 		hxd.Res.initLocal();
@@ -76,11 +94,20 @@ class Elk extends hxd.App {
 		hxd.res.Resource.LIVE_UPDATE = true;
 		#end
 		#elseif (use_pak)
-		ResTools.initPakAuto(null, on_ready, on_load_progress);
+		ResTools.initPakAuto(null, on_ready, on_load_progress, {
+			embedded_paths: ['preloader', 'data.cdb'],
+		});
 		return;
 		#else
 		hxd.Res.initEmbed();
 		#end
+
+		/*
+			#if macro
+			var pre = EmbedFileSystem.create(null);
+			hxd.Res.loader = macro new hxd.res.Loader(new MultiFileSystem([hxd.Res.loader.fs, pre]));
+			#end
+		 */
 
 		on_ready();
 	}
@@ -88,8 +115,8 @@ class Elk extends hxd.App {
 	override function onResize() {
 		super.onResize();
 
-		var w = Std.int(engine.width / pixelSize);
-		var h = Std.int(engine.height / pixelSize);
+		var w = Std.int(engine.width / pixelSize / window_scale);
+		var h = Std.int(engine.height / pixelSize / window_scale);
 
 		if (s2d == null) {
 			return;
