@@ -16,13 +16,13 @@ typedef SubPakDefinition = {
 typedef PakAutoOptions = {
 	?embedded_paths:Array<String>,
 	?named_paks:Array<SubPakDefinition>,
-	?res_configuration:String,
 }
 
 typedef PakInfo = {
 	hash:String,
 	name:String,
 	size:Int,
+	?embedded:Bool,
 }
 
 class ResTools {
@@ -48,7 +48,8 @@ class ResTools {
 		@param onProgress `Float->Void` Optional callback for loading progress. Passed value is a percentile from 0 to 1.
 		Never called on non-JS target.
 	**/
-	public static macro function initPakAuto(?file:String, onReady:ExprOf<Void->Void>, ?onProgress:ExprOf<Float->Void>, ?options:PakAutoOptions) {
+	public static macro function initPakAuto(?file:String, onReady:ExprOf<Void->Void>, ?onProgress:ExprOf<Float->Void>, ?res_configuration:String,
+			?options:PakAutoOptions) {
 		if (file == null)
 			file = haxe.macro.Context.definedValue("resourcesPath");
 		if (file == null)
@@ -56,7 +57,7 @@ class ResTools {
 
 		// #if debug null #else haxe.macro.Context.definedValue('res_config') #end;
 
-		var configuration = options?.res_configuration;
+		var configuration = res_configuration;
 		var build_dir = haxe.macro.Context.definedValue('build_dir');
 		var root_dir = build_dir != null ? '$build_dir/' : '';
 
@@ -186,8 +187,27 @@ class ResTools {
 		}
 	}
 
+	static var loaded_paks = new Map<String, Bool>();
+
 	#if !macro
 	public static function load_named_pak(id:elk.castle.CastleDB.Pak_configKind, on_loaded:Void->Void, ?on_progress:Float->Void, ?on_error:String->Void) {
+		#if !use_pak
+		on_loaded();
+		return;
+		#end
+
+		// Pak is embedded, return immediately
+		if (elk.castle.CastleDB.pak_config.get(id).Embed) {
+			on_loaded();
+			return;
+		}
+
+		// PAK loaded, return
+		if (loaded_paks.get(id.toString())) {
+			on_loaded();
+			return;
+		}
+
 		if (pak_infos == null || pak_fs == null)
 			throw "Pak system not initialized or loaded yet.";
 
@@ -237,6 +257,7 @@ class ResTools {
 		pak_fs.loadPak(get_file_path(name));
 		on_loaded();
 		#end
+		loaded_paks[id.toString()] = true;
 	}
 	#end
 

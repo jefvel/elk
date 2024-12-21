@@ -2,7 +2,7 @@ package elk;
 
 class Process {
 	static var PROCESSES:Array<Process> = [];
-	
+
 	var _paused = false;
 
 	public var priority = 0;
@@ -22,11 +22,11 @@ class Process {
 	public function resume() {
 		_paused = false;
 	}
-	
+
 	public function new() {
 		init();
 	}
-	
+
 	function init() {
 		PROCESSES.push(this);
 	}
@@ -37,14 +37,14 @@ class Process {
 		else
 			pause();
 	}
-	
+
 	public static var tickRate(default, set) = 60;
 	public static var currentTick = 0;
 
 	static var accumulatedTime = 0.;
 	static var frameTime = 1 / 60;
 	static var maxAccumulatedTime = 2.;
-	
+
 	public static var timeScale = 1.0;
 	public static var currentTickElapsed = 0.;
 
@@ -52,7 +52,7 @@ class Process {
 		var scaledDt = dt * timeScale;
 		accumulatedTime += scaledDt;
 		currentTickElapsed = hxd.Math.clamp(accumulatedTime / frameTime);
-		
+
 		for (p in PROCESSES) {
 			if (!p._paused) {
 				p.preUpdate();
@@ -62,7 +62,7 @@ class Process {
 		currentTickElapsed = hxd.Math.clamp(accumulatedTime / frameTime);
 
 		while (accumulatedTime >= frameTime) {
-			currentTick ++;
+			currentTick++;
 			hxd.Timer.frameCount = currentTick;
 
 			accumulatedTime -= frameTime;
@@ -72,7 +72,7 @@ class Process {
 				}
 			}
 		}
-		
+
 		for (p in PROCESSES) {
 			if (!p._paused) {
 				p.update(scaledDt);
@@ -81,12 +81,12 @@ class Process {
 
 		currentTickElapsed = hxd.Math.clamp(accumulatedTime / frameTime);
 	}
-	
+
 	public function destroy() {
 		PROCESSES.remove(this);
 	}
 
-	static function set_tickRate(rate: Int) {
+	static function set_tickRate(rate:Int) {
 		rate = hxd.Math.iclamp(rate, 1, 999);
 		frameTime = 1 / rate;
 		return tickRate = rate;

@@ -94,9 +94,8 @@ class Elk extends hxd.App {
 			null, //
 			mark_ready, //
 			on_load_progress, //
-			{
-				res_configuration: 'web',
-			});
+			'web', //
+		);
 		return;
 		#elseif (debug && hl)
 		hxd.Res.initLocal();

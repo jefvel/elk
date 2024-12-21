@@ -27,14 +27,16 @@ class WebGenerator {
 		}
 		getRec("templates");
 
-		final build_dir = "build";
+		final build_dir = val('build_dir') ?? "build/html5";
 
 		final windowTitle = val("windowTitle");
 		final name = "html5";
 
+		var game_file_hash = haxe.crypto.Sha1.make(sys.io.File.getBytes('$build_dir/game.js')).toHex();
+
 		var context = {
 			windowTitle: val("windowTitle"),
-			gameFile: 'game.js?h=${Date.now()}',
+			gameFile: 'game.js?h=${game_file_hash}',
 			additionalCss: "",
 			twitterSite: val("twitterSite"),
 			twitterCreator: val("twitterCreator"),
@@ -101,9 +103,9 @@ class WebGenerator {
 			var dir = file.split("/");
 			dir.pop();
 			try
-				sys.FileSystem.createDirectory('$build_dir/$name/${dir.join("/")}')
+				sys.FileSystem.createDirectory('$build_dir/${dir.join("/")}')
 			catch (e:Dynamic) {};
-			sys.io.File.saveContent('$build_dir/$name/$file', data);
+			sys.io.File.saveContent('$build_dir/$file', data);
 		}
 
 		Sys.println('Generated web files');

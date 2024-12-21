@@ -1,6 +1,6 @@
 package elk.extensions;
 
-class StringTools {
+class ResTools {
 	static inline function isBinJson(bytes:haxe.io.Bytes) {
 		return bytes.getString(0, 5) == 'HBSON';
 	}
