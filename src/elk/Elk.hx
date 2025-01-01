@@ -51,6 +51,13 @@ class Elk extends hxd.App {
 
 		Process.tickRate = tickRate;
 		this.pixelSize = pixelSize;
+
+		#if sys
+		switch (Sys.systemName()) {
+			case "Mac", "Linux":
+				window_scale = 1.0;
+		}
+		#end
 	}
 
 	function set_window_scale(s:Float) {
