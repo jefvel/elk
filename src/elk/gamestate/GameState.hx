@@ -22,7 +22,7 @@ class GameState extends h2d.Object {
 	 */
 	public function tick(dt:Float) {}
 
-	public function onEnter() {}
+	public function on_enter() {}
 
-	public function onLeave() {}
+	public function on_leave() {}
 }

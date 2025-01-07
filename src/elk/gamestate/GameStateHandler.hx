@@ -1,7 +1,9 @@
 package elk.gamestate;
 
 class GameStateHandler extends elk.Process {
-	public var current(default, set):GameState = null;
+	public var current(get, null):GameState;
+
+	private var _current:GameState = null;
 
 	var elk:Elk;
 
@@ -20,17 +22,22 @@ class GameStateHandler extends elk.Process {
 			current.update(dt);
 	}
 
-	function set_current(newState:GameState) {
+	public function change(new_state:GameState) {
+		var current = _current;
 		if (current != null) {
 			elk.s2d.removeChild(current);
-			current.onLeave();
+			current.on_leave();
 			current = null;
 		}
 
-		newState.game = elk;
-		elk.s2d.addChild(newState);
-		newState.onEnter();
+		new_state.game = elk;
+		elk.s2d.addChild(new_state);
+		new_state.on_enter();
 
-		return current = newState;
+		return _current = new_state;
+	}
+
+	function get_current():GameState {
+		return _current;
 	}
 }
