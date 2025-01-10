@@ -16,6 +16,7 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 				cb(resp);
 			}
 
+			resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, 'auth_token');
 			return cb(resp);
 
 			try {
