@@ -35,6 +35,8 @@ class WebSocketClient extends NetworkClient {
 	}
 
 	override function send(bytes:haxe.io.Bytes) {
+		if (socket == null || socket.state == Closed)
+			return;
 		#if js
 		var data = bytes.getData();
 		if (data.byteLength != bytes.length) {
@@ -52,6 +54,75 @@ class WebSocketClient extends NetworkClient {
 			socket.close();
 			socket = null;
 		}
+	}
+}
+
+private class WebSocketHostCommon extends NetworkHost {
+	public var connected(default, null) = false;
+	public var enableSound:Bool = true;
+
+	var web_socket:hx.ws.WebSocket;
+	var on_disconnect:Void->Void = null;
+
+	public function new() {
+		super();
+		isAuth = false;
+	}
+
+	function close() {
+		if (on_disconnect != null)
+			on_disconnect();
+
+		connected = false;
+		if (web_socket != null) {
+			web_socket.close();
+			web_socket = null;
+		}
+	}
+
+	override function dispose() {
+		super.dispose();
+		close();
+	}
+
+	public function connect(address:String, ?protocols:Array<String>, ?onConnect:Bool->Void, ?onDisconnect:Void->Void) {
+		close();
+		on_disconnect = onDisconnect;
+
+		isAuth = false;
+		web_socket = new hx.ws.WebSocket(address, false, protocols);
+
+		self = new WebSocketClient(this, web_socket);
+		web_socket.onerror = function(msg) {
+			if (!connected) {
+				web_socket.onerror = function(_) {};
+				if (onConnect != null)
+					onConnect(false);
+			} else
+				throw msg;
+		};
+
+		web_socket.onopen = function() {
+			web_socket.onerror = null;
+			connected = true;
+			if (StringTools.contains(address, "127.0.0.1"))
+				enableSound = false;
+			clients = [self];
+			if (onConnect != null)
+				onConnect(true);
+		}
+
+		web_socket.onclose = function() {
+			close();
+		}
+
+		web_socket.open();
+	}
+
+	public function offlineServer() {
+		close();
+		self = new WebSocketClient(this, null);
+		isAuth = true;
 	}
 }
 
@@ -89,6 +160,8 @@ class WebSocketHandlerClient extends NetworkClient {
 	}
 
 	override function send(bytes:haxe.io.Bytes) {
+		if (socket == null || socket.state == Closed)
+			return;
 		socket.send(bytes);
 	}
 
@@ -101,59 +174,15 @@ class WebSocketHandlerClient extends NetworkClient {
 	}
 }
 
-class WebSocketHost extends NetworkHost {
-	public var connected(default, null) = false;
-
+class WebSocketHost extends WebSocketHostCommon {
 	var server:WebSocketServer<elk.newgrounds.NGWebSocketHandler>;
 
-	public var enableSound:Bool = true;
-
-	public function new() {
-		super();
-		isAuth = false;
-	}
-
-	override function dispose() {
-		super.dispose();
-		close();
-	}
-
-	function close() {
+	override function close() {
+		super.close();
 		if (server != null) {
 			server.stop();
 			server = null;
 		}
-		connected = false;
-	}
-
-	public function connect(address:String, ?protocols:Array<String>, ?onConnect:Bool->Void) {
-		close();
-
-		isAuth = false;
-		var socket = new hx.ws.WebSocket(address, false, protocols);
-
-		self = new WebSocketClient(this, socket);
-		socket.onerror = function(msg) {
-			if (!connected) {
-				socket.onerror = function(_) {};
-				if (onConnect != null)
-					onConnect(false);
-			} else
-				throw msg;
-		};
-		socket.onopen = function() {
-			connected = true;
-			if (StringTools.contains(address, "127.0.0.1"))
-				enableSound = false;
-			clients = [self];
-			if (onConnect != null)
-				onConnect(true);
-		}
-		socket.onclose = function() {
-			trace('closed');
-			close();
-		}
-		socket.open();
 	}
 
 	public function wait(host:String, port:Int, ?onConnected:NetworkClient->Void, ?use_tls:Bool = false) {
@@ -167,6 +196,7 @@ class WebSocketHost extends NetworkHost {
 		// }
 
 		server.onClientAdded = (client) -> {
+			trace('new client connected $client');
 			var c = new WebSocketHandlerClient(this, client);
 			client.onopen = () -> {
 				pendingClients.push(c);
@@ -182,64 +212,11 @@ class WebSocketHost extends NetworkHost {
 		server.start();
 		isAuth = true;
 	}
-
-	public function offlineServer() {
-		close();
-		self = new WebSocketClient(this, null);
-		isAuth = true;
-	}
 }
 #else
-class WebSocketHost extends NetworkHost {
-	public var connected(default, null) = false;
-
-	public var enableSound:Bool = true;
-
-	public function new() {
-		super();
-		isAuth = false;
-	}
-
-	public function connect(address:String, ?protocols:Array<String>, ?onConnect:Bool->Void) {
-		close();
-
-		isAuth = false;
-		var socket = new hx.ws.WebSocket(address, false, protocols);
-
-		self = new WebSocketClient(this, socket);
-		socket.onerror = function(msg) {
-			if (!connected) {
-				socket.onerror = function(_) {};
-				if (onConnect != null)
-					onConnect(false);
-			} else
-				throw msg;
-		};
-		socket.onopen = function() {
-			connected = true;
-			if (StringTools.contains(address, "127.0.0.1"))
-				enableSound = false;
-			clients = [self];
-			if (onConnect != null)
-				onConnect(true);
-		}
-		socket.onclose = function() {
-			close();
-		}
-		socket.open();
-	}
-
+class WebSocketHost extends WebSocketHostCommon {
 	public function wait(host:String, port:Int, ?onConnected:NetworkClient->Void, ?use_tls:Bool = false) {
 		throw "Can't host websocket server in browser.";
-	}
-
-	override function dispose() {
-		super.dispose();
-		close();
-	}
-
-	function close() {
-		connected = false;
 	}
 }
 #end
