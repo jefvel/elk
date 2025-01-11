@@ -33,6 +33,8 @@ class Database {
 	var connection:Connection;
 	var migrations:Migrations;
 
+	#if (target.threaded)
+	#end
 	public function new(?options:DatabaseOptions) {
 		options = options ?? default_options;
 		switch (options.type) {

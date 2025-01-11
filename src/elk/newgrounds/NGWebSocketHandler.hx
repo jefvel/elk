@@ -4,6 +4,9 @@ import elk.newgrounds.ValidateNGSession;
 
 #if sys
 class NGWebSocketHandler extends hx.ws.WebSocketHandler {
+	public var username(default, null):String = null;
+	public var session(default, null):String = null;
+
 	public function new(s:hx.ws.SocketImpl) {
 		super(s);
 
@@ -39,6 +42,9 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 					if (!valid) {
 						return unauthorized();
 					}
+
+					this.username = username;
+					this.session = session;
 
 					resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, type);
 

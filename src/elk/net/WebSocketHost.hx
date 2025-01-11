@@ -70,14 +70,18 @@ private class WebSocketHostCommon extends NetworkHost {
 	}
 
 	function close() {
-		if (on_disconnect != null)
+		if (connected && on_disconnect != null)
 			on_disconnect();
 
 		connected = false;
+
 		if (web_socket != null) {
+			trace('closed socket.');
 			web_socket.close();
 			web_socket = null;
 		}
+
+		MultiplayerHandler.instance.reset();
 	}
 
 	override function dispose() {
@@ -93,6 +97,9 @@ private class WebSocketHostCommon extends NetworkHost {
 		web_socket = new hx.ws.WebSocket(address, false, protocols);
 
 		self = new WebSocketClient(this, web_socket);
+
+		elk.net.MultiplayerHandler.instance.host = this;
+
 		web_socket.onerror = function(msg) {
 			if (!connected) {
 				web_socket.onerror = function(_) {};
@@ -145,11 +152,9 @@ class WebSocketHandlerClient extends NetworkClient {
 					}
 				} catch (e) {
 					trace(e);
+					trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
 					stop();
 				}
-			}
-			s.onclose = () -> {
-				stop();
 			}
 		}
 	}
@@ -165,7 +170,7 @@ class WebSocketHandlerClient extends NetworkClient {
 		socket.send(bytes);
 	}
 
-	override function stop() {
+	override public function stop() {
 		super.stop();
 		if (socket != null) {
 			socket.close();
@@ -185,8 +190,9 @@ class WebSocketHost extends WebSocketHostCommon {
 		}
 	}
 
-	public function wait(host:String, port:Int, ?onConnected:NetworkClient->Void, ?use_tls:Bool = false) {
+	public function wait(host:String, port:Int, ?onConnected:NetworkClient->Void, ?onDisconnected:NetworkClient->Void, ?use_tls:Bool = false) {
 		close();
+		elk.net.MultiplayerHandler.instance.host = this;
 		isAuth = false;
 		self = new WebSocketHandlerClient(this, null);
 		// if (!use_tls) {
@@ -196,16 +202,23 @@ class WebSocketHost extends WebSocketHostCommon {
 		// }
 
 		server.onClientAdded = (client) -> {
-			trace('new client connected $client');
 			var c = new WebSocketHandlerClient(this, client);
 			client.onopen = () -> {
 				pendingClients.push(c);
 				if (onConnected != null)
 					onConnected(c);
+				client.onclose = () -> {
+					c.stop();
+					if (onDisconnected != null) {
+						onDisconnected(c);
+					}
+					client.onclose = null;
+				}
 			}
 			client.onerror = function(err) {
 				trace(err);
 				c.stop();
+				client.close();
 			}
 		}
 
