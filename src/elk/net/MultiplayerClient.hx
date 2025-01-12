@@ -42,7 +42,7 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 		on_disconnect();
 
-		MultiplayerHandler.instance.remove_client(this);
+		MultiplayerHandler.instance.remove_client(cast this);
 
 		if (host?.isAuth) {
 			this.host.flush();
@@ -62,7 +62,7 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 		var host = MultiplayerHandler.instance.host;
 
-		MultiplayerHandler.instance.add_client(this);
+		MultiplayerHandler.instance.add_client(cast this);
 	}
 
 	public function alive() {

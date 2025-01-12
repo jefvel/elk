@@ -66,6 +66,7 @@ private class WebSocketHostCommon extends NetworkHost {
 
 	public function new() {
 		super();
+		MultiplayerHandler.instance.host = this;
 		isAuth = false;
 	}
 
@@ -77,6 +78,9 @@ private class WebSocketHostCommon extends NetworkHost {
 
 		if (web_socket != null) {
 			trace('closed socket.');
+			// If mid connection, socket might not close correctly.
+			// in this case, close the socket as soon as it connects.
+			web_socket.onopen = web_socket.close;
 			web_socket.close();
 			web_socket = null;
 		}
@@ -97,8 +101,6 @@ private class WebSocketHostCommon extends NetworkHost {
 		web_socket = new hx.ws.WebSocket(address, false, protocols);
 
 		self = new WebSocketClient(this, web_socket);
-
-		elk.net.MultiplayerHandler.instance.host = this;
 
 		web_socket.onerror = function(msg) {
 			if (!connected) {
@@ -174,7 +176,6 @@ class WebSocketHandlerClient extends NetworkClient {
 		super.stop();
 		if (socket != null) {
 			socket.close();
-			socket = null;
 		}
 	}
 }
@@ -192,7 +193,6 @@ class WebSocketHost extends WebSocketHostCommon {
 
 	public function wait(host:String, port:Int, ?onConnected:NetworkClient->Void, ?onDisconnected:NetworkClient->Void, ?use_tls:Bool = false) {
 		close();
-		elk.net.MultiplayerHandler.instance.host = this;
 		isAuth = false;
 		self = new WebSocketHandlerClient(this, null);
 		// if (!use_tls) {
@@ -217,8 +217,7 @@ class WebSocketHost extends WebSocketHostCommon {
 			}
 			client.onerror = function(err) {
 				trace(err);
-				c.stop();
-				client.close();
+				// trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
 			}
 		}
 

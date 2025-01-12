@@ -42,14 +42,14 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 
 		host.wait(bind_address, bind_port, (client) -> {
 			var user = new T(client, host);
+			trace('server: client connect: ${user.uid}');
 			client.sendMessage('uid:${user.uid}');
-			clients.push(user);
 			client.sync();
+			clients.push(user);
 		}, (client) -> {
-			trace('server: client disconnect: ${client}, $clients');
 			for (c in clients) {
-				trace(c.client);
 				if (c.client == client) {
+					trace('server: client disconnect: ${c.uid}, $clients');
 					clients.remove(c);
 					@:privateAccess
 					c.disconnect();
