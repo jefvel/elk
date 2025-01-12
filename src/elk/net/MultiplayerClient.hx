@@ -15,14 +15,23 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 	public function new(client:NetworkClient, host:hxbit.NetworkHost) {
 		uid = elk.util.Uuid.v4();
 
-		client.ownerObject = this;
-
 		this.host = host;
 		this.client = client;
 
+		client.ownerObject = this;
 		this.enableReplication = true;
 
+		#if hxbit_visibility
+		this.setVisibilityDirty(Default);
+		#end
+
 		_init();
+	}
+
+	public function evalVisibility(group:hxbit.VisibilityGroup, from:hxbit.NetworkSerializable):Bool {
+		trace(group);
+		trace(from);
+		return true;
 	}
 
 	public function networkAllow(op:hxbit.NetworkSerializable.Operation, propId:Int, client:hxbit.NetworkSerializable):Bool {

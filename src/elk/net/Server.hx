@@ -7,6 +7,8 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	var running = false;
 
 	public var on_message:(T, Dynamic) -> Void;
+	public var on_connected:(T) -> Void;
+	public var on_disconnected:(T) -> Void;
 
 	var max_users = 100;
 	var bind_address = '0.0.0.0';
@@ -46,13 +48,17 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 			client.sendMessage('uid:${user.uid}');
 			client.sync();
 			clients.push(user);
+			if (on_connected != null)
+				on_connected(user);
 		}, (client) -> {
 			for (c in clients) {
 				if (c.client == client) {
-					trace('server: client disconnect: ${c.uid}, $clients');
 					clients.remove(c);
+					trace('server: client disconnect: ${c.uid}, $clients');
 					@:privateAccess
 					c.disconnect();
+					if (on_disconnected != null)
+						on_disconnected(c);
 					break;
 				}
 			}
