@@ -96,10 +96,8 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	var last_time = 0.0;
 
 	public function update(dt:Float) {
-		trace('$elapsed, $dt');
 		elapsed += dt;
 		if (running && host != null && elapsed > 0.5) {
-			trace("fuls");
 			elapsed = 0.0;
 			host.flush();
 		}
