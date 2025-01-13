@@ -97,7 +97,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 
 	public function update(dt:Float) {
 		elapsed += dt;
-		if (running && host != null && elapsed > 0.5) {
+		if (running && host != null && elapsed > 0.2) {
 			elapsed = 0.0;
 			host.flush();
 		}
