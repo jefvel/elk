@@ -209,6 +209,7 @@ class WebSocketHost extends WebSocketHostCommon {
 			var cert_path = '/etc/letsencrypt/live/$host_address/cert.pem';
 			var key_path = '/etc/letsencrypt/live/$host_address/privkey.pem';
 			var full_chain_path = '/etc/letsencrypt/live/$host_address/fullchain.pem';
+			trace('$cert_path, $key_path, $full_chain_path');
 			var cert = sys.ssl.Certificate.loadPath(cert_path);
 			var full_chain = sys.ssl.Certificate.loadPath(full_chain_path);
 			var key = sys.ssl.Key.loadFile(key_path);
