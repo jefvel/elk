@@ -211,7 +211,8 @@ class WebSocketHost extends WebSocketHostCommon {
 			var key_path = '/etc/letsencrypt/live/$host_address/privkey.pem';
 			var full_chain_path = '/etc/letsencrypt/live/$host_address/fullchain.pem';
 			var cert = sys.ssl.Certificate.fromString(sys.io.File.getContent(cert_path));
-			var full_chain = sys.ssl.Certificate.fromString(sys.io.File.getContent(full_chain_path));
+			// var full_chain = sys.ssl.Certificate.fromString(sys.io.File.getContent(full_chain_path));
+			var full_chain = sys.ssl.Certificate.loadDefaults();
 			var key = sys.ssl.Key.readPEM(sys.io.File.getContent(key_path), false);
 			var server = new WebSocketSecureServer<elk.newgrounds.NGWebSocketHandler>(host, port, cert, key, full_chain, 100);
 			this.server = server;
