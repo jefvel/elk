@@ -5,7 +5,7 @@ import hx.ws.Types;
 #if (sys || hxnodejs)
 import hx.ws.WebSocketServer;
 import hx.ws.WebSocketHandler;
-// import hx.ws.WebSocketSecureServer;
+import hx.ws.WebSocketSecureServer;
 #end
 #if !hxbit
 #error "Using SocketHost requires compiling with -lib hxbit"
@@ -202,11 +202,16 @@ class WebSocketHost extends WebSocketHostCommon {
 		close();
 		isAuth = false;
 		self = new WebSocketHandlerClient(this, null);
-		// if (!use_tls) {
-		server = new WebSocketServer(host, port, 100);
-		// } else {
-		// server = new WebSocketSecureServer<WebsocketHandler>(host, port, null, null, sys.ssl.Certificate.loadDefaults(), 100);
-		// }
+		if (!use_tls) {
+			server = new WebSocketServer(host, port, 100);
+		} else {
+			var host_address = Sys.getEnv("HOST_ADDRESS");
+			var cert_path = '/etc/letsencrypt/live/$host_address/cert.pem';
+			var key_path = '/etc/letsencrypt/live/$host_address/privkey.pem';
+			var cert = sys.ssl.Certificate.loadPath(cert_path);
+			var key = sys.ssl.Key.loadFile(key_path);
+			server = new WebSocketSecureServer(host, port, cert, key, sys.ssl.Certificate.loadDefaults(), 100);
+		}
 
 		server.onClientAdded = (client) -> {
 			var c = new WebSocketHandlerClient(this, client);

@@ -36,6 +36,8 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	public function start() {
 		stop();
 
+		var use_tls = Sys.getEnv("USE_TLS") == true;
+
 		host = new elk.net.WebSocketHost();
 
 		host.wait(bind_address, bind_port, (client) -> {
@@ -58,7 +60,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 					break;
 				}
 			}
-		});
+		}, use_tls);
 
 		host.onMessage = (client:hxbit.NetworkHost.NetworkClient, message:Dynamic) -> {
 			if (on_message == null)
