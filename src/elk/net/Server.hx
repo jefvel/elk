@@ -36,7 +36,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	public function start() {
 		stop();
 
-		var use_tls = Sys.getEnv("USE_TLS") == true;
+		var use_tls = Sys.getEnv("USE_TLS") == "true";
 
 		host = new elk.net.WebSocketHost();
 
