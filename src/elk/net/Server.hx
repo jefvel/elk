@@ -16,17 +16,13 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 
 	var host:elk.net.WebSocketHost = null;
 
-	var clients:Array<T> = [];
+	public var clients:Array<T> = [];
 
 	public function new(address = '0.0.0.0', port = 9999, max_users = 100) {
 		this.bind_address = address;
 		this.bind_port = port;
 		this.max_users = max_users;
 		start();
-
-		haxe.MainLoop.add(function() {
-			main_loop();
-		});
 	}
 
 	public function stop() {
@@ -99,16 +95,15 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	var elapsed = 0.0;
 	var last_time = 0.0;
 
-	function main_loop() {
-		var now = Sys.time();
-		var dt = now - last_time;
-		last_time = now;
-		elapsed += dt;
-		if (running && host != null && elapsed > 0.5) {
-			elapsed -= 0.5;
-			host.flush();
+	public function update(dt:Float) {
+		try {
+			elapsed += dt;
+			if (running && host != null && elapsed > 0.5) {
+				elapsed = 0.0;
+				host.flush();
+			}
+		} catch (e) {
+			trace('errorr $e');
 		}
-
-		Sys.sleep(1 / 60.0);
 	}
 }

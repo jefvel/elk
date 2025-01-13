@@ -71,8 +71,15 @@ private class WebSocketHostCommon extends NetworkHost {
 	}
 
 	function close() {
-		if (connected && on_disconnect != null)
-			on_disconnect();
+		if (connected && on_disconnect != null) {
+			#if (target.threaded)
+			haxe.MainLoop.runInMainThread(() -> {
+			#end
+				on_disconnect();
+			#if (target.threaded)
+			});
+			#end
+		}
 
 		connected = false;
 
