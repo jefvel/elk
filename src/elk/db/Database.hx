@@ -65,6 +65,14 @@ class Database {
 			port: options.port,
 		});
 	}
+
+	public function close() {
+		if (connection == null)
+			return;
+		connection.close();
+		connection = null;
+		Sys.println("Closed DB connection.");
+	}
 }
 #else
 class Database {

@@ -3,7 +3,7 @@ package elk.net;
 import hxbit.NetworkHost.NetworkClient;
 
 class MultiplayerClient implements hxbit.NetworkSerializable {
-	@:s public var uid:String;
+	@:s @:notMutable public var uid:String;
 
 	public var connected(default, null) = false;
 	public var client:NetworkClient = null;
@@ -20,9 +20,8 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 		client.ownerObject = this;
 		this.enableReplication = true;
-
 		#if hxbit_visibility
-		this.setVisibilityDirty(Default);
+		// this.setVisibilityDirty(hxbit.VisibilityGroup.Test);
 		#end
 
 		_init();
@@ -36,7 +35,7 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 	public function networkAllow(op:hxbit.NetworkSerializable.Operation, propId:Int, client:hxbit.NetworkSerializable):Bool {
 		var allow = client == this;
-		if (propId == 0) {
+		if (propId == networkPropUid.toInt()) {
 			return false;
 		}
 		return allow;

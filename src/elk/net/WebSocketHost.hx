@@ -72,13 +72,7 @@ private class WebSocketHostCommon extends NetworkHost {
 
 	function close() {
 		if (connected && on_disconnect != null) {
-			#if (target.threaded)
-			haxe.MainLoop.runInMainThread(() -> {
-			#end
-				on_disconnect();
-			#if (target.threaded)
-			});
-			#end
+			on_disconnect();
 		}
 
 		connected = false;
@@ -88,14 +82,15 @@ private class WebSocketHostCommon extends NetworkHost {
 			// If mid connection, socket might not close correctly.
 			// in this case, close the socket as soon as it connects.
 			web_socket.onopen = web_socket.close;
-			web_socket.close();
+			var sock = web_socket;
 			web_socket = null;
+			sock.close();
 		}
 
 		MultiplayerHandler.instance.reset();
 	}
 
-	override function dispose() {
+	override public function dispose() {
 		super.dispose();
 		close();
 	}

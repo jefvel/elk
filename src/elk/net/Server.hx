@@ -14,7 +14,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	var bind_address = '0.0.0.0';
 	var bind_port = 9999;
 
-	var host:elk.net.WebSocketHost = null;
+	public var host:elk.net.WebSocketHost = null;
 
 	public var clients:Array<T> = [];
 
@@ -39,6 +39,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 		var use_tls = Sys.getEnv("USE_TLS") == "true";
 
 		host = new elk.net.WebSocketHost();
+		host.setLogger((t) -> trace(t));
 
 		host.wait(bind_address, bind_port, (client) -> {
 			var user = new T(client, host);
