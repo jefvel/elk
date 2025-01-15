@@ -2,6 +2,7 @@ package elk.net;
 
 import hxbit.NetworkHost.NetworkClient;
 
+@:keepSub
 class MultiplayerClient implements hxbit.NetworkSerializable {
 	@:s @:notMutable public var uid:String;
 
