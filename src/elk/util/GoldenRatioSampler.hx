@@ -7,10 +7,11 @@ package elk.util;
 class GoldenRatioSampler {
 	var i = 0;
 	final goldenRatio = (Math.sqrt(5) + 1) / 2.;
-	public function new() {
-	}
+
+	public function new() {}
+
 	public function nextSample() {
-		i ++;
+		i++;
 		return (i * goldenRatio) % 1;
 	}
 }

@@ -1,10 +1,10 @@
 package elk.util;
 
 class EasedFloat {
-	public var value(get, set):Float;
+	public var value(get, set): Float;
 
 	public var easeTime = 0.3;
-	public var easeFunction:(Float) -> Float = M.expoOut;
+	public var easeFunction: (Float) -> Float = M.expoOut;
 
 	public var timeScale = 1.0;
 
@@ -16,12 +16,12 @@ class EasedFloat {
 
 	var internalValue = 0.;
 
-	public function new(initial:Float = 0., easeTime = 0.3) {
+	public function new(initial: Float = 0., easeTime = 0.3) {
 		this.easeTime = easeTime;
 		setImmediate(initial);
 	}
 
-	public function setImmediate(value:Float) {
+	public function setImmediate(value: Float) {
 		targetValue = from = value;
 		changeTime = easeTime;
 	}

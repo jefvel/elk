@@ -56,6 +56,8 @@ class Database {
 	}
 
 	function init_mysql(options:DatabaseOptions) {
+		trace('Connectiing to db..');
+		trace(options);
 		connection = sys.db.Mysql.connect({
 			host: options.host,
 			socket: options.socket,
@@ -64,6 +66,7 @@ class Database {
 			pass: options.pass,
 			port: options.port,
 		});
+		trace('Connected.');
 	}
 
 	public function close() {

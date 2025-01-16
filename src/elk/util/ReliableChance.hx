@@ -8,6 +8,7 @@ package elk.util;
  */
 class ReliableChance {
 	public var percentage(default, set) = 0.;
+
 	var tries = 0;
 	var successEvery = 0;
 
@@ -20,7 +21,7 @@ class ReliableChance {
 			return false;
 		}
 
-		tries ++;
+		tries++;
 
 		if (tries >= successEvery) {
 			tries = 0;
@@ -33,7 +34,8 @@ class ReliableChance {
 	function set_percentage(p: Float) {
 		if (p == 0) {
 			successEvery = 0;
-		} else {
+		}
+		else {
 			successEvery = Std.int(1. / p);
 		}
 

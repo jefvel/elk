@@ -19,7 +19,7 @@ import hxd.Save;
 **/
 @:autoBuild(elk.macro.SaveDataMacro.build())
 class GameSaveData {
-	static var SALT:String = "S!!!A***L*TTT";
+	static var SALT: String = "S!!!A***L*TTT";
 
 	public function new() {}
 
@@ -35,7 +35,7 @@ class GameSaveData {
 	static inline final baseSaveName = save_namespace;
 	#end
 
-	var saveName(get, null):String;
+	var saveName(get, null): String;
 
 	function get_saveName() {
 		return '$baseSaveName-$saveSlot';
@@ -48,27 +48,28 @@ class GameSaveData {
 		try {
 			var data = serialize();
 			try
-				if (Save.readSaveData(this.saveName) == data)
-					return false
+				if (Save.readSaveData(this.saveName) == data) return false
 			catch (e:Dynamic) {};
 			Save.writeSaveData(this.saveName, data);
 			return true;
-		} catch (e) {
+		}
+		catch (e) {
 			trace(e);
 			return false;
 		}
 	}
 
-	public function load(defVal:Dynamic = null, saveSlot = 0) {
+	public function load(defVal: Dynamic = null, saveSlot = 0) {
 		this.saveSlot = saveSlot;
 		try {
 			return deserialize(Save.readSaveData(saveName), defVal);
-		} catch (e:Dynamic) {
+		}
+		catch (e:Dynamic) {
 			return defVal;
 		}
 	}
 
-	static function makeCRC(data:String) {
+	static function makeCRC(data: String) {
 		return haxe.crypto.Sha1.encode(data + haxe.crypto.Sha1.encode(data + SALT)).substr(4, 32);
 	}
 
@@ -76,7 +77,7 @@ class GameSaveData {
 	 * returns serialized savedata as string
 	 * @return String
 	 */
-	public function serialize():String {
+	public function serialize(): String {
 		var data = haxe.Serializer.run(this);
 		return hash ? data + "#" + makeCRC(data) : data;
 	}
@@ -86,22 +87,19 @@ class GameSaveData {
 	 * returns savedata object
 	 * @param data 
 	 */
-	public function deserialize(data:String, defValue:Dynamic) {
+	public function deserialize(data: String, defValue: Dynamic) {
 		if (hash) {
-			if (data.charCodeAt(data.length - 33) != '#'.code)
-				throw "Missing CRC";
+			if (data.charCodeAt(data.length - 33) != '#'.code) throw "Missing CRC";
 			var crc = data.substr(data.length - 32);
 			data = data.substr(0, -33);
-			if (makeCRC(data) != crc)
-				throw "Invalid CRC";
+			if (makeCRC(data) != crc) throw "Invalid CRC";
 		}
-		var obj:Dynamic = haxe.Unserializer.run(data);
+		var obj: Dynamic = haxe.Unserializer.run(data);
 
 		// set all fields that were not set to default value (auto upgrade)
 		if (defValue != null && Reflect.isObject(obj) && Reflect.isObject(defValue)) {
 			for (f in Reflect.fields(defValue)) {
-				if (Reflect.hasField(obj, f))
-					continue;
+				if (Reflect.hasField(obj, f)) continue;
 				Reflect.setField(obj, f, Reflect.field(defValue, f));
 			}
 		}
@@ -109,7 +107,7 @@ class GameSaveData {
 		return obj;
 	}
 
-	function writeSaveData(data:String) {
+	function writeSaveData(data: String) {
 		#if sys
 		sys.io.File.saveContent(saveName + ".sav", data);
 		#elseif js

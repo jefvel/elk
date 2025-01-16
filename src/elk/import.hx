@@ -1,2 +1,2 @@
 using elk.extensions.ArrayTools;
-using elk.extensions.MathTools;	
+using elk.extensions.MathTools;

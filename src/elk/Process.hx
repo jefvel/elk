@@ -1,7 +1,7 @@
 package elk;
 
 class Process {
-	static var PROCESSES:Array<Process> = [];
+	static var PROCESSES: Array<Process> = [];
 
 	var _paused = false;
 
@@ -9,11 +9,11 @@ class Process {
 
 	public function preUpdate() {}
 
-	public function update(dt:Float) {}
+	public function update(dt: Float) {}
 
 	public function postUpdate() {}
 
-	public function tick(dt:Float) {}
+	public function tick(dt: Float) {}
 
 	public function pause() {
 		_paused = true;
@@ -32,10 +32,8 @@ class Process {
 	}
 
 	public function togglePause() {
-		if (_paused)
-			resume();
-		else
-			pause();
+		if (_paused) resume();
+		else pause();
 	}
 
 	public static var tickRate(default, set) = 60;
@@ -48,7 +46,7 @@ class Process {
 	public static var timeScale = 1.0;
 	public static var currentTickElapsed = 0.;
 
-	public static function _runUpdate(dt:Float) {
+	public static function _runUpdate(dt: Float) {
 		var scaledDt = dt * timeScale;
 		accumulatedTime += scaledDt;
 		currentTickElapsed = hxd.Math.clamp(accumulatedTime / frameTime);
@@ -86,7 +84,7 @@ class Process {
 		PROCESSES.remove(this);
 	}
 
-	static function set_tickRate(rate:Int) {
+	static function set_tickRate(rate: Int) {
 		rate = hxd.Math.iclamp(rate, 1, 999);
 		frameTime = 1 / rate;
 		return tickRate = rate;

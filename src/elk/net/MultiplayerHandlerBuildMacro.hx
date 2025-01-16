@@ -5,9 +5,9 @@ import haxe.macro.Context;
 import haxe.macro.Expr;
 
 class MultiplayerHandlerBuildMacro {
-	static public var T = macro :MultiplayerClient;
+	static public var T = macro : MultiplayerClient;
 
-	public static function defineMultiplayerClient(typeName:String) {
+	public static function defineMultiplayerClient(typeName: String) {
 		var t = Context.getType(typeName);
 		var ClassType = TypeTools.toComplexType(t);
 
@@ -15,7 +15,7 @@ class MultiplayerHandlerBuildMacro {
 		return null;
 	}
 
-	static public function build():Array<Field> {
+	static public function build(): Array<Field> {
 		var fields = Context.getBuildFields();
 
 		fields = fields.concat((macro class {}).fields);
@@ -25,7 +25,7 @@ class MultiplayerHandlerBuildMacro {
 			doc: null,
 			meta: [],
 			access: [APublic],
-			kind: FVar(macro :Array<$T>, macro []),
+			kind: FVar(macro : Array<$T>, macro []),
 			pos: Context.currentPos()
 		};
 		fields.push(newField);

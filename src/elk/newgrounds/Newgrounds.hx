@@ -7,14 +7,14 @@ import io.newgrounds.NGLite;
 #end
 
 typedef HighScorePost = {
-	name:String,
-	scoreRaw:Int,
-	score:String,
+	name: String,
+	scoreRaw: Int,
+	score: String,
 }
 
 private class NewgroundsData {
-	public var failedMedalUnlocks:Array<Int> = [];
-	public var failedHighscorePosts:Array<{boardID:Int, score:Int}> = [];
+	public var failedMedalUnlocks: Array<Int> = [];
+	public var failedHighscorePosts: Array<{boardID: Int, score: Int}> = [];
 
 	public function new() {
 		failedMedalUnlocks = [];
@@ -26,22 +26,22 @@ private class NewgroundsData {
  * Simple class for managing newgrounds leaderboards and medals
  */
 class Newgrounds {
-	public static var instance(get, null):Newgrounds;
+	public static var instance(get, null): Newgrounds;
 
-	public var username:String = null;
-	public var avatarUrl:String = null;
-	public var sessionId:String = null;
+	public var username: String = null;
+	public var avatarUrl: String = null;
+	public var sessionId: String = null;
 	public var signedIn = false;
 
 	public var isLocal = false;
 
 	final heartbeatTime = 3 * 60 * 1000;
-	var heartbeatTimer:Timer = null;
+	var heartbeatTimer: Timer = null;
 
 	static final APP_ID = haxe.macro.Compiler.getDefine("newgroundsAppId");
 	static final ENCRYPTION_KEY_AES_128 = haxe.macro.Compiler.getDefine("newgroundsEncryptionKey");
 
-	static var _instance:Newgrounds = null;
+	static var _instance: Newgrounds = null;
 
 	public var hasFailedCalls(get, null) = false;
 
@@ -58,7 +58,7 @@ class Newgrounds {
 	final debug = false;
 	#end
 
-	public static function initializeAndLogin(?onSuccess:Void->Void, ?onFail:Void->Void) {
+	public static function initializeAndLogin(?onSuccess: Void -> Void, ?onFail: Void -> Void) {
 		if (_instance != null) {
 			if (onSuccess != null) {
 				onSuccess();
@@ -71,7 +71,8 @@ class Newgrounds {
 		try {
 			_instance = new Newgrounds();
 			_instance.init(onSuccess, onFail);
-		} catch (e) {
+		}
+		catch (e) {
 			trace(e);
 		}
 
@@ -133,8 +134,7 @@ class Newgrounds {
 			}
 			onLogin();
 		}).addErrorHandler(e -> {
-			if (onFail != null)
-				onFail();
+			if (onFail != null) onFail();
 		}).send();
 		#else
 		isLocal = true;
@@ -151,7 +151,7 @@ class Newgrounds {
 		return Save.load(new NewgroundsData(), ngDataSave, !debug);
 	}
 
-	inline function saveFailedCalls(d:NewgroundsData) {
+	inline function saveFailedCalls(d: NewgroundsData) {
 		Save.save(d, ngDataSave, !debug);
 	}
 
@@ -175,7 +175,7 @@ class Newgrounds {
 		#end
 	}
 
-	public function getTop10Scoreboard(boardID:Int, onComplete:Array<HighScorePost>->Void, user:String = null) {
+	public function getTop10Scoreboard(boardID: Int, onComplete: Array<HighScorePost> -> Void, user: String = null) {
 		#if js
 		if (!signedIn) {
 			onComplete([]);
@@ -216,9 +216,9 @@ class Newgrounds {
 		#end
 	}
 
-	public var unlockedMedals:Map<Int, Bool> = new Map();
+	public var unlockedMedals: Map<Int, Bool> = new Map();
 
-	function loadMedalsAndScoreboards(?onComplete:Void->Void) {
+	function loadMedalsAndScoreboards(?onComplete: Void -> Void) {
 		#if js
 		if (!signedIn) {
 			if (onComplete != null) {
@@ -238,9 +238,7 @@ class Newgrounds {
 			}).send();
 		});
 
-		js.lib.Promise.all([
-			medalsPromise,
-			// boardsPromise,
+		js.lib.Promise.all([medalsPromise, // boardsPromise,
 		]).then(res -> {
 			if (onComplete != null) {
 				onComplete();
@@ -253,7 +251,7 @@ class Newgrounds {
 		#end
 	}
 
-	public function unlockMedal(medalID:Int) {
+	public function unlockMedal(medalID: Int) {
 		#if js
 		if (!signedIn) {
 			return;
@@ -289,12 +287,12 @@ class Newgrounds {
 		#end
 	}
 
-	public function submitTimeHighscore(scoreboardID:Int, seconds:Float) {
+	public function submitTimeHighscore(scoreboardID: Int, seconds: Float) {
 		var timeMillisecs = Std.int(seconds * 1000);
 		submitHighscore(scoreboardID, timeMillisecs);
 	}
 
-	public function submitHighscore(scoreboardID:Int, totalScore:Int) {
+	public function submitHighscore(scoreboardID: Int, totalScore: Int) {
 		#if js
 		if (!signedIn) {
 			return;

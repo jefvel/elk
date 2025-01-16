@@ -13,30 +13,28 @@ import hx.ws.WebSocketSecureServer;
 import hxbit.NetworkHost;
 
 class WebSocketClient extends NetworkClient {
-	var socket:WebSocket;
+	var socket: WebSocket;
 
 	public function new(host, s) {
 		super(host);
 		this.socket = s;
-		if (s != null)
-			s.onmessage = function(message) {
-				switch (message) {
-					case BytesMessage(content):
-						var bytes = content.readAllAvailableBytes();
-						processMessagesData(bytes, 0, bytes.length);
-					case StrMessage(content):
-				}
+		if (s != null) s.onmessage = function(message) {
+			switch (message) {
+				case BytesMessage(content):
+					var bytes = content.readAllAvailableBytes();
+					processMessagesData(bytes, 0, bytes.length);
+				case StrMessage(content):
 			}
+		}
 	}
 
-	override function error(msg:String) {
+	override function error(msg: String) {
 		socket.close();
 		super.error(msg);
 	}
 
-	override function send(bytes:haxe.io.Bytes) {
-		if (socket == null || socket.state == Closed)
-			return;
+	override function send(bytes: haxe.io.Bytes) {
+		if (socket == null || socket.state == Closed) return;
 		#if js
 		var data = bytes.getData();
 		if (data.byteLength != bytes.length) {
@@ -59,10 +57,10 @@ class WebSocketClient extends NetworkClient {
 
 private class WebSocketHostCommon extends NetworkHost {
 	public var connected(default, null) = false;
-	public var enableSound:Bool = true;
+	public var enableSound: Bool = true;
 
-	var web_socket:hx.ws.WebSocket;
-	var on_disconnect:Void->Void = null;
+	var web_socket: hx.ws.WebSocket;
+	var on_disconnect: Void -> Void = null;
 
 	public function new() {
 		super();
@@ -95,7 +93,7 @@ private class WebSocketHostCommon extends NetworkHost {
 		close();
 	}
 
-	public function connect(address:String, ?protocols:Array<String>, ?onConnect:Bool->Void, ?onDisconnect:Void->Void) {
+	public function connect(address: String, ?protocols: Array<String>, ?onConnect: Bool -> Void, ?onDisconnect: Void -> Void) {
 		close();
 		on_disconnect = onDisconnect;
 
@@ -107,20 +105,17 @@ private class WebSocketHostCommon extends NetworkHost {
 		web_socket.onerror = function(msg) {
 			if (!connected) {
 				web_socket.onerror = function(_) {};
-				if (onConnect != null)
-					onConnect(false);
-			} else
-				throw msg;
+				if (onConnect != null) onConnect(false);
+			}
+			else throw msg;
 		};
 
 		web_socket.onopen = function() {
 			web_socket.onerror = null;
 			connected = true;
-			if (StringTools.contains(address, "127.0.0.1"))
-				enableSound = false;
+			if (StringTools.contains(address, "127.0.0.1")) enableSound = false;
 			clients = [self];
-			if (onConnect != null)
-				onConnect(true);
+			if (onConnect != null) onConnect(true);
 		}
 
 		web_socket.onclose = function() {
@@ -139,7 +134,7 @@ private class WebSocketHostCommon extends NetworkHost {
 
 #if (sys || hxnodejs)
 class WebSocketHandlerClient extends NetworkClient {
-	var socket:WebSocketHandler;
+	var socket: WebSocketHandler;
 
 	public function new(host, s) {
 		super(host);
@@ -154,7 +149,8 @@ class WebSocketHandlerClient extends NetworkClient {
 
 						case StrMessage(content):
 					}
-				} catch (e) {
+				}
+				catch (e) {
 					trace(e);
 					trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
 					stop();
@@ -163,14 +159,13 @@ class WebSocketHandlerClient extends NetworkClient {
 		}
 	}
 
-	override function error(msg:String) {
+	override function error(msg: String) {
 		socket.close();
 		super.error(msg);
 	}
 
-	override function send(bytes:haxe.io.Bytes) {
-		if (socket == null || socket.state == Closed)
-			return;
+	override function send(bytes: haxe.io.Bytes) {
+		if (socket == null || socket.state == Closed) return;
 		socket.send(bytes);
 	}
 
@@ -183,7 +178,7 @@ class WebSocketHandlerClient extends NetworkClient {
 }
 
 class WebSocketHost extends WebSocketHostCommon {
-	var server:WebSocketServer<elk.newgrounds.NGWebSocketHandler>;
+	var server: WebSocketServer<elk.newgrounds.NGWebSocketHandler>;
 
 	override function close() {
 		super.close();
@@ -193,13 +188,14 @@ class WebSocketHost extends WebSocketHostCommon {
 		}
 	}
 
-	public function wait(host:String, port:Int, ?onConnected:NetworkClient->Void, ?onDisconnected:NetworkClient->Void, ?use_tls:Bool = false) {
+	public function wait(host: String, port: Int, ?onConnected: NetworkClient -> Void, ?onDisconnected: NetworkClient -> Void, ?use_tls: Bool = false) {
 		close();
 		isAuth = false;
 		self = new WebSocketHandlerClient(this, null);
 		if (!use_tls) {
 			server = new WebSocketServer(host, port, 100);
-		} else {
+		}
+		else {
 			var host_address = Sys.getEnv("HOST_ADDRESS");
 
 			var cert_path = '/etc/letsencrypt/live/$host_address/cert.pem';
@@ -217,8 +213,7 @@ class WebSocketHost extends WebSocketHostCommon {
 			var c = new WebSocketHandlerClient(this, client);
 			client.onopen = () -> {
 				pendingClients.push(c);
-				if (onConnected != null)
-					onConnected(c);
+				if (onConnected != null) onConnected(c);
 				client.onclose = () -> {
 					c.stop();
 					if (onDisconnected != null) {
@@ -239,7 +234,7 @@ class WebSocketHost extends WebSocketHostCommon {
 }
 #else
 class WebSocketHost extends WebSocketHostCommon {
-	public function wait(host:String, port:Int, ?onConnected:NetworkClient->Void, ?use_tls:Bool = false) {
+	public function wait(host: String, port: Int, ?onConnected: NetworkClient -> Void, ?use_tls: Bool = false) {
 		throw "Can't host websocket server in browser.";
 	}
 }

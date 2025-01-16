@@ -6,17 +6,17 @@ import elk.net.MultiplayerClient;
 class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, hxbit.NetworkHost) -> Void> & MultiplayerClient> {
 	var running = false;
 
-	public var on_message:(T, Dynamic) -> Void;
-	public var on_connected:(T) -> Void;
-	public var on_disconnected:(T) -> Void;
+	public var on_message: (T, Dynamic) -> Void;
+	public var on_connected: (T) -> Void;
+	public var on_disconnected: (T) -> Void;
 
 	var max_users = 100;
 	var bind_address = '0.0.0.0';
 	var bind_port = 9999;
 
-	public var host:elk.net.WebSocketHost = null;
+	public var host: elk.net.WebSocketHost = null;
 
-	public var clients:Array<T> = [];
+	public var clients: Array<T> = [];
 
 	public function new(address = '0.0.0.0', port = 9999, max_users = 100) {
 		this.bind_address = address;
@@ -26,8 +26,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	}
 
 	public function stop() {
-		if (!running)
-			return;
+		if (!running) return;
 		running = false;
 		host.dispose();
 		host = null;
@@ -47,8 +46,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 			client.sendMessage('uid:${user.uid}');
 			client.sync();
 			clients.push(user);
-			if (on_connected != null)
-				on_connected(user);
+			if (on_connected != null) on_connected(user);
 		}, (client) -> {
 			for (c in clients) {
 				if (c.client == client) {
@@ -56,22 +54,18 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 					trace('server: client disconnect: ${c.uid}, $clients');
 					@:privateAccess
 					c.disconnect();
-					if (on_disconnected != null)
-						on_disconnected(c);
+					if (on_disconnected != null) on_disconnected(c);
 					break;
 				}
 			}
 		}, use_tls);
 
-		host.onMessage = (client:hxbit.NetworkHost.NetworkClient, message:Dynamic) -> {
-			if (on_message == null)
-				return;
-			if (client == null)
-				on_message(null, message);
+		host.onMessage = (client: hxbit.NetworkHost.NetworkClient, message: Dynamic) -> {
+			if (on_message == null) return;
+			if (client == null) on_message(null, message);
 
 			var mp_client = get_multiplayer_client(client);
-			if (mp_client == null)
-				throw('Could not find client for message: $message');
+			if (mp_client == null) throw('Could not find client for message: $message');
 
 			on_message(mp_client, message);
 		}
@@ -87,10 +81,8 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 		Sys.println('Listening on $bind_address:$bind_port');
 	}
 
-	function get_multiplayer_client(c:hxbit.NetworkHost.NetworkClient) {
-		for (client in clients)
-			if (client.client == c)
-				return client;
+	function get_multiplayer_client(c: hxbit.NetworkHost.NetworkClient) {
+		for (client in clients) if (client.client == c) return client;
 
 		return null;
 	}
@@ -98,7 +90,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	var elapsed = 0.0;
 	var last_time = 0.0;
 
-	public function update(dt:Float) {
+	public function update(dt: Float) {
 		elapsed += dt;
 		if (running && host != null && elapsed > 0.2) {
 			elapsed = 0.0;

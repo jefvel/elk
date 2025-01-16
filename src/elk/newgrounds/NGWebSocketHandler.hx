@@ -4,10 +4,10 @@ import elk.newgrounds.ValidateNGSession;
 
 #if sys
 class NGWebSocketHandler extends hx.ws.WebSocketHandler {
-	public var username(default, null):String = null;
-	public var session(default, null):String = null;
+	public var username(default, null): String = null;
+	public var session(default, null): String = null;
 
-	public function new(s:hx.ws.SocketImpl) {
+	public function new(s: hx.ws.SocketImpl) {
 		super(s);
 
 		validateHandshake = (req, resp, cb) -> {
@@ -24,8 +24,7 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 
 			try {
 				var protocols = req.headers.get(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL);
-				if (protocols == null)
-					return unauthorized();
+				if (protocols == null) return unauthorized();
 
 				var split = protocols.split(',').map(s -> StringTools.trim(s));
 				var type = split[0];
@@ -50,7 +49,8 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 
 					cb(resp);
 				});
-			} catch (err) {
+			}
+			catch (err) {
 				trace('handshake check error.');
 				unauthorized();
 			}

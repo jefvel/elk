@@ -3,7 +3,7 @@ package elk.newgrounds;
 import haxe.Http;
 import haxe.http.HttpBase;
 
-function ValidateNGSession(username:String, session_id:String, callback:(session_valid:Bool) -> Void) {
+function ValidateNGSession(username: String, session_id: String, callback: (session_valid: Bool) -> Void) {
 	var req = new Http('https://www.newgrounds.io/gateway_v3.php');
 	var data = {
 		app_id: haxe.macro.Compiler.getDefine('newgroundsAppId'),
@@ -29,7 +29,8 @@ function ValidateNGSession(username:String, session_id:String, callback:(session
 			var session = result_data.session;
 			var valid = session?.user?.name == username && !session.expired;
 			callback(valid);
-		} catch (_) {
+		}
+		catch (_) {
 			callback(false);
 		}
 	}

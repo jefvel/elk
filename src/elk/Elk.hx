@@ -13,20 +13,20 @@ import elk.sound.SoundHandler;
 import h3d.Engine;
 
 class Elk extends hxd.App {
-	public static var instance:Elk = null;
+	public static var instance: Elk = null;
 
-	public var time:Float = 0.0;
+	public var time: Float = 0.0;
 
 	public var pixelSize(default, set) = 2;
 
 	public var window_scale(default, set) = #if js 1.0 #else 1.5 #end;
 
-	public var tickRate(get, set):Int;
-	public var timeScale(get, set):Float;
+	public var tickRate(get, set): Int;
+	public var timeScale(get, set): Float;
 
-	public var entities:EntityManager;
-	public var states:GameStateHandler;
-	public var sounds:SoundHandler;
+	public var entities: EntityManager;
+	public var states: GameStateHandler;
+	public var sounds: SoundHandler;
 
 	/**
 	 * automatically sets scalemode
@@ -38,11 +38,11 @@ class Elk extends hxd.App {
 
 	public var drawCalls = 0;
 
-	public var renderer:elk.graphics.CustomRenderer;
+	public var renderer: elk.graphics.CustomRenderer;
 
-	var loaded_assets:Bool = false;
+	var loaded_assets: Bool = false;
 
-	public var is_ready(get, null):Bool;
+	public var is_ready(get, null): Bool;
 
 	function get_is_ready()
 		return loaded_assets;
@@ -62,7 +62,7 @@ class Elk extends hxd.App {
 		#end
 	}
 
-	function set_window_scale(s:Float) {
+	function set_window_scale(s: Float) {
 		window_scale = s;
 		onResize();
 		return window_scale;
@@ -93,7 +93,7 @@ class Elk extends hxd.App {
 		initRenderer();
 	}
 
-	public function on_load_progress(progress:Float) {}
+	public function on_load_progress(progress: Float) {}
 
 	function initResources() {
 		var mark_ready = () -> haxe.Timer.delay(on_ready, 0);
@@ -182,12 +182,12 @@ class Elk extends hxd.App {
 		onResize();
 	}
 
-	var buf:h3d.mat.Texture;
-	var ctx:RenderContext;
+	var buf: h3d.mat.Texture;
+	var ctx: RenderContext;
 
-	public var s3dBitmap:Bitmap;
+	public var s3dBitmap: Bitmap;
 
-	public override function update(dt:Float) {
+	public override function update(dt: Float) {
 		super.update(dt);
 		time += dt;
 		Process._runUpdate(dt);
@@ -197,7 +197,7 @@ class Elk extends hxd.App {
 		#end
 	}
 
-	override function render(e:Engine) {
+	override function render(e: Engine) {
 		@:privateAccess s3d.ctx.elapsedTime *= timeScale;
 
 		e.pushTarget(buf);
@@ -207,12 +207,11 @@ class Elk extends hxd.App {
 
 		s2d.render(e);
 
-		if (entities != null)
-			entities.render();
+		if (entities != null) entities.render();
 		drawCalls = e.drawCalls;
 	}
 
-	function set_pixelSize(size:Int) {
+	function set_pixelSize(size: Int) {
 		this.pixelSize = size;
 		onResize();
 

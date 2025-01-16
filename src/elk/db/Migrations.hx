@@ -40,6 +40,7 @@ class Migrations {
 	}
 
 	public function migrate(migration_dir:String) {
+		trace('running migrations...');
 		connection.startTransaction();
 		var files = hxd.Res.loader.dir(migration_dir);
 		for (file in files) {

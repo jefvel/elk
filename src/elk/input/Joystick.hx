@@ -12,8 +12,8 @@ enum JoystickSide {
 }
 
 class Joystick extends Object {
-	var bg:Graphics;
-	var dot:Graphics;
+	var bg: Graphics;
+	var dot: Graphics;
 	var r = 54.;
 	var maxR = 92;
 
@@ -37,9 +37,9 @@ class Joystick extends Object {
 
 	var tapTime = 0.;
 
-	public var onActivate:Void->Void = null;
+	public var onActivate: Void -> Void = null;
 
-	public function new(side:JoystickSide = Left, ?p) {
+	public function new(side: JoystickSide = Left, ?p) {
 		super(p);
 		this.side = side;
 		visible = false;
@@ -67,11 +67,10 @@ class Joystick extends Object {
 		dot.drawCircle(0, 0, r * 0.3);
 	}
 
-	public function handleEvent(e:hxd.Event) {
+	public function handleEvent(e: hxd.Event) {
 		#if js
 		var s2d = getScene();
-		if (s2d == null)
-			return false;
+		if (s2d == null) return false;
 		var g = s2d.globalToLocal(new Point(e.relX, e.relY));
 		g.x /= elk.Elk.instance.pixelSize;
 		g.y /= elk.Elk.instance.pixelSize;
@@ -153,7 +152,7 @@ class Joystick extends Object {
 
 	public var disableDrag = false;
 
-	public function movement(tx:Float, ty:Float) {
+	public function movement(tx: Float, ty: Float) {
 		if (disabled) {
 			return;
 		}
@@ -183,7 +182,8 @@ class Joystick extends Object {
 				dx = mx * r;
 				dy = my * r;
 			}
-		} else {
+		}
+		else {
 			mx = my = dx = dy = 0;
 		}
 
@@ -223,7 +223,7 @@ class Joystick extends Object {
 		return active && my > dz;
 	}
 
-	override function sync(ctx:RenderContext) {
+	override function sync(ctx: RenderContext) {
 		super.sync(ctx);
 		bg.setScale(eased_scale.value);
 		dot.setScale(bg.scaleX);

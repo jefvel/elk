@@ -18,7 +18,7 @@ class SaveDataMacro {
 		}
 
 		return Context.getBuildFields().concat((macro class Foo {
-			static var _current:$ct;
+			static var _current: $ct;
 
 			/**
 			 * resets the current saveslot
@@ -40,7 +40,7 @@ class SaveDataMacro {
 			 * @param saveSlot = 0 
 			 * @return $ct
 			 */
-			public static function getCurrent(saveSlot = 0):$ct {
+			public static function getCurrent(saveSlot = 0): $ct {
 				if (_current == null) {
 					_current = new $path();
 					_current = _current.load(_current, saveSlot);
