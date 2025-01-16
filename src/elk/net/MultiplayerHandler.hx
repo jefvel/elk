@@ -36,10 +36,18 @@ class MultiplayerHandler {
 			c.client.ownerObject = c;
 			self = c;
 		}
+
+		if (on_client_connected != null) {
+			on_client_connected(c);
+		}
+		trace('client added.');
 	}
 
 	public function remove_client(c) {
 		clients.remove(c);
+		c.on_disconnect();
+		if (on_client_disconnected != null) on_client_disconnected(c);
+		trace('removing client');
 	}
 
 	static function get_instance() {
@@ -47,7 +55,14 @@ class MultiplayerHandler {
 		return _instance;
 	}
 
-	function on_unregister(c: hxbit.NetworkSerializable) {}
+	public function on_unregister(c: hxbit.NetworkSerializable) {
+		for (client in clients) {
+			if (client.client.ownerObject == c) {
+				remove_client(client);
+				break;
+			}
+		}
+	}
 
 	function set_host(h: hxbit.NetworkHost) {
 		h.onUnregister = on_unregister;

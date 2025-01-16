@@ -7,8 +7,8 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	var running = false;
 
 	public var on_message: (T, Dynamic) -> Void;
-	public var on_connected: (T) -> Void;
-	public var on_disconnected: (T) -> Void;
+	public var on_client_connected: (T) -> Void;
+	public var on_client_disconnected: (T) -> Void;
 
 	var max_users = 100;
 	var bind_address = '0.0.0.0';
@@ -46,15 +46,15 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 			client.sendMessage('uid:${user.uid}');
 			client.sync();
 			clients.push(user);
-			if (on_connected != null) on_connected(user);
+			if (on_client_connected != null) on_client_connected(user);
 		}, (client) -> {
 			for (c in clients) {
 				if (c.client == client) {
 					clients.remove(c);
 					trace('server: client disconnect: ${c.uid}, $clients');
-					@:privateAccess
-					c.disconnect();
-					if (on_disconnected != null) on_disconnected(c);
+					c.enableReplication = false;
+					MultiplayerHandler.instance.on_unregister(c);
+					if (on_client_disconnected != null) on_client_disconnected(c);
 					break;
 				}
 			}
@@ -70,12 +70,6 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 			on_message(mp_client, message);
 		}
 
-		host.onUnregister = (e) -> {
-			trace('unregistered');
-			trace(e);
-		}
-
-		host.makeAlive();
 		running = true;
 
 		Sys.println('Listening on $bind_address:$bind_port');

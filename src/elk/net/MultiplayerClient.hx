@@ -29,47 +29,24 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 	}
 
 	public function evalVisibility(group: hxbit.VisibilityGroup, from: hxbit.NetworkSerializable): Bool {
-		trace(group);
-		trace(from);
+		trace('eval visibility MultiplayerClient');
 		return true;
 	}
 
 	public function networkAllow(op: hxbit.NetworkSerializable.Operation, propId: Int, client: hxbit.NetworkSerializable): Bool {
 		var allow = client == this;
-		if (propId == networkPropUid.toInt()) {
-			return false;
-		}
 		return allow;
 	}
 
-	@:rpc(all)
-	function disconnect() {
-		if (!connected) return;
-
+	public function on_disconnect() {
 		connected = false;
-
-		on_disconnect();
-
-		MultiplayerHandler.instance.remove_client(cast this);
-
-		if (host?.isAuth) {
-			this.host.flush();
-			this.enableReplication = false;
-		}
-
-		trace('removed client $uid, self: $is_self');
 	}
-
-	public function on_disconnect() {}
 
 	public function on_connect() {}
 
 	function _init() {
 		connected = true;
 		this.is_self = MultiplayerHandler.instance.get_own_uid() == uid;
-
-		var host = MultiplayerHandler.instance.host;
-
 		MultiplayerHandler.instance.add_client(cast this);
 	}
 

@@ -18,7 +18,10 @@ class MultiplayerHandlerBuildMacro {
 	static public function build(): Array<Field> {
 		var fields = Context.getBuildFields();
 
-		fields = fields.concat((macro class {}).fields);
+		fields = fields.concat((macro class {
+			public var on_client_connected: $T -> Void = null;
+			public var on_client_disconnected: $T -> Void = null;
+		}).fields);
 
 		var newField = {
 			name: 'clients',
