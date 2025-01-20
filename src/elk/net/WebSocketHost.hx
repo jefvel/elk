@@ -1,5 +1,6 @@
 package elk.net;
 
+import haxe.MainLoop;
 import hx.ws.WebSocket;
 import hx.ws.Types;
 #if (sys || hxnodejs)
@@ -188,36 +189,23 @@ class WebSocketHost extends WebSocketHostCommon {
 		}
 	}
 
-	public function wait(host: String, port: Int, ?onConnected: NetworkClient -> Void, ?onDisconnected: NetworkClient -> Void, ?use_tls: Bool = false) {
+	public function wait(host: String, port: Int, ?onConnected: NetworkClient -> Void, ?onDisconnected: NetworkClient -> Void) {
 		close();
 		isAuth = false;
 		self = new WebSocketHandlerClient(this, null);
-		if (!use_tls) {
-			server = new WebSocketServer(host, port, 100);
-		}
-		else {
-			var host_address = Sys.getEnv("HOST_ADDRESS");
-
-			var cert_path = '/etc/letsencrypt/live/$host_address/cert.pem';
-			var key_path = '/etc/letsencrypt/live/$host_address/privkey.pem';
-			var full_chain_path = '/etc/letsencrypt/live/$host_address/fullchain.pem';
-			var cert = sys.ssl.Certificate.fromString(sys.io.File.getContent(cert_path));
-			// var full_chain = sys.ssl.Certificate.fromString(sys.io.File.getContent(full_chain_path));
-			var full_chain = sys.ssl.Certificate.loadDefaults();
-			var key = sys.ssl.Key.readPEM(sys.io.File.getContent(key_path), false);
-			var server = new WebSocketSecureServer<elk.newgrounds.NGWebSocketHandler>(host, port, cert, key, full_chain, 100);
-			this.server = server;
-		}
+		server = new WebSocketServer(host, port, 100);
 
 		server.onClientAdded = (client) -> {
 			var c = new WebSocketHandlerClient(this, client);
 			client.onopen = () -> {
 				pendingClients.push(c);
-				if (onConnected != null) onConnected(c);
+				if (onConnected != null) {
+					MainLoop.runInMainThread(() -> onConnected(c));
+				}
 				client.onclose = () -> {
 					c.stop();
 					if (onDisconnected != null) {
-						onDisconnected(c);
+						MainLoop.runInMainThread(() -> onDisconnected(c));
 					}
 					client.onclose = null;
 				}
@@ -234,7 +222,7 @@ class WebSocketHost extends WebSocketHostCommon {
 }
 #else
 class WebSocketHost extends WebSocketHostCommon {
-	public function wait(host: String, port: Int, ?onConnected: NetworkClient -> Void, ?use_tls: Bool = false) {
+	public function wait(host: String, port: Int, ?onConnected: NetworkClient -> Void) {
 		throw "Can't host websocket server in browser.";
 	}
 }
