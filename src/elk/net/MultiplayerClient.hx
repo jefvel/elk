@@ -4,7 +4,7 @@ import hxbit.NetworkHost.NetworkClient;
 
 @:keepSub
 class MultiplayerClient implements hxbit.NetworkSerializable {
-	@:s @:notMutable public var uid: String;
+	@:s @:notMutable @:visible(sameRoom) public var uid: String;
 
 	public var connected(default, null) = false;
 	public var client: NetworkClient = null;

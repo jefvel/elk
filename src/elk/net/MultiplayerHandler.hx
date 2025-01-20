@@ -10,6 +10,8 @@ class MultiplayerHandler {
 
 	public var host(default, set): hxbit.NetworkHost = null;
 
+	public var on_object_unregister: (o: hxbit.NetworkSerializable) -> Void;
+
 	private var own_uid: String = null;
 
 	public function new() {}
@@ -56,8 +58,9 @@ class MultiplayerHandler {
 	}
 
 	public function on_unregister(c: hxbit.NetworkSerializable) {
+		if (on_object_unregister != null) on_object_unregister(c);
 		for (client in clients) {
-			if (client.client.ownerObject == c) {
+			if (client == c) {
 				remove_client(client);
 				break;
 			}

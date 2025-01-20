@@ -40,7 +40,10 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 		host = new elk.net.WebSocketHost();
 		host.setLogger((t) -> trace(t));
 
+		host.setStats(new hxbit.NetworkStats());
+
 		host.wait(bind_address, bind_port, (client) -> {
+			trace('clecl');
 			var user = new T(client, host);
 			trace('server: client connect: ${user.uid}');
 			client.sendMessage('uid:${user.uid}');
