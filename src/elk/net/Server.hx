@@ -4,27 +4,27 @@ import elk.newgrounds.NGWebSocketHandler;
 import elk.net.MultiplayerClient;
 
 @:generic
-class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, hxbit.NetworkHost) -> Void> & MultiplayerClient> {
+class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, hxbit.NetworkHost) -> Void> & MultiplayerClient> {
 	var running = false;
 
-	public var on_message: (T, Dynamic) -> Void;
-	public var on_player_connected: (T) -> Void;
-	public var on_player_disconnected: (T) -> Void;
+	public var on_message : (T, Dynamic) -> Void;
+	public var on_player_connected : (T) -> Void;
+	public var on_player_disconnected : (T) -> Void;
 
 	var max_users = 100;
 	var bind_address = '0.0.0.0';
 	var bind_port = 9999;
 
-	public var handler: MultiplayerHandler;
+	public var handler : MultiplayerHandler;
 
 	#if !use_sockets
-	public var host: elk.net.WebSocketHost = null;
+	public var host : elk.net.WebSocketHost = null;
 	#else
-	public var host: hxd.net.SocketHost = null;
+	public var host : hxd.net.SocketHost = null;
 	#end
-	public var players: Array<T> = [];
+	public var players : Array<T> = [];
 
-	public function new(address = '0.0.0.0', port = 9999, max_users = 100, handler: MultiplayerHandler) {
+	public function new(address = '0.0.0.0', port = 9999, max_users = 100, handler : MultiplayerHandler) {
 		this.bind_address = address;
 		this.bind_port = port;
 		this.max_users = max_users;
@@ -33,7 +33,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	}
 
 	public function stop() {
-		if (!running) return;
+		if( !running ) return;
 		running = false;
 		host.dispose();
 		host = null;
@@ -52,7 +52,7 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 		host.setLogger((t) -> trace(t));
 		#end
 
-		if (offline_server) {
+		if( offline_server ) {
 			host.offlineServer();
 		} else {
 			host.wait(bind_address, bind_port, (client) -> {
@@ -60,27 +60,27 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 				client.sendMessage('uid:${user.uid}');
 				client.sync();
 				players.push(user);
-				if (on_player_connected != null) on_player_connected(user);
+				if( on_player_connected != null ) on_player_connected(user);
 			}, (client) -> {
 				var player = get_player(client);
-				if (player == null) return;
+				if( player == null ) return;
 
 				players.remove(player);
 				player.enableReplication = false;
 
 				handler.on_unregister(player);
 
-				if (on_player_disconnected != null) on_player_disconnected(player);
+				if( on_player_disconnected != null ) on_player_disconnected(player);
 			});
 		}
 
-		host.onMessage = (client: hxbit.NetworkHost.NetworkClient, message: Dynamic) -> {
-			if (on_message == null) return;
+		host.onMessage = (client : hxbit.NetworkHost.NetworkClient, message : Dynamic) -> {
+			if( on_message == null ) return;
 
-			if (client == null) on_message(null, message);
+			if( client == null ) on_message(null, message);
 
 			var player = get_player(client);
-			if (player == null) throw('Could not find player for message: $message');
+			if( player == null ) throw('Could not find player for message: $message');
 
 			on_message(player, message);
 		}
@@ -90,8 +90,8 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 		Sys.println('Listening on $bind_address:$bind_port');
 	}
 
-	function get_player(c: hxbit.NetworkHost.NetworkClient) {
-		for (client in players) if (client.client == c) return client;
+	function get_player(c : hxbit.NetworkHost.NetworkClient) {
+		for (client in players)if( client.client == c ) return client;
 
 		return null;
 	}
@@ -99,9 +99,9 @@ class Server<T:haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient, 
 	var elapsed = 0.0;
 	var last_time = 0.0;
 
-	public function update(dt: Float) {
+	public function update(dt : Float) {
 		elapsed += dt;
-		if (running && host != null && elapsed > 0.2) {
+		if( running && host != null && elapsed > 0.2 ) {
 			elapsed = 0.0;
 			host.flush();
 		}

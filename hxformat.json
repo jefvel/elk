@@ -68,10 +68,17 @@
     "arrowFunctionsPolicy": "around",
     "functionTypeHaxe3Policy": "around",
     "functionTypeHaxe4Policy": "around",
-    "colonPolicy": "none",
+    "ifPolicy": "none",
+    "parenConfig": {
+      "ifConditionParens": {
+        "closingPolicy": "around",
+        "openingPolicy": "after"
+      }
+    },
+    "colonPolicy": "around",
     "caseColonPolicy": "onlyAfter",
-    "objectFieldColonPolicy": "after",
-    "typeHintColonPolicy": "after",
+    "objectFieldColonPolicy": "around",
+    "typeHintColonPolicy": "around",
     "typeCheckColonPolicy": "around",
     "ternaryPolicy": "around"
   }
