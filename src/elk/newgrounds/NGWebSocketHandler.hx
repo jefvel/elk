@@ -20,7 +20,6 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 			}
 
 			resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, 'auth_token');
-			return cb(resp);
 
 			try {
 				var protocols = req.headers.get(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL);
@@ -39,11 +38,12 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 
 				ValidateNGSession(username, session, function(valid) {
 					if (!valid) {
-						return unauthorized();
+						// return unauthorized();
 					}
 
 					this.username = username;
 					this.session = session;
+					return cb(resp);
 
 					resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, type);
 
@@ -55,6 +55,26 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 				unauthorized();
 			}
 		};
+	}
+
+	/**
+	 * fetches the newgrounds username + session from a connected client. If it's not
+	 * a newgrounds connection, it will return null.
+	 * @param client 
+	 */
+	public static function get_session_info(client: hxbit.NetworkHost.NetworkClient) {
+		if (client is elk.net.WebSocketHost.WebSocketHandlerClient) {
+			var cl = cast(client, elk.net.WebSocketHost.WebSocketHandlerClient);
+			if (cl.socket is elk.newgrounds.NGWebSocketHandler) {
+				var casted = cast(cl.socket, elk.newgrounds.NGWebSocketHandler);
+				return {
+					username: casted.username,
+					session_id: casted.session,
+				}
+			}
+		}
+
+		return null;
 	}
 }
 #end

@@ -1,13 +1,14 @@
 {
   "lineEnds": {
     "leftCurly": "after",
-    "emptyCurly": "noBreak"
+    "emptyCurly": "noBreak",
+    "rightCurly": "both"
   },
   "sameLine": {
     "caseBody": "next",
     "tryCatch": "next",
     "ifBody": "same",
-    "ifElse": "next",
+    "ifElse": "same",
     "elseBody": "same",
     "forBody": "same",
     "whileBody": "same",

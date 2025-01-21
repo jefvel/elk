@@ -4,7 +4,7 @@ import hxbit.NetworkHost.NetworkClient;
 
 @:keepSub
 class MultiplayerClient implements hxbit.NetworkSerializable {
-	@:s @:notMutable @:visible(sameRoom) public var uid: String;
+	@:s @:notMutable public var uid: String;
 
 	public var connected(default, null) = false;
 	public var client: NetworkClient = null;
@@ -20,10 +20,6 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 		this.client = client;
 
 		client.ownerObject = this;
-		this.enableReplication = true;
-		#if hxbit_visibility
-		// this.setVisibilityDirty(hxbit.VisibilityGroup.Test);
-		#end
 
 		_init();
 	}
@@ -35,6 +31,7 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 	public function networkAllow(op: hxbit.NetworkSerializable.Operation, propId: Int, client: hxbit.NetworkSerializable): Bool {
 		var allow = client == this;
+		if (propId == this.networkPropUid.toInt()) return false;
 		return allow;
 	}
 
@@ -46,6 +43,7 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 	function _init() {
 		connected = true;
+		this.enableReplication = true;
 		this.is_self = MultiplayerHandler.instance.get_own_uid() == uid;
 		MultiplayerHandler.instance.add_client(cast this);
 	}

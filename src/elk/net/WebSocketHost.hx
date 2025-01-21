@@ -103,23 +103,28 @@ private class WebSocketHostCommon extends NetworkHost {
 
 		self = new WebSocketClient(this, web_socket);
 
+		var successfully_connected = false;
+
 		web_socket.onerror = function(msg) {
 			if (!connected) {
 				web_socket.onerror = function(_) {};
 				if (onConnect != null) onConnect(false);
-			}
-			else throw msg;
+			} else throw msg;
 		};
 
 		web_socket.onopen = function() {
 			web_socket.onerror = null;
 			connected = true;
+			successfully_connected = true;
 			if (StringTools.contains(address, "127.0.0.1")) enableSound = false;
 			clients = [self];
 			if (onConnect != null) onConnect(true);
 		}
 
 		web_socket.onclose = function() {
+			if (!successfully_connected && onConnect != null) {
+				onConnect(false);
+			}
 			close();
 		}
 
@@ -135,7 +140,7 @@ private class WebSocketHostCommon extends NetworkHost {
 
 #if (sys || hxnodejs)
 class WebSocketHandlerClient extends NetworkClient {
-	var socket: WebSocketHandler;
+	public var socket: WebSocketHandler;
 
 	public function new(host, s) {
 		super(host);
