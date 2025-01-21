@@ -4,10 +4,10 @@ import elk.newgrounds.ValidateNGSession;
 
 #if sys
 class NGWebSocketHandler extends hx.ws.WebSocketHandler {
-	public var username(default, null): String = null;
-	public var session(default, null): String = null;
+	public var username(default, null) : String = null;
+	public var session(default, null) : String = null;
 
-	public function new(s: hx.ws.SocketImpl) {
+	public function new(s : hx.ws.SocketImpl) {
 		super(s);
 
 		validateHandshake = (req, resp, cb) -> {
@@ -23,11 +23,11 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 
 			try {
 				var protocols = req.headers.get(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL);
-				if (protocols == null) return unauthorized();
+				if( protocols == null ) return unauthorized();
 
 				var split = protocols.split(',').map(s -> StringTools.trim(s));
 				var type = split[0];
-				if (type != 'auth_token') {
+				if( type != 'auth_token' ) {
 					return unauthorized();
 				}
 
@@ -37,7 +37,7 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 				var session = split[1];
 
 				ValidateNGSession(username, session, function(valid) {
-					if (!valid) {
+					if( !valid ) {
 						// return unauthorized();
 					}
 
@@ -62,14 +62,14 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 	 * a newgrounds connection, it will return null.
 	 * @param client 
 	 */
-	public static function get_session_info(client: hxbit.NetworkHost.NetworkClient) {
-		if (client is elk.net.WebSocketHost.WebSocketHandlerClient) {
+	public static function get_session_info(client : hxbit.NetworkHost.NetworkClient) {
+		if( client is elk.net.WebSocketHost.WebSocketHandlerClient ) {
 			var cl = cast(client, elk.net.WebSocketHost.WebSocketHandlerClient);
-			if (cl.socket is elk.newgrounds.NGWebSocketHandler) {
+			if( cl.socket is elk.newgrounds.NGWebSocketHandler ) {
 				var casted = cast(cl.socket, elk.newgrounds.NGWebSocketHandler);
 				return {
-					username: casted.username,
-					session_id: casted.session,
+					username : casted.username,
+					session_id : casted.session,
 				}
 			}
 		}
