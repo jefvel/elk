@@ -1,5 +1,6 @@
 package elk.graphics;
 
+import elk.util.RectPacker;
 import h2d.Drawable;
 import h2d.Object;
 import h2d.Bitmap;
@@ -8,28 +9,43 @@ import h2d.RenderContext;
 import h2d.TileGroup;
 import h2d.Tile;
 
+private class TileRect implements elk.util.RectPacker.RectPackNode {
+	public var object : Object;
+	public var x : Int;
+	public var y : Int;
+	public var width : Int;
+	public var height : Int;
+
+	public function new() {}
+}
+
 class TileAtlas extends Tile {
 	static final DEFAULT_MAX_WIDTH = 1024 << 2;
 	static final DEFAULT_MAX_HEIGHT = 1024 << 2;
 
+	var packer : RectPacker<TileRect>;
+
 	var atlas_width = DEFAULT_MAX_WIDTH;
 	var atlas_height = DEFAULT_MAX_HEIGHT;
 
-	var atlas:Texture;
+	var atlas : Texture;
 
-	var namedTiles:Map<String, Tile> = new Map();
-	var tileList:Array<Tile> = [];
+	var namedTiles : Map<String, Tile> = new Map();
+	var tileList : Array<Tile> = [];
 
 	public function new(max_width = 1024 << 2, max_height = 1024 << 2) {
 		atlas_width = max_width;
 		atlas_height = max_height;
 
 		resetTexture();
+		packer = new RectPacker(atlas_width, atlas_height);
+		packer.autoResize = false;
+
 		super(atlas, 0, 0, atlas_width, atlas_height);
 	}
 
 	function resetTexture() {
-		if (atlas != null) {
+		if( atlas != null ) {
 			atlas.dispose();
 			atlas = null;
 		}
@@ -39,39 +55,21 @@ class TileAtlas extends Tile {
 		this.innerTex = atlas;
 	}
 
-	var cx = 0;
-	var cy = 0;
-	var rowHeight = 0;
-
-	function addObject(o:Object) {
+	function addObject(o : Object) {
 		var b = o.getBounds();
-		if (cx + b.width > atlas_width) {
-			cx = 0;
-			cy += rowHeight;
-			rowHeight = 0;
-		}
+		var rect = new TileRect();
+		rect.object = o;
+		rect.width = Std.int(b.width);
+		rect.height = Std.int(b.height);
+		packer.add(rect);
 
-		if (b.height > rowHeight)
-			rowHeight = Std.int(b.height);
-
-		o.x = cx;
-		o.y = cy;
+		o.x = rect.x;
+		o.y = rect.y;
 		o.drawTo(atlas);
 
-		var res = sub(cx, cy, b.width, b.height);
-
-		cx += Std.int(b.width);
+		var res = sub(o.x, o.y, b.width, b.height);
 
 		return res;
-	}
-
-	/**
-	 * skips to the next row in the packing
-	 */
-	function nextRow() {
-		cx = 0;
-		cy += rowHeight;
-		rowHeight = 0;
 	}
 
 	/**
@@ -87,8 +85,8 @@ class TileAtlas extends Tile {
 	 * @param tile 
 	 * @param name 
 	 */
-	public function add_tile(tile:Tile, name) {
-		if (namedTiles.exists(name)) {
+	public function add_tile(tile : Tile, name) {
+		if( namedTiles.exists(name) ) {
 			return namedTiles[name];
 		}
 
