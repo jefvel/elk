@@ -4,10 +4,10 @@ import elk.graphics.Animation;
 import h3d.mat.Texture;
 
 class AsepriteRes extends hxd.res.Resource {
-	var imgPath:String;
-	var rootTile:h2d.Tile;
-	var aseData:AsepriteData;
-	var tiles:Array<h2d.Tile>;
+	var imgPath : String;
+	var rootTile : h2d.Tile;
+	var aseData : AsepriteData;
+	var tiles : Array<h2d.Tile>;
 
 	public function new(entry) {
 		super(entry);
@@ -15,13 +15,13 @@ class AsepriteRes extends hxd.res.Resource {
 		tiles = [];
 	}
 
-	public function replaceTile(rootTile:h2d.Tile, data:AsepriteData) {
+	public function replaceTile(rootTile : h2d.Tile, data : AsepriteData) {
 		this.rootTile = rootTile;
 		data.rootTile = rootTile;
 		generateFrameTiles(data);
 	}
 
-	function toImage():hxd.res.Image {
+	function toImage() : hxd.res.Image {
 		#if debug
 		toAseData();
 		#end
@@ -29,16 +29,16 @@ class AsepriteRes extends hxd.res.Resource {
 	}
 
 	public function toAseData() {
-		if (aseData != null) {
+		if( aseData != null ) {
 			return aseData;
 		}
 
-		aseData = haxe.Unserializer.run(entry.getText());
-		if (rootTile == null) {
+		aseData = AsepriteData.load(entry);
+		if( rootTile == null ) {
 			replaceTile(toTile(), aseData);
 		}
 
-		if (hxd.res.Resource.LIVE_UPDATE) {
+		if( hxd.res.Resource.LIVE_UPDATE ) {
 			watch(refresh);
 		}
 
@@ -47,7 +47,7 @@ class AsepriteRes extends hxd.res.Resource {
 
 	function refresh() {
 		haxe.Timer.delay(() -> {
-			var newData:AsepriteData = haxe.Unserializer.run(entry.getText());
+			var newData : AsepriteData = AsepriteData.load(entry);
 			replaceTile(toTile(), newData);
 			aseData.copyFrom(newData);
 		}, 100);
@@ -58,11 +58,11 @@ class AsepriteRes extends hxd.res.Resource {
 		return new Animation(data);
 	}
 
-	public function toSprite(?p:h2d.Object) {
+	public function toSprite(?p : h2d.Object) {
 		return new elk.graphics.Sprite(toAnimation(), p);
 	}
 
-	function generateFrameTiles(data:AsepriteData) {
+	function generateFrameTiles(data : AsepriteData) {
 		for (i in 0...data.frames.length) {
 			var frame = data.frames[i];
 			var dx = frame.dx;
@@ -73,12 +73,12 @@ class AsepriteRes extends hxd.res.Resource {
 		}
 	}
 
-	function getSlicesForFrame(frame:Int) {
+	function getSlicesForFrame(frame : Int) {
 		var slices = new Map<String, elk.aseprite.AsepriteData.AseDataSliceKey>();
 		var empty = true;
 		for (name => slice in aseData.slices) {
 			for (s in slice.keys) {
-				if (s.frame == frame) {
+				if( s.frame == frame ) {
 					slices[name] = s;
 					empty = false;
 					break;
@@ -86,17 +86,16 @@ class AsepriteRes extends hxd.res.Resource {
 			}
 		}
 
-		if (empty)
-			return null;
+		if( empty ) return null;
 
 		return slices;
 	}
 
-	public function toTile():h2d.Tile {
+	public function toTile() : h2d.Tile {
 		return toImage().toTile();
 	}
 
-	public function toTexture():h3d.mat.Texture {
+	public function toTexture() : h3d.mat.Texture {
 		return toImage().toTexture();
 	}
 }

@@ -101,6 +101,7 @@ class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient
 
 	public function update(dt : Float) {
 		elapsed += dt;
+		host.checkReferences();
 		if( running && host != null && elapsed > 0.2 ) {
 			elapsed = 0.0;
 			host.flush();

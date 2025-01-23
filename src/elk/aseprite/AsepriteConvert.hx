@@ -1,5 +1,9 @@
 package elk.aseprite;
 
+import elk.util.RectPacker;
+import hxd.BitmapData;
+import haxe.Int32;
+import haxe.io.Bytes;
 import haxe.io.Path;
 import elk.aseprite.AsepriteData;
 
@@ -94,6 +98,9 @@ class AsepriteConvert extends hxd.fs.Convert {
 	}
 
 	static function exportAsepriteFile(srcPath : String, dstPath : String) {
+		elk.aseprite.AseImageExporter.export(srcPath, dstPath);
+
+		return;
 		getAsepritePath();
 
 		var spacing = 1;
@@ -212,13 +219,14 @@ class AsepriteConvert extends hxd.fs.Convert {
 					name : t.name,
 					direction : switch (t.direction) {
 						case "forward": Forward;
-						case "backward": Backward;
+						case "backward": Reverse;
 						case "pingpong": PingPong;
 						default: Forward;
 					},
 					from : t.from,
 					to : t.to,
 					constantSpeed : true,
+					repeat : true,
 				};
 
 				var frameCount = tag.to - tag.from;
@@ -243,8 +251,7 @@ class AsepriteConvert extends hxd.fs.Convert {
 		res.slices = slices;
 		res.tags = tags;
 
-		var bytes = haxe.io.Bytes.ofString(haxe.Serializer.run(res));
-		hxd.File.saveBytes(jsonPath, bytes);
+		res.writeToFile(jsonPath);
 	}
 
 	#if macro

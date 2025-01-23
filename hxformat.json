@@ -51,15 +51,15 @@
         },
         {
           "conditions": [{ "cond": "totalItemLength >= n", "value": 140 }],
-          "type": "onePerLineAfterFirst"
+          "type": "onePerLine"
         },
         {
           "conditions": [{ "cond": "anyItemLength >= n", "value": 120 }],
-          "type": "onePerLineAfterFirst"
+          "type": "onePerLine"
         },
         {
           "conditions": [{ "cond": "lineLength >= n", "value": 80 }],
-          "type": "onePerLineAfterFirst"
+          "type": "onePerLine"
         }
       ]
     }

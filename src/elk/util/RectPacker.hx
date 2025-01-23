@@ -26,18 +26,22 @@ class RectPacker<T : RectPackNode> {
 
 	var freeRects : Array<Rect>;
 	var rows : Array<Row>;
-	var nodes : Array<T>;
+
+	public var nodes : Array<T>;
 
 	public var padding(default, set) : Int = 1;
 
 	public var autoResize = true;
 
-	public var width : Int = 1024 << 2;
-	public var height : Int = 1024 << 2;
+	public var width : Int = 0;
+	public var height : Int = 0;
 
-	public function new(width = 1024, height = 1024) {
-		this.width = width;
-		this.height = height;
+	var internalWidth = 64;
+	var internalHeight = 64;
+
+	public function new(width = 128, height = 128) {
+		this.internalWidth = width;
+		this.internalHeight = height;
 
 		reset();
 	}
@@ -46,12 +50,14 @@ class RectPacker<T : RectPackNode> {
 		nodes = [];
 		rows = [];
 		freeRects = [];
+		width = 0;
+		height = 0;
 	}
 
 	public function resize(width : Int, height : Int) {
 		var nodes = this.nodes;
-		this.width = width;
-		this.height = height;
+		this.internalWidth = width;
+		this.internalHeight = height;
 		reset();
 
 		nodes.sort((a, b) -> {
@@ -61,8 +67,8 @@ class RectPacker<T : RectPackNode> {
 		for (n in nodes) add(n);
 	}
 
-	public function refresh(?startWidth = 128, ?startHeight = 128) {
-		resize(startWidth ?? width, startHeight ?? height);
+	public function refresh(?startWidth, ?startHeight) {
+		resize(startWidth ?? internalWidth, startHeight ?? internalHeight);
 	}
 
 	inline function newRow(height : Int) : Row {
@@ -74,11 +80,11 @@ class RectPacker<T : RectPackNode> {
 				y : lastRow.topY + padding,
 				x : lastRow.endX + padding,
 				height : lastRow.height - padding,
-				width : this.width - lastRow.endX - padding,
+				width : this.internalWidth - lastRow.endX - padding,
 			});
 		}
 
-		if( topY + height > this.height - padding ) {
+		if( topY + height > this.internalHeight - padding ) {
 			return null;
 		}
 
@@ -104,7 +110,7 @@ class RectPacker<T : RectPackNode> {
 		var height = node.height + padding;
 		var width = node.width + padding;
 
-		return height <= row.height && endX + width < this.width;
+		return height <= row.height && endX + width < this.internalWidth;
 	}
 
 	inline function findFreeRect(node : T) {
@@ -137,6 +143,12 @@ class RectPacker<T : RectPackNode> {
 		addFreeRect(bottomRect);
 	}
 
+	private inline function pushNode(node : T) {
+		nodes.push(node);
+		width = Std.int(Math.max(width, node.x + node.width + padding));
+		height = Std.int(Math.max(height, node.y + node.height + padding));
+	}
+
 	public function add(node : T) {
 		var freeCell = findFreeRect(node);
 		if( freeCell != null ) {
@@ -144,7 +156,7 @@ class RectPacker<T : RectPackNode> {
 			splitRect(freeCell, node);
 			node.x = freeCell.x;
 			node.y = freeCell.y;
-			nodes.push(node);
+			pushNode(node);
 			return node;
 		}
 
@@ -155,8 +167,13 @@ class RectPacker<T : RectPackNode> {
 
 		if( curRow == null ) {
 			if( !autoResize ) return null;
-			var newWidth = this.width << 1;
-			var newHeight = this.height << 1;
+			var sizeInc = Std.int(Math.max(node.width, node.height));
+			/*
+				var newWidth = this.internalWidth << 1;
+				var newHeight = this.internalHeight << 1;
+			 */
+			var newWidth = internalWidth + node.width;
+			var newHeight = internalHeight + node.height + rows.length * padding * 2;
 			if( newWidth >= MAX_WIDTH || newHeight >= MAX_HEIGHT ) {
 				throw "Can't resize, size exceeds maximum";
 			}
@@ -179,7 +196,7 @@ class RectPacker<T : RectPackNode> {
 			});
 		}
 
-		nodes.push(node);
+		pushNode(node);
 
 		return node;
 	}
