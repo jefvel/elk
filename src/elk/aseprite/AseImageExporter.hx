@@ -5,6 +5,7 @@ import haxe.io.BytesOutput;
 import elk.aseprite.AsepriteData.AseDataFrame;
 
 private class BitmapDataRect implements elk.util.RectPacker.RectPackNode {
+	public var index : Int;
 	public var x : Int;
 	public var y : Int;
 
@@ -17,7 +18,8 @@ private class BitmapDataRect implements elk.util.RectPacker.RectPackNode {
 
 	public var frame : ase.Frame;
 
-	public function new(w, h, d, ox, oy, f) {
+	public function new(i, w, h, d, ox, oy, f) {
+		index = i;
 		width = w;
 		height = h;
 		bitmap = d;
@@ -41,7 +43,6 @@ class AseImageExporter {
 		var tags = getAseTags(file);
 		var slices = getAseSlices(file);
 
-		for (chunk in file.firstFrame.chunks) {}
 		var packer = new elk.util.RectPacker<BitmapDataRect>(32, 32);
 
 		var frameIndex = 0;
@@ -81,7 +82,7 @@ class AseImageExporter {
 			var pixls = new hxd.Pixels(cel.width, cel.height, bytes, hxd.PixelFormat.RGBA);
 
 			dat.setPixels(pixls);
-			packer.add(new BitmapDataRect(cel.width, cel.height, dat, cel.xPosition, cel.yPosition, frame));
+			packer.add(new BitmapDataRect(frameIndex, cel.width, cel.height, dat, cel.xPosition, cel.yPosition, frame));
 
 			frameIndex++;
 		}
@@ -99,7 +100,7 @@ class AseImageExporter {
 		var frames : Array<AseDataFrame> = [];
 
 		info.frames = frames;
-
+		packer.nodes.sort((a, b) -> a.index - b.index);
 		for (cel in packer.nodes) {
 			var dat = cel.bitmap;
 
