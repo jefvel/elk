@@ -1,5 +1,7 @@
 package elk.aseprite;
 
+import ase.chunks.OldPaleteChunk;
+import ase.types.ColorDepth;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
 import elk.aseprite.AsepriteData.AseDataFrame;
@@ -42,6 +44,14 @@ class AseImageExporter {
 
 		var tags = getAseTags(file);
 		var slices = getAseSlices(file);
+		var palette = getAsePalette(file);
+		for (p in palette) {
+			var b = haxe.io.Bytes.alloc(4);
+			b.setInt32(0, p);
+			// trace(b.toHex());
+		}
+
+		var colorDepth = file.colorDepth;
 
 		var packer = new elk.util.RectPacker<BitmapDataRect>(32, 32);
 
@@ -62,27 +72,52 @@ class AseImageExporter {
 			}
 
 			var cel = frame.cels[0];
-			var bytes = frame.cels[0].pixelData;
-			var converted = haxe.io.Bytes.alloc(bytes.length);
-			for (i in 0...Std.int(bytes.length / 4)) {
-				var col = bytes.getInt32(i * 4);
+			var width = 0;
+			var height = 0;
+			var yPos = 0;
+			var xPos = 0;
+			var converted : haxe.io.Bytes;
 
-				var R = (col & 0x000000ff);
-				var G = (col & 0x0000ff00) >> 8;
-				var B = (col & 0x00ff0000) >> 16;
+			if( cel != null ) {
+				width = cel.width;
+				height = cel.height;
+				xPos = cel.xPosition;
+				yPos = cel.yPosition;
+				converted = haxe.io.Bytes.alloc(width * height * 4);
+				var bytes = cel.pixelData;
+				var r = new haxe.io.BytesInput(cel.pixelData);
+				r.bigEndian = false;
+				if( colorDepth == BPP32 ) {
+					for (i in 0...Std.int(bytes.length / 4)) {
+						var col = bytes.getInt32(i * 4);
 
-				var A = cast(col & 0xff000000, UInt) >> 24;
+						var R = (col & 0x000000ff);
+						var G = (col & 0x0000ff00) >> 8;
+						var B = (col & 0x00ff0000) >> 16;
 
-				col = (B << 24) | (G << 16) | (R << 8) | A;
+						var A = cast(col & 0xff000000, UInt) >> 24;
 
-				converted.setInt32(i * 4, col);
+						col = (B << 24) | (G << 16) | (R << 8) | A;
+
+						converted.setInt32(i * 4, col);
+					}
+				}
+				if( colorDepth == BPP8 ) {
+					for (i in 0...bytes.length) {
+						var index = r.readByte();
+						var color = palette[index];
+						converted.setInt32(i * 4, color);
+					}
+				}
+			} else {
+				converted = haxe.io.Bytes.alloc(0);
 			}
 
-			var dat = new hxd.BitmapData(cel.width, cel.height);
-			var pixls = new hxd.Pixels(cel.width, cel.height, bytes, hxd.PixelFormat.RGBA);
+			var dat = new hxd.BitmapData(width, height);
+			var pixls = new hxd.Pixels(width, height, converted, hxd.PixelFormat.ARGB);
 
 			dat.setPixels(pixls);
-			packer.add(new BitmapDataRect(frameIndex, cel.width, cel.height, dat, cel.xPosition, cel.yPosition, frame));
+			packer.add(new BitmapDataRect(frameIndex, width, height, dat, xPos, yPos, frame));
 
 			frameIndex++;
 		}
@@ -101,10 +136,19 @@ class AseImageExporter {
 
 		info.frames = frames;
 		packer.nodes.sort((a, b) -> a.index - b.index);
+		bmpD.lock();
 		for (cel in packer.nodes) {
 			var dat = cel.bitmap;
 
+			#if (hl && false)
 			bmpD.draw(cel.x, cel.y, dat, 0, 0, cel.width, cel.height, None,);
+			#else
+			for (dy in 0...cel.height) {
+				for (dx in 0...cel.width) {
+					bmpD.setPixel(dx + cel.x, dy + cel.y, dat.getPixel(dx, dy));
+				}
+			}
+			#end
 			frames.push({
 				x : cel.x,
 				y : cel.y,
@@ -115,10 +159,15 @@ class AseImageExporter {
 				duration : cel.frame.duration,
 			});
 		}
+		bmpD.unlock();
 
 		var png = bmpD.toPNG();
 
-		sys.io.File.saveBytes('$srcDir/generated/$imageName.png', png);
+		var fileOutName = '$srcDir/generated/$imageName.png';
+		var dir = haxe.io.Path.directory(fileOutName);
+		sys.FileSystem.createDirectory(dir);
+
+		sys.io.File.saveBytes(fileOutName, png);
 		info.writeToFile(destPath);
 	}
 
@@ -131,51 +180,19 @@ class AseImageExporter {
 		var slices = [];
 		for (chunk in file.firstFrame.chunks) {
 			if( chunk.header.type != ase.types.ChunkType.SLICE ) continue;
-			var bytes = chunk.toBytes();
-
-			var input = new haxe.io.BytesInput(bytes);
-			input.bigEndian = false;
-
-			var size = input.readInt32();
-			var header = input.readUInt16();
-
-			var sliceCount : UInt = input.readInt32();
-			var flags : UInt = input.readInt32();
-			var is9Patch = (flags & 1) != 0;
-			var hasPivot = (flags & 2) != 0;
-			input.readInt32(); // Reserved
-			var name = readString(input);
-
+			var sliceChunk : ase.chunks.SliceChunk = cast chunk;
 			var slice : AsepriteData.AseDataSlice = {
-				name : name,
+				name : sliceChunk.name,
 				keys : [],
 			}
 
-			for (sliceIndex in 0...sliceCount) {
-				var frameNumber : UInt = input.readInt32();
-				var x = input.readInt32();
-				var y = input.readInt32();
-				var width : UInt = input.readInt32();
-				var height : UInt = input.readInt32();
-
-				if( is9Patch ) {
-					var centerX = input.readInt32();
-					var centerY = input.readInt32();
-					var centerWidth : UInt = input.readInt32();
-					var centerHeight : UInt = input.readInt32();
-				}
-
-				if( hasPivot ) {
-					var relativePivotX = input.readInt32();
-					var relativePivotY = input.readInt32();
-				}
-
+			for (key in sliceChunk.sliceKeys) {
 				slice.keys.push({
-					frame : frameNumber,
-					x : x,
-					y : y,
-					w : width,
-					h : height,
+					frame : key.frameNumber,
+					x : key.xOrigin,
+					y : key.yOrigin,
+					w : key.width,
+					h : key.height,
 				});
 			}
 
@@ -189,22 +206,10 @@ class AseImageExporter {
 		var tags : Array<elk.aseprite.AsepriteData.AseDataTag> = [];
 		for (chunk in file.firstFrame.chunks) {
 			if( chunk.header.type != ase.types.ChunkType.TAGS ) continue;
-			var bytes = chunk.toBytes();
+			var tagsChunk : ase.chunks.TagsChunk = cast chunk;
 
-			var input = new haxe.io.BytesInput(bytes);
-			input.bigEndian = false;
-
-			var size = input.readInt32();
-			var header = input.readUInt16();
-
-			var tagCount = input.readInt16();
-
-			input.read(8); // Blank
-
-			for (i in 0...tagCount) {
-				var from = input.readUInt16();
-				var to = input.readUInt16();
-				var direction : elk.aseprite.AsepriteData.AnimationDirection = switch (input.readByte()) {
+			for (tag in tagsChunk.tags) {
+				var direction : elk.aseprite.AsepriteData.AnimationDirection = switch (tag.animDirection) {
 					case 0: Forward;
 					case 1: Reverse;
 					case 2: PingPong;
@@ -213,32 +218,68 @@ class AseImageExporter {
 						Forward;
 				}
 
-				input.readUInt16(); // repeat
+				var name = tag.tagName;
+				var repeat = !StringTools.startsWith(name, '_');
+				if( !repeat ) {
+					name = name.substr(1);
+				}
 
-				input.read(6); // Empty
-				input.read(3); // RGB value
-				input.readByte(); // Empty
-
-				var name = readString(input);
-
-				var tag : elk.aseprite.AsepriteData.AseDataTag = {
+				tags.push({
 					name : name,
 					duration : 0,
 					constantSpeed : true,
-					from : from,
-					to : to,
+					from : tag.fromFrame,
+					to : tag.toFrame,
 					direction : direction,
-					repeat : !StringTools.startsWith(name, '_'),
-				};
-
-				tags.push(tag);
-
-				if( input.position + 1 >= input.length ) break;
+					repeat : repeat,
+				});
 			}
-
-			input.close();
 		}
 
 		return tags;
+	}
+
+	private static inline function getAsePalette(file : ase.Ase) {
+		inline function genColor(r, g, b, a) {
+			var color : UInt = (b << 24) | (g << 16) | (r << 8) | a;
+			return color;
+		}
+
+		var colors : Array<UInt> = [];
+		var tags : Array<elk.aseprite.AsepriteData.AseDataTag> = [];
+		for (frame in file.frames) for (chunk in frame.chunks) {
+			if( chunk.header.type == ase.types.ChunkType.OLD_PALETTE_04 ) {
+				var paletteChunk : OldPaleteChunk = cast chunk;
+				for (p in paletteChunk.packets) {
+					var index = p.skipEntries;
+					for (c in p.colors) {
+						if( index == file.header.paletteEntry ) {
+							colors[index] = genColor(0, 0, 0, 0);
+						} else {
+							colors[index] = genColor(c.red, c.green, c.blue, 0xff);
+						}
+						index++;
+					}
+				}
+				continue;
+			}
+
+			if( chunk.header.type != ase.types.ChunkType.PALETTE ) continue;
+
+			var paletteChunk : ase.chunks.PaletteChunk = cast chunk;
+			var index = paletteChunk.firstColorIndex;
+			for (index in paletteChunk.entries.keys()) {
+				var e = paletteChunk.entries[index];
+				var color = genColor(e.red, e.green, e.blue, e.alpha);
+				colors[index] = color;
+			}
+		}
+
+		return colors;
+	}
+
+	public static function main() {
+		var args = Sys.args();
+		export(args[0], args[1]);
 	}
 }

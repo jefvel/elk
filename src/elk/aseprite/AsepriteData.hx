@@ -1,7 +1,6 @@
 package elk.aseprite;
 
 import haxe.io.BytesInput;
-import hxd.fs.Convert.ConvertBinJSON;
 
 enum abstract AnimationDirection(Int) {
 	var Forward = 0;

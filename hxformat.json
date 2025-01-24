@@ -50,11 +50,11 @@
           "type": "fillLine"
         },
         {
-          "conditions": [{ "cond": "totalItemLength >= n", "value": 140 }],
+          "conditions": [{ "cond": "totalItemLength >= n", "value": 100 }],
           "type": "onePerLine"
         },
         {
-          "conditions": [{ "cond": "anyItemLength >= n", "value": 120 }],
+          "conditions": [{ "cond": "anyItemLength >= n", "value": 100 }],
           "type": "onePerLine"
         },
         {
@@ -68,7 +68,7 @@
     "arrowFunctionsPolicy": "around",
     "functionTypeHaxe3Policy": "around",
     "functionTypeHaxe4Policy": "around",
-    "ifPolicy": "none",
+    "ifPolicy": "before",
     "parenConfig": {
       "ifConditionParens": {
         "closingPolicy": "around",

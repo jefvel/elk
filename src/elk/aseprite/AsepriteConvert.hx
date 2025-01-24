@@ -94,11 +94,24 @@ class AsepriteConvert extends hxd.fs.Convert {
 	}
 
 	override function convert() {
+		#if sys
+		Sys.sleep(0.05);
+		#end
 		exportAsepriteFile(srcPath, dstPath);
 	}
 
 	static function exportAsepriteFile(srcPath : String, dstPath : String) {
+		#if hl
 		elk.aseprite.AseImageExporter.export(srcPath, dstPath);
+		#else
+		// Generate aseprite converter hl command line app, and delete it after conversion
+		if( !sys.FileSystem.exists('ase.converter.hl') ) {
+			Sys.command('haxe -hl ase.converter.hl -lib heaps -lib ase -lib elk -main elk.aseprite.AseImageExporter');
+			haxe.macro.Context.onAfterGenerate(() -> sys.FileSystem.deleteFile('ase.converter.hl'));
+		}
+
+		Sys.command('hl ase.converter.hl "$srcPath" "$dstPath"');
+		#end
 
 		return;
 		getAsepritePath();
