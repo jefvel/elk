@@ -54,9 +54,6 @@ class AseImageExporter {
 		var packer = new elk.util.RectPacker<BitmapDataRect>(32, 32);
 
 		var layers = file.layers;
-		for (l in layers) {
-			trace(l.name);
-		}
 
 		var frameIndex = 0;
 		var tagFrameDurations = new Map<String, Int>();
