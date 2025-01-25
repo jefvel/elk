@@ -1,5 +1,8 @@
 package elk.aseprite;
 
+import h3d.Vector4;
+import h2d.BlendMode;
+import hxd.Pixels;
 import ase.chunks.OldPaleteChunk;
 import ase.types.ColorDepth;
 import haxe.io.BytesInput;
@@ -13,7 +16,7 @@ private class BitmapDataRect implements elk.util.RectPacker.RectPackNode {
 
 	public var width : Int;
 	public var height : Int;
-	public var bitmap : hxd.BitmapData;
+	public var bitmap : Pixels;
 
 	public var offsetX = 0;
 	public var offsetY = 0;
@@ -45,15 +48,15 @@ class AseImageExporter {
 		var tags = getAseTags(file);
 		var slices = getAseSlices(file);
 		var palette = getAsePalette(file);
-		for (p in palette) {
-			var b = haxe.io.Bytes.alloc(4);
-			b.setInt32(0, p);
-			// trace(b.toHex());
-		}
 
 		var colorDepth = file.colorDepth;
 
 		var packer = new elk.util.RectPacker<BitmapDataRect>(32, 32);
+
+		var layers = file.layers;
+		for (l in layers) {
+			trace(l.name);
+		}
 
 		var frameIndex = 0;
 		var tagFrameDurations = new Map<String, Int>();
@@ -71,59 +74,123 @@ class AseImageExporter {
 				}
 			}
 
-			var cel = frame.cels[0];
-			var width = 0;
-			var height = 0;
-			var yPos = 0;
-			var xPos = 0;
-			var converted : haxe.io.Bytes;
-
-			if( cel != null ) {
-				width = cel.width;
-				height = cel.height;
-				xPos = cel.xPosition;
-				yPos = cel.yPosition;
-				converted = haxe.io.Bytes.alloc(width * height * 4);
-				var bytes = cel.pixelData;
-				var r = new haxe.io.BytesInput(cel.pixelData);
-				r.bigEndian = false;
-				if( colorDepth == BPP32 ) {
-					for (i in 0...Std.int(bytes.length / 4)) {
-						var col = bytes.getInt32(i * 4);
-
-						var R = (col & 0x000000ff);
-						var G = (col & 0x0000ff00) >> 8;
-						var B = (col & 0x00ff0000) >> 16;
-
-						var A = cast(col & 0xff000000, UInt) >> 24;
-
-						col = (B << 24) | (G << 16) | (R << 8) | A;
-
-						converted.setInt32(i * 4, col);
-					}
-				}
-				if( colorDepth == BPP8 ) {
-					for (i in 0...bytes.length) {
-						var index = r.readByte();
-						var color = palette[index];
-						converted.setInt32(i * 4, color);
-					}
-				}
-			} else {
-				converted = haxe.io.Bytes.alloc(0);
+			var top = file.height;
+			var left = file.width;
+			var bottom = 0;
+			var right = 0;
+			for (i in 0...layers.length) {
+				var l = layers[i];
+				if( !l.visible ) continue;
+				var c = frame.cel(i);
+				if( c == null ) continue;
+				if( top > c.yPosition ) top = c.yPosition;
+				if( left > c.xPosition ) left = c.xPosition;
+				if( right < c.xPosition + c.width ) right = c.xPosition + c.width;
+				if( bottom < c.yPosition + c.height ) bottom = c.yPosition + c.height;
 			}
 
-			var dat = new hxd.BitmapData(width, height);
-			var pixls = new hxd.Pixels(width, height, converted, hxd.PixelFormat.ARGB);
+			var frameWidth = right - left;
+			var frameHeight = bottom - top;
+			var pixels : Pixels;
+			var src = new Vector4();
+			var dst = new Vector4();
+			var resColor = new Vector4();
+			if( frameWidth <= 0 || frameHeight <= 0 ) {
+				frameWidth = 0;
+				frameHeight = 0;
+				var bytes = haxe.io.Bytes.alloc(0);
+				pixels = new hxd.Pixels(frameWidth, frameHeight, bytes, hxd.PixelFormat.ARGB);
+			} else {
+				var bytes = haxe.io.Bytes.alloc(frameWidth * frameHeight * 4);
+				pixels = new hxd.Pixels(frameWidth, frameHeight, bytes, hxd.PixelFormat.ARGB);
+				var yPos = 0;
+				var xPos = 0;
 
-			dat.setPixels(pixls);
-			packer.add(new BitmapDataRect(frameIndex, width, height, dat, xPos, yPos, frame));
+				for (i in 0...layers.length) {
+					var l = layers[i];
+					if( !l.visible ) continue;
+
+					var cel = frame.cel(i);
+					if( cel == null ) continue;
+
+					var width = cel.width;
+					var height = cel.height;
+
+					xPos = cel.xPosition - left;
+					yPos = cel.yPosition - top;
+
+					var opacity = l.chunk.opacity / 255;
+
+					inline function drawPixel(index : Int, color) {
+						var py = Std.int(index / width);
+						var px = index % width;
+						px += xPos;
+						py += yPos;
+
+						pixels.getPixelF(px, py, dst);
+						src.setColor(color);
+						var srcA = src.a * opacity;
+						switch (l.chunk.blendMode) {
+							case Normal:
+								src.scale4(srcA);
+								dst.scale4(1 - srcA);
+								dst += src;
+							case Addition:
+								src.scale4(srcA);
+								dst += src;
+							case Multiply:
+								resColor.set(dst.r, dst.g, dst.b, dst.a);
+								src.scale4(srcA);
+								dst.r *= src.r;
+								dst.g *= src.g;
+								dst.b *= src.b;
+								dst.a *= src.a;
+								resColor.scale4(1 - srcA);
+								dst += resColor;
+							default:
+								src.scale4(srcA);
+								dst.scale4(1 - srcA);
+								dst += src;
+						}
+
+						pixels.setPixelF(px, py, dst);
+						// converted.setInt32((px + py * frameWidth) * 4, color);
+					}
+
+					var bytes = cel.pixelData;
+					var r = new haxe.io.BytesInput(cel.pixelData);
+					r.bigEndian = false;
+					if( colorDepth == BPP32 ) {
+						for (i in 0...Std.int(bytes.length / 4)) {
+							var col = bytes.getInt32(i * 4);
+							var R = (col & 0x000000ff);
+							var G = (col & 0x0000ff00) >> 8;
+							var B = (col & 0x00ff0000) >> 16;
+							var A = cast(col & 0xff000000, UInt) >> 24;
+
+							var pixelColor = (A << 24) | (R << 16) | (G << 8) | B;
+							drawPixel(i, pixelColor);
+						}
+					}
+					if( colorDepth == BPP8 ) {
+						for (i in 0...bytes.length) {
+							var index = r.readByte();
+							var color = palette[index];
+							drawPixel(i, color);
+						}
+					}
+				}
+			}
+
+			packer.add(new BitmapDataRect(frameIndex, frameWidth, frameHeight, pixels, left, top, frame));
 
 			frameIndex++;
 		}
 
 		packer.refresh();
-		var bmpD = new hxd.BitmapData(packer.width, packer.height);
+		var w = packer.width;
+		var h = packer.height;
+		var bmpD = new Pixels(packer.width, packer.height, haxe.io.Bytes.alloc(w * h * 4), ARGB);
 		var info = new AsepriteData();
 
 		for (tag in tags) info.tags[tag.name] = tag;
@@ -136,7 +203,6 @@ class AseImageExporter {
 
 		info.frames = frames;
 		packer.nodes.sort((a, b) -> a.index - b.index);
-		bmpD.lock();
 		for (cel in packer.nodes) {
 			var dat = cel.bitmap;
 
@@ -159,7 +225,6 @@ class AseImageExporter {
 				duration : cel.frame.duration,
 			});
 		}
-		bmpD.unlock();
 
 		var png = bmpD.toPNG();
 
@@ -274,6 +339,15 @@ class AseImageExporter {
 				colors[index] = color;
 			}
 		}
+
+		colors = colors.map(col -> {
+			var R = (col & 0x000000ff);
+			var G = (col & 0x0000ff00) >> 8;
+			var B = (col & 0x00ff0000) >> 16;
+			var A = cast(col & 0xff000000, UInt) >> 24;
+
+			return (R << 24) | (G << 16) | (B << 8) | A;
+		});
 
 		return colors;
 	}
