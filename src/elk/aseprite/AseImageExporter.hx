@@ -56,6 +56,22 @@ class AseImageExporter {
 
 		var layers = file.layers;
 
+		var groups = new Map<Int, Array<ase.Layer>>();
+		var groupStack = [];
+		var curDepth = 0;
+		var curGroup = null;
+		for (i in 0...layers.length) {
+			var l = layers[i];
+			while (l.chunk.childLevel < groupStack.length) groupStack.pop();
+			if( l.chunk.layerType == Group ) {
+				var curTop = groupStack.length > 0 ? groupStack[l.chunk.childLevel] : null;
+				if( curTop == null || curTop.chunk.childLevel < l.chunk.childLevel ) groupStack.push(l);
+				else groupStack[l.chunk.childLevel] = l;
+			}
+
+			groups[i] = groupStack.slice(0);
+		}
+
 		var frameIndex = 0;
 		var tagFrameDurations = new Map<String, Int>();
 		for (frame in file.frames) {
@@ -78,7 +94,21 @@ class AseImageExporter {
 			var right = 0;
 			for (i in 0...layers.length) {
 				var l = layers[i];
+				if( l.chunk.layerType != Normal ) continue;
 				if( !l.visible ) continue;
+				if( l.chunk.childLevel > 0 ) {
+					var visible = true;
+					for (group in groups[i]) {
+						if( !group.visible ) {
+							visible = false;
+							break;
+						}
+					}
+					if( !visible ) {
+						l.visible = false;
+						continue;
+					}
+				}
 				var c = frame.cel(i);
 				if( c == null ) continue;
 				if( top > c.yPosition ) top = c.yPosition;
@@ -169,7 +199,6 @@ class AseImageExporter {
 						}
 
 						pixels.setPixelF(px, py, resColor);
-						// converted.setInt32((px + py * frameWidth) * 4, color);
 					}
 
 					var bytes = cel.pixelData;
