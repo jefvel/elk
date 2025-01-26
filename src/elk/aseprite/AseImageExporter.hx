@@ -1,5 +1,6 @@
 package elk.aseprite;
 
+import elk.util.BlendModes;
 import h3d.Vector4;
 import h2d.BlendMode;
 import hxd.Pixels;
@@ -126,31 +127,48 @@ class AseImageExporter {
 
 						pixels.getPixelF(px, py, dst);
 						src.setColor(color);
-						var srcA = src.a * opacity;
 						switch (l.chunk.blendMode) {
 							case Normal:
-								src.scale4(srcA);
-								dst.scale4(1 - srcA);
-								dst += src;
-							case Addition:
-								src.scale4(srcA);
-								dst += src;
+								resColor = BlendModes.normal(src, dst, opacity, resColor);
+							case Darken:
+								resColor = BlendModes.darken(src, dst, opacity, resColor);
 							case Multiply:
-								resColor.set(dst.r, dst.g, dst.b, dst.a);
-								src.scale4(srcA);
-								dst.r *= src.r;
-								dst.g *= src.g;
-								dst.b *= src.b;
-								dst.a *= src.a;
-								resColor.scale4(1 - srcA);
-								dst += resColor;
-							default:
-								src.scale4(srcA);
-								dst.scale4(1 - srcA);
-								dst += src;
+								resColor = BlendModes.multiply(src, dst, opacity, resColor);
+							case ColorBurn:
+								resColor = BlendModes.burn(src, dst, opacity, resColor);
+							case Lighten:
+								resColor = BlendModes.lighten(src, dst, opacity, resColor);
+							case Screen:
+								resColor = BlendModes.screen(src, dst, opacity, resColor);
+							case ColorDodge:
+								resColor = BlendModes.dodge(src, dst, opacity, resColor);
+							case Addition:
+								resColor = BlendModes.addition(src, dst, opacity, resColor);
+							case Overlay:
+								resColor = BlendModes.overlay(src, dst, opacity, resColor);
+							case SoftLight:
+								resColor = BlendModes.soft_light(src, dst, opacity, resColor);
+							case HardLight:
+								resColor = BlendModes.hard_light(src, dst, opacity, resColor);
+							case Difference:
+								resColor = BlendModes.difference(src, dst, opacity, resColor);
+							case Exclusion:
+								resColor = BlendModes.exclusion(src, dst, opacity, resColor);
+							case Subtract:
+								resColor = BlendModes.subtract(src, dst, opacity, resColor);
+							case Divide:
+								resColor = BlendModes.divide(src, dst, opacity, resColor);
+							case Hue:
+								resColor = BlendModes.hue(src, dst, opacity, resColor);
+							case Saturation:
+								resColor = BlendModes.saturation(src, dst, opacity, resColor);
+							case Color:
+								resColor = BlendModes.color(src, dst, opacity, resColor);
+							case Luminosity:
+								resColor = BlendModes.luminosity(src, dst, opacity, resColor);
 						}
 
-						pixels.setPixelF(px, py, dst);
+						pixels.setPixelF(px, py, resColor);
 						// converted.setInt32((px + py * frameWidth) * 4, color);
 					}
 
