@@ -58,11 +58,14 @@ class BlendModes {
 	public static inline function addition(src : Vector4, dst : Vector4, opacity : Float, ?res : Vector4) : Vector4 {
 		if( res == null ) res = new Vector4();
 		var srcA = src.a * opacity;
-		res.load(src);
-		res.scale3(srcA);
-		res += dst;
+		inline function blend(b : Float, s : Float)
+			return Math.min(b + s, 1);
 
-		return res;
+		src.r = blend(dst.r, src.r);
+		src.g = blend(dst.g, src.g);
+		src.b = blend(dst.b, src.b);
+
+		return normal(src, dst, opacity, res);
 	}
 
 	public static inline function multiply(src : Vector4, dst : Vector4, opacity : Float, ?res : Vector4) : Vector4 {
@@ -185,7 +188,7 @@ class BlendModes {
 		if( res == null ) res = new Vector4();
 
 		inline function blend(b : Float, s : Float)
-			return b - s;
+			return Math.max(b - s, 0);
 
 		src.r = blend(dst.r, src.r);
 		src.g = blend(dst.g, src.g);
