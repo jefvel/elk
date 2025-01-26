@@ -2,10 +2,8 @@ package elk.aseprite;
 
 import elk.util.BlendModes;
 import h3d.Vector4;
-import h2d.BlendMode;
 import hxd.Pixels;
 import ase.chunks.OldPaleteChunk;
-import ase.types.ColorDepth;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
 import elk.aseprite.AsepriteData.AseDataFrame;
@@ -38,13 +36,26 @@ private class BitmapDataRect implements elk.util.RectPacker.RectPackNode {
 class AseImageExporter {
 	public function new() {}
 
-	public static function export(srcPath : String, destPath : String) {
+	public static function export(srcPath : String, destPath : String, isRetry = false) {
 		var srcDir = haxe.io.Path.directory(srcPath);
 		var imageName = haxe.io.Path.withoutExtension(haxe.io.Path.withoutDirectory(srcPath));
 
 		var fileBytes = sys.io.File.getBytes(srcPath);
 
-		var file = ase.Ase.fromBytes(fileBytes);
+		var file : ase.Ase = null;
+		try {
+			file = ase.Ase.fromBytes(fileBytes);
+		}
+		catch (e) {
+			if( e is haxe.ValueException && !isRetry ) {
+				var r = cast(e, haxe.ValueException);
+				if( r.value is haxe.io.Eof ) {
+					Sys.sleep(0.2);
+					return export(srcPath, destPath, isRetry);
+				}
+			}
+			throw e;
+		}
 
 		var tags = getAseTags(file);
 		var slices = getAseSlices(file);

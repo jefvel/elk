@@ -4,16 +4,16 @@ import hxbit.NetworkHost.NetworkClient;
 
 @:keepSub
 class MultiplayerClient implements hxbit.NetworkSerializable {
-	@:s @:notMutable public var uid: String;
+	@:s @:notMutable public var uid : String;
 
 	public var connected(default, null) = false;
-	public var client: NetworkClient = null;
+	public var client : NetworkClient = null;
 
-	public var is_self(default, null): Bool = false;
+	public var is_self(default, null) : Bool = false;
 
-	var host: hxbit.NetworkHost;
+	var host : hxbit.NetworkHost;
 
-	public function new(client: NetworkClient, host: hxbit.NetworkHost) {
+	public function new(client : NetworkClient, host : hxbit.NetworkHost) {
 		uid = elk.util.Uuid.v4();
 
 		this.host = host;
@@ -24,14 +24,14 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 		_init();
 	}
 
-	public function evalVisibility(group: hxbit.VisibilityGroup, from: hxbit.NetworkSerializable): Bool {
+	public function evalVisibility(group : hxbit.VisibilityGroup, from : hxbit.NetworkSerializable) : Bool {
 		trace('eval visibility MultiplayerClient');
 		return true;
 	}
 
-	public function networkAllow(op: hxbit.NetworkSerializable.Operation, propId: Int, client: hxbit.NetworkSerializable): Bool {
+	public function networkAllow(op : hxbit.NetworkSerializable.Operation, propId : Int, client : hxbit.NetworkSerializable) : Bool {
 		var allow = client == this;
-		if (propId == this.networkPropUid.toInt()) return false;
+		if( propId == this.networkPropUid.toInt() ) return false;
 		return allow;
 	}
 
@@ -44,6 +44,7 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 	function _init() {
 		connected = true;
 		this.enableReplication = true;
+		this.enableAutoReplication = true;
 		this.is_self = MultiplayerHandler.instance.get_own_uid() == uid;
 		MultiplayerHandler.instance.add_client(cast this);
 	}

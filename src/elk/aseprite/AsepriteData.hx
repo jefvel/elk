@@ -61,6 +61,16 @@ class AseDataTag {
 		return '$name [$from - $to], duration: $duration, constant: $constantSpeed, direction: $direction, repeat: $repeat';
 	}
 
+	public function copyFrom(t : AseDataTag) {
+		name = t.name;
+		duration = t.duration;
+		constantSpeed = t.constantSpeed;
+		from = t.from;
+		to = t.to;
+		direction = t.direction;
+		repeat = t.repeat;
+	}
+
 	public inline function serialize(w : haxe.io.Output) {
 		w.writeInt32(name.length);
 		w.writeString(name);
@@ -93,6 +103,20 @@ class AseDataSlice {
 
 	public function toString() {
 		return '$name: [\n${keys.map(k -> '  frame: ${k.frame}, x:${k.x}, y: ${k.y} (${k.w}x${k.h})').join('\n')}\n]';
+	}
+
+	public function copyFrom(s : AseDataSlice) {
+		name = s.name;
+		for (i in 0...s.keys.length) {
+			if( keys[i] != null ) {
+				keys[i].copyFrom(s.keys[i]);
+			} else {
+				keys.push(s.keys[i]);
+			}
+		}
+		if( s.keys.length > keys.length ) {
+			keys.splice(s.keys.length - 1, -1);
+		}
 	}
 
 	public inline function serialize(w : haxe.io.Output) {
@@ -129,6 +153,14 @@ class AseDataSliceKey {
 		o.writeInt32(y);
 		o.writeInt32(w);
 		o.writeInt32(h);
+	}
+
+	public function copyFrom(k : AseDataSliceKey) {
+		frame = k.frame;
+		x = k.x;
+		y = k.y;
+		w = k.w;
+		h = k.h;
 	}
 
 	public static function deserialize(o : haxe.io.Input) : AseDataSliceKey {
@@ -186,8 +218,21 @@ class AsepriteData {
 			frames.splice(data.frames.length, -1);
 		}
 
-		tags = data.tags;
-		slices = data.slices;
+		for (k => v in data.tags.keyValueIterator()) {
+			if( tags.exists(k) ) {
+				tags[k].copyFrom(v);
+			} else {
+				tags.set(k, v);
+			}
+		}
+
+		for (k => v in data.slices.keyValueIterator()) {
+			if( slices.exists(k) ) {
+				slices[k].copyFrom(v);
+			} else {
+				slices.set(k, v);
+			}
+		}
 	}
 
 	private static inline function dynToMap(objo) : Map<String, Dynamic> {
@@ -202,6 +247,7 @@ class AsepriteData {
 	public static function load(entry : hxd.fs.FileEntry) : AsepriteData {
 		var d = new AsepriteData();
 		var r = new BytesInput(entry.getBytes());
+
 		d.width = r.readInt32();
 		d.height = r.readInt32();
 		d.totalDuration = r.readInt32();
@@ -224,31 +270,9 @@ class AsepriteData {
 		r.close();
 
 		return d;
-
-		/*
-			return haxe.Unserializer.run(entry.getText());
-
-				var bytes = entry.getBytes();
-				var reader = new hxd.fmt.hbson.Reader(bytes, true);
-				var data = haxe.Json.parse(reader.read());
-				var res = new AsepriteData();
-				res.frames = data.frames;
-				res.width = data.width;
-				res.height = data.height;
-				res.slices = cast dynToMap(data.slices);
-				res.tags = cast dynToMap(data.tags);
-				res.totalDuration = data.totalDuration;
-				return res;
-		 */
 	}
 
 	public function writeToFile(destPath : String) {
-		/*
-			var json = haxe.Json.stringify(this);
-			var out = new haxe.io.BytesOutput();
-			new hxd.fmt.hbson.Writer(out).write(json);
-			hxd.File.saveBytes(destPath, out.getBytes());
-		 */
 		var w = new haxe.io.BytesOutput();
 		w.writeInt32(width);
 		w.writeInt32(height);
@@ -272,10 +296,5 @@ class AsepriteData {
 		w.flush();
 		hxd.File.saveBytes(destPath, w.getBytes());
 		w.close();
-		/*
-			var bytes = haxe.io.Bytes.ofString(haxe.Serializer.run(this));
-
-			hxd.File.saveBytes(destPath, bytes);
-		 */
 	}
 }
