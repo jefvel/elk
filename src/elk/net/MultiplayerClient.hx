@@ -21,6 +21,7 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 		client.ownerObject = this;
 
+		this.enableReplication = true;
 		_init();
 	}
 
@@ -43,8 +44,6 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 	function _init() {
 		connected = true;
-		this.enableReplication = true;
-		this.enableAutoReplication = true;
 		this.is_self = MultiplayerHandler.instance.get_own_uid() == uid;
 		MultiplayerHandler.instance.add_client(cast this);
 	}

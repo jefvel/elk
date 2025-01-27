@@ -39,6 +39,8 @@ class RectPacker<T : RectPackNode> {
 	var internalWidth = 64;
 	var internalHeight = 64;
 
+	var overlaps : Array<{right : Rect, bottom : Rect}> = [];
+
 	public function new(width = 128, height = 128) {
 		this.internalWidth = width;
 		this.internalHeight = height;
@@ -50,6 +52,7 @@ class RectPacker<T : RectPackNode> {
 		nodes = [];
 		rows = [];
 		freeRects = [];
+		overlaps = [];
 		width = 0;
 		height = 0;
 	}
@@ -102,7 +105,11 @@ class RectPacker<T : RectPackNode> {
 		if( r.width < 2 + padding || r.height < 2 + padding ) {
 			return;
 		}
+
 		freeRects.push(r);
+		freeRects.sort((a, b) -> {
+			return (a.height + a.width) - (b.height - b.width);
+		});
 	}
 
 	inline function fitsRow(row : Row, node : T) {
@@ -137,10 +144,12 @@ class RectPacker<T : RectPackNode> {
 		var bottomRect : Rect = {
 			x : rect.x,
 			y : rect.y + node.height + padding,
-			width : node.width,
+			width : rect.width,
 			height : rect.height - node.height - padding,
 		}
 		addFreeRect(bottomRect);
+
+		overlaps.push({right : rightRect, bottom : bottomRect});
 	}
 
 	private inline function pushNode(node : T) {
@@ -153,6 +162,18 @@ class RectPacker<T : RectPackNode> {
 		var freeCell = findFreeRect(node);
 		if( freeCell != null ) {
 			freeRects.remove(freeCell);
+			for (o in overlaps) {
+				if( o.bottom == freeCell ) {
+					o.right.height = o.bottom.y - o.right.y;
+					overlaps.remove(o);
+					break;
+				} else if( o.right == freeCell ) {
+					o.bottom.width = o.right.x - o.bottom.x;
+					overlaps.remove(o);
+					break;
+				}
+			}
+
 			splitRect(freeCell, node);
 			node.x = freeCell.x;
 			node.y = freeCell.y;

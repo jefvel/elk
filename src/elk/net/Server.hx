@@ -1,5 +1,6 @@
 package elk.net;
 
+import net.RootObject;
 import elk.newgrounds.NGWebSocketHandler;
 import elk.net.MultiplayerClient;
 
@@ -14,6 +15,8 @@ class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient
 	var max_users = 100;
 	var bind_address = '0.0.0.0';
 	var bind_port = 9999;
+
+	var rootObject : RootObject;
 
 	public var handler : MultiplayerHandler;
 
@@ -60,7 +63,12 @@ class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient
 				client.sendMessage('uid:${user.uid}');
 				client.sync();
 				players.push(user);
-				if( on_player_connected != null ) on_player_connected(user);
+				#if hxbit_visibility
+				rootObject.players.push(cast user);
+				#end
+				/*
+					if( on_player_connected != null ) on_player_connected(user);
+				 */
 			}, (client) -> {
 				var player = get_player(client);
 				if( player == null ) return;
@@ -70,9 +78,19 @@ class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient
 
 				handler.on_unregister(player);
 
-				if( on_player_disconnected != null ) on_player_disconnected(player);
+				#if hxbit_visibility
+				rootObject.players.remove(cast player);
+				#end
+
+				// if( on_player_disconnected != null ) on_player_disconnected(player);
 			});
 		}
+
+		#if hxbit_visibility
+		host.lateRegistration = true;
+		rootObject = new RootObject(host.self);
+		host.rootObject = rootObject;
+		#end
 
 		host.onMessage = (client : hxbit.NetworkHost.NetworkClient, message : Dynamic) -> {
 			if( on_message == null ) return;
@@ -91,7 +109,7 @@ class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient
 	}
 
 	function get_player(c : hxbit.NetworkHost.NetworkClient) {
-		for (client in players)if( client.client == c ) return client;
+		for (client in players) if( client.client == c ) return client;
 
 		return null;
 	}
@@ -101,7 +119,7 @@ class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient
 
 	public function update(dt : Float) {
 		elapsed += dt;
-		host.checkReferences();
+		// host.checkReferences();
 		if( running && host != null && elapsed > 0.2 ) {
 			elapsed = 0.0;
 			host.flush();
