@@ -188,13 +188,15 @@ class RectPacker<T : RectPackNode> {
 
 		if( curRow == null ) {
 			if( !autoResize ) return null;
-			var sizeInc = Std.int(Math.max(node.width, node.height));
+			var sizeInc = Std.int(Math.min(node.width, node.height));
 			/*
 				var newWidth = this.internalWidth << 1;
 				var newHeight = this.internalHeight << 1;
 			 */
-			var newWidth = internalWidth + node.width;
-			var newHeight = internalHeight + node.height + rows.length * padding * 2;
+			var widthIncrease = (node.width < node.height) ? node.width : 0;
+			var heightIncrease = (node.height < node.width) ? node.height : 0;
+			var newWidth = internalWidth + sizeInc;
+			var newHeight = internalHeight + sizeInc;
 			if( newWidth >= MAX_WIDTH || newHeight >= MAX_HEIGHT ) {
 				throw "Can't resize, size exceeds maximum";
 			}

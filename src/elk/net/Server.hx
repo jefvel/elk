@@ -61,11 +61,11 @@ class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient
 			host.wait(bind_address, bind_port, (client) -> {
 				var user = new T(client, host);
 				client.sendMessage('uid:${user.uid}');
-				client.sync();
 				players.push(user);
 				#if hxbit_visibility
 				rootObject.players.push(cast user);
 				#end
+				client.sync();
 				/*
 					if( on_player_connected != null ) on_player_connected(user);
 				 */
