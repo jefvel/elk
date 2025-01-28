@@ -53,8 +53,6 @@ class ResTools {
 		if( file == null ) file = haxe.macro.Context.definedValue("resourcesPath");
 		if( file == null ) file = "res";
 
-		// #if debug null #else haxe.macro.Context.definedValue('res_config') #end;
-
 		var configuration = res_configuration;
 		var build_dir = haxe.macro.Context.definedValue('build_dir');
 		var root_dir = build_dir != null ? '$build_dir/' : '';
@@ -212,7 +210,7 @@ class ResTools {
 
 		var existing_pak_name = root_dir + name;
 		var pak_info : PakInfo = null;
-		for (p in pak_infos)if( p.name == name ) {
+		for (p in pak_infos) if( p.name == name ) {
 			pak_info = p;
 			break;
 		}

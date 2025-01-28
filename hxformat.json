@@ -6,7 +6,7 @@
   },
   "sameLine": {
     "caseBody": "next",
-    "tryCatch": "next",
+    "tryCatch": "same",
     "ifBody": "same",
     "ifElse": "same",
     "elseBody": "same",

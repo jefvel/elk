@@ -6,7 +6,7 @@ import hxd.Pixels;
 import ase.chunks.OldPaleteChunk;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
-import elk.aseprite.AsepriteData.AseDataFrame;
+import elk.aseprite.AnimationData.AnimationFrame;
 
 private class BitmapDataRect implements elk.util.RectPacker.RectPackNode {
 	public var index : Int;
@@ -45,8 +45,7 @@ class AseImageExporter {
 		var file : ase.Ase = null;
 		try {
 			file = ase.Ase.fromBytes(fileBytes);
-		}
-		catch (e) {
+		} catch (e) {
 			if( e is haxe.ValueException && !isRetry ) {
 				var r = cast(e, haxe.ValueException);
 				if( r.value is haxe.io.Eof ) {
@@ -246,7 +245,7 @@ class AseImageExporter {
 		var w = packer.width;
 		var h = packer.height;
 		var bmpD = new Pixels(packer.width, packer.height, haxe.io.Bytes.alloc(w * h * 4), ARGB);
-		var info = new AsepriteData();
+		var info = new AnimationData();
 
 		for (tag in tags) info.tags[tag.name] = tag;
 		for (slice in slices) info.slices[slice.name] = slice;
@@ -254,7 +253,7 @@ class AseImageExporter {
 		info.width = file.width;
 		info.height = file.height;
 
-		var frames : Array<AseDataFrame> = [];
+		var frames : Array<AnimationFrame> = [];
 
 		info.frames = frames;
 		packer.nodes.sort((a, b) -> a.index - b.index);
@@ -296,12 +295,12 @@ class AseImageExporter {
 		return input.readString(length);
 	}
 
-	private static inline function getAseSlices(file : ase.Ase) : Array<AsepriteData.AseDataSlice> {
+	private static inline function getAseSlices(file : ase.Ase) : Array<AnimationData.AseDataSlice> {
 		var slices = [];
 		for (chunk in file.firstFrame.chunks) {
 			if( chunk.header.type != ase.types.ChunkType.SLICE ) continue;
 			var sliceChunk : ase.chunks.SliceChunk = cast chunk;
-			var slice : AsepriteData.AseDataSlice = {
+			var slice : AnimationData.AseDataSlice = {
 				name : sliceChunk.name,
 				keys : [],
 			}
@@ -323,13 +322,13 @@ class AseImageExporter {
 	}
 
 	private static inline function getAseTags(file : ase.Ase) {
-		var tags : Array<elk.aseprite.AsepriteData.AseDataTag> = [];
+		var tags : Array<elk.aseprite.AnimationData.AseDataTag> = [];
 		for (chunk in file.firstFrame.chunks) {
 			if( chunk.header.type != ase.types.ChunkType.TAGS ) continue;
 			var tagsChunk : ase.chunks.TagsChunk = cast chunk;
 
 			for (tag in tagsChunk.tags) {
-				var direction : elk.aseprite.AsepriteData.AnimationDirection = switch (tag.animDirection) {
+				var direction : elk.aseprite.AnimationData.AnimationDirection = switch (tag.animDirection) {
 					case 0: Forward;
 					case 1: Reverse;
 					case 2: PingPong;
@@ -366,7 +365,7 @@ class AseImageExporter {
 		}
 
 		var colors : Array<UInt> = [];
-		var tags : Array<elk.aseprite.AsepriteData.AseDataTag> = [];
+		var tags : Array<elk.aseprite.AnimationData.AseDataTag> = [];
 		for (frame in file.frames) for (chunk in frame.chunks) {
 			if( chunk.header.type == ase.types.ChunkType.OLD_PALETTE_04 ) {
 				var paletteChunk : OldPaleteChunk = cast chunk;

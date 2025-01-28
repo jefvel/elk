@@ -9,11 +9,12 @@ import h2d.Graphics;
 enum JoystickSide {
 	Left;
 	Right;
+	Center;
 }
 
 class Joystick extends Object {
-	var bg: Graphics;
-	var dot: Graphics;
+	var bg : Graphics;
+	var dot : Graphics;
 	var r = 54.;
 	var maxR = 92;
 
@@ -28,7 +29,7 @@ class Joystick extends Object {
 	public var my = 0.;
 
 	public var magnitude = 0.0;
-	public var side = Left;
+	public var side : JoystickSide = Left;
 
 	public var doubleTapped = false;
 	public var doubleTapTime = 0.25;
@@ -37,9 +38,9 @@ class Joystick extends Object {
 
 	var tapTime = 0.;
 
-	public var onActivate: Void -> Void = null;
+	public var onActivate : Void -> Void = null;
 
-	public function new(side: JoystickSide = Left, ?p) {
+	public function new(side : JoystickSide = Left, ?p) {
 		super(p);
 		this.side = side;
 		visible = false;
@@ -67,40 +68,44 @@ class Joystick extends Object {
 		dot.drawCircle(0, 0, r * 0.3);
 	}
 
-	public function handleEvent(e: hxd.Event) {
+	public function handleEvent(e : hxd.Event) {
 		#if js
 		var s2d = getScene();
-		if (s2d == null) return false;
+		if( s2d == null ) return false;
 		var g = s2d.globalToLocal(new Point(e.relX, e.relY));
 		g.x /= elk.Elk.instance.pixelSize;
 		g.y /= elk.Elk.instance.pixelSize;
 
-		if (e.kind == EPush) {
-			if (g.y < s2d.height * 0.5) {
+		if( e.kind == EPush ) {
+			if( g.y < s2d.height * 0.5 ) {
 				return false;
 			}
 
-			var valid = g.x < s2d.width * 0.5;
-			if (side == Right) {
+			var valid = false;
+			if( side == Center ) {
+				valid = Math.abs(g.x - s2d.width * 0.5) < s2d.width * 0.2;
+			} else if( side == Left ) {
+				valid = g.x < s2d.width * 0.5;
+			} else if( side == Right ) {
 				valid = g.x > s2d.width * 0.5;
 			}
-			if (valid) {
-				if (e.touchId != null && !active) {
+			if( valid ) {
+				if( e.touchId != null && !active ) {
 					start(g.x, g.y, e.touchId);
 					return true;
 				}
 			}
 		}
 
-		if (e.kind == EMove) {
-			if (e.touchId != null && e.touchId == touchId) {
+		if( e.kind == EMove ) {
+			if( e.touchId != null && e.touchId == touchId ) {
 				movement(g.x, g.y);
 				return true;
 			}
 		}
 
-		if (e.kind == ERelease || e.kind == EReleaseOutside) {
-			if (e.touchId == touchId && active) {
+		if( e.kind == ERelease || e.kind == EReleaseOutside ) {
+			if( e.touchId == touchId && active ) {
 				end();
 				return true;
 			}
@@ -113,7 +118,7 @@ class Joystick extends Object {
 	public var disabled(default, set) = false;
 
 	function set_disabled(disabled) {
-		if (disabled) {
+		if( disabled ) {
 			end();
 		}
 
@@ -121,17 +126,17 @@ class Joystick extends Object {
 	}
 
 	public function start(x, y, touchID) {
-		if (disabled) {
+		if( disabled ) {
 			return;
 		}
 
-		if (active) {
+		if( active ) {
 			return;
 		}
 
 		var currentTime = elk.Elk.instance.time;
 
-		if (currentTime - tapTime < doubleTapTime) {
+		if( currentTime - tapTime < doubleTapTime ) {
 			doubleTapped = true;
 		}
 
@@ -145,15 +150,15 @@ class Joystick extends Object {
 		visible = true;
 		active = true;
 		eased_scale.value = 1.0;
-		if (onActivate != null) {
+		if( onActivate != null ) {
 			onActivate();
 		}
 	}
 
 	public var disableDrag = false;
 
-	public function movement(tx: Float, ty: Float) {
-		if (disabled) {
+	public function movement(tx : Float, ty : Float) {
+		if( disabled ) {
 			return;
 		}
 
@@ -161,7 +166,7 @@ class Joystick extends Object {
 		var dy = ty - y;
 		var l = Math.sqrt(dx * dx + dy * dy);
 
-		if (l > maxR && !disableDrag) {
+		if( l > maxR && !disableDrag ) {
 			var fx = dx / l;
 			var fy = dy / l;
 			fx *= (maxR - l);
@@ -174,16 +179,15 @@ class Joystick extends Object {
 			l = Math.sqrt(dx * dx + dy * dy);
 		}
 
-		if (l > 0) {
+		if( l > 0 ) {
 			mx = dx / l;
 			my = dy / l;
 
-			if (l > r) {
+			if( l > r ) {
 				dx = mx * r;
 				dy = my * r;
 			}
-		}
-		else {
+		} else {
 			mx = my = dx = dy = 0;
 		}
 
@@ -192,12 +196,12 @@ class Joystick extends Object {
 		mx *= l / r;
 		my *= l / r;
 
-		if (magnitude < 0.5) {
+		if( magnitude < 0.5 ) {
 			mx *= (1 - 2 * (0.5 - magnitude));
 			my *= (1 - 2 * (0.5 - magnitude));
 		}
 
-		if (magnitude < 0.2) {
+		if( magnitude < 0.2 ) {
 			mx = my = 0;
 		}
 
@@ -223,7 +227,7 @@ class Joystick extends Object {
 		return active && my > dz;
 	}
 
-	override function sync(ctx: RenderContext) {
+	override function sync(ctx : RenderContext) {
 		super.sync(ctx);
 		bg.setScale(eased_scale.value);
 		dot.setScale(bg.scaleX);

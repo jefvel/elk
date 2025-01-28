@@ -1,14 +1,14 @@
 package elk.graphics;
 
 import h2d.Tile;
-import elk.aseprite.AsepriteData;
+import elk.aseprite.AnimationData;
 
 class Animation {
-	var data : AsepriteData = null;
+	var data : AnimationData = null;
 
-	var currentAnimation : AseDataTag = null;
+	var currentAnimation : AnimationTag = null;
 
-	public var currentFrame : AseDataFrame = null;
+	public var currentFrame : AnimationFrame = null;
 
 	public var timeScale = 1.0;
 
@@ -46,7 +46,7 @@ class Animation {
 
 	public dynamic function onEnd(anim : String) {}
 
-	public function new(data : AsepriteData) {
+	public function new(data : AnimationData) {
 		this.data = data;
 		to = data.frames.length - 1;
 		currentFrame = data.frames[0];

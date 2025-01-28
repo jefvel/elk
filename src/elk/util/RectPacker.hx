@@ -24,6 +24,10 @@ class RectPacker<T : RectPackNode> {
 	static var MAX_WIDTH = 1024 << 2;
 	static var MAX_HEIGHT = 1024 << 2;
 
+	// If a node fits in by resizing the container by this amount,
+	// the size will be increased
+	final wiggleRoom = 16;
+
 	var freeRects : Array<Rect>;
 	var rows : Array<Row>;
 

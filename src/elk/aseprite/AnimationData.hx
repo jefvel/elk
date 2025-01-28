@@ -10,7 +10,7 @@ enum abstract AnimationDirection(Int) {
 }
 
 @:structInit
-class AseDataFrame {
+class AnimationFrame {
 	public var x : Int;
 	public var y : Int;
 	public var w : Int;
@@ -22,7 +22,7 @@ class AseDataFrame {
 	public var duration : Int;
 
 	public var tile : h2d.Tile = null;
-	public var slices : Map<String, AseDataSliceKey> = null;
+	public var slices : Map<String, AnimationSliceKey> = null;
 
 	public inline function serialize(o : haxe.io.Output) {
 		o.writeInt32(x);
@@ -34,7 +34,7 @@ class AseDataFrame {
 		o.writeInt32(duration);
 	}
 
-	public static function deserialize(o : haxe.io.Input) : AseDataFrame {
+	public static function deserialize(o : haxe.io.Input) : AnimationFrame {
 		return {
 			x : o.readInt32(),
 			y : o.readInt32(),
@@ -48,7 +48,7 @@ class AseDataFrame {
 }
 
 @:structInit
-class AseDataTag {
+class AnimationTag {
 	public var name : String;
 	public var duration : Int;
 	public var constantSpeed : Bool;
@@ -61,7 +61,7 @@ class AseDataTag {
 		return '$name [$from - $to], duration: $duration, constant: $constantSpeed, direction: $direction, repeat: $repeat';
 	}
 
-	public function copyFrom(t : AseDataTag) {
+	public function copyFrom(t : AnimationTag) {
 		name = t.name;
 		duration = t.duration;
 		constantSpeed = t.constantSpeed;
@@ -82,7 +82,7 @@ class AseDataTag {
 		w.writeByte(repeat ? 1 : 0);
 	}
 
-	public static function deserialize(w : haxe.io.Input) : AseDataTag {
+	public static function deserialize(w : haxe.io.Input) : AnimationTag {
 		var nameLength = w.readInt32();
 		return {
 			name : w.readString(nameLength),
@@ -97,15 +97,15 @@ class AseDataTag {
 }
 
 @:structInit
-class AseDataSlice {
+class AnimationSlice {
 	public var name : String;
-	public var keys : Array<AseDataSliceKey>;
+	public var keys : Array<AnimationSliceKey>;
 
 	public function toString() {
 		return '$name: [\n${keys.map(k -> '  frame: ${k.frame}, x:${k.x}, y: ${k.y} (${k.w}x${k.h})').join('\n')}\n]';
 	}
 
-	public function copyFrom(s : AseDataSlice) {
+	public function copyFrom(s : AnimationSlice) {
 		name = s.name;
 		for (i in 0...s.keys.length) {
 			if( keys[i] != null ) {
@@ -126,12 +126,12 @@ class AseDataSlice {
 		for (k in keys) k.serialize(w);
 	}
 
-	public static function deserialize(w : haxe.io.Input) : AseDataSlice {
+	public static function deserialize(w : haxe.io.Input) : AnimationSlice {
 		var nameLength = w.readInt32();
 		var name = w.readString(nameLength);
 		var keyCount = w.readInt32();
 		var keys = [];
-		for (ki in 0...keyCount) keys.push(AseDataSliceKey.deserialize(w));
+		for (ki in 0...keyCount) keys.push(AnimationSliceKey.deserialize(w));
 		return {
 			name : name,
 			keys : keys,
@@ -140,7 +140,7 @@ class AseDataSlice {
 }
 
 @:structInit
-class AseDataSliceKey {
+class AnimationSliceKey {
 	public var frame : Int;
 	public var x : Int;
 	public var y : Int;
@@ -155,7 +155,7 @@ class AseDataSliceKey {
 		o.writeInt32(h);
 	}
 
-	public function copyFrom(k : AseDataSliceKey) {
+	public function copyFrom(k : AnimationSliceKey) {
 		frame = k.frame;
 		x = k.x;
 		y = k.y;
@@ -163,7 +163,7 @@ class AseDataSliceKey {
 		h = k.h;
 	}
 
-	public static function deserialize(o : haxe.io.Input) : AseDataSliceKey {
+	public static function deserialize(o : haxe.io.Input) : AnimationSliceKey {
 		return {
 			frame : o.readInt32(),
 			x : o.readInt32(),
@@ -175,13 +175,13 @@ class AseDataSliceKey {
 }
 
 @:structInit
-class AsepriteData {
+class AnimationData {
 	public var width : Int = 0;
 	public var height : Int = 0;
 
-	public var frames : Array<AseDataFrame> = [];
-	public var tags : Map<String, AseDataTag> = new Map();
-	public var slices : Map<String, AseDataSlice> = new Map();
+	public var frames : Array<AnimationFrame> = [];
+	public var tags : Map<String, AnimationTag> = new Map();
+	public var slices : Map<String, AnimationSlice> = new Map();
 
 	public var totalDuration : Int = 0;
 
@@ -189,7 +189,7 @@ class AsepriteData {
 
 	public function new() {}
 
-	public function copyFrom(data : AsepriteData) {
+	public function copyFrom(data : AnimationData) {
 		width = data.width;
 		height = data.height;
 
@@ -244,8 +244,8 @@ class AsepriteData {
 		return res;
 	}
 
-	public static function load(entry : hxd.fs.FileEntry) : AsepriteData {
-		var d = new AsepriteData();
+	public static function load(entry : hxd.fs.FileEntry) : AnimationData {
+		var d = new AnimationData();
 		var r = new BytesInput(entry.getBytes());
 
 		d.width = r.readInt32();
@@ -253,17 +253,17 @@ class AsepriteData {
 		d.totalDuration = r.readInt32();
 
 		var frameCount = r.readInt32();
-		for (fi in 0...frameCount) d.frames.push(AseDataFrame.deserialize(r));
+		for (fi in 0...frameCount) d.frames.push(AnimationFrame.deserialize(r));
 
 		var tagsCount = r.readInt32();
 		for (tc in 0...tagsCount) {
-			var tag = AseDataTag.deserialize(r);
+			var tag = AnimationTag.deserialize(r);
 			d.tags.set(tag.name, tag);
 		}
 
 		var sliceCount = r.readInt32();
 		for (sc in 0...sliceCount) {
-			var slice = AseDataSlice.deserialize(r);
+			var slice = AnimationSlice.deserialize(r);
 			d.slices.set(slice.name, slice);
 		}
 
