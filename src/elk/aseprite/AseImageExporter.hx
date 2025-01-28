@@ -295,12 +295,12 @@ class AseImageExporter {
 		return input.readString(length);
 	}
 
-	private static inline function getAseSlices(file : ase.Ase) : Array<AnimationData.AseDataSlice> {
+	private static inline function getAseSlices(file : ase.Ase) : Array<AnimationData.AnimationSlice> {
 		var slices = [];
 		for (chunk in file.firstFrame.chunks) {
 			if( chunk.header.type != ase.types.ChunkType.SLICE ) continue;
 			var sliceChunk : ase.chunks.SliceChunk = cast chunk;
-			var slice : AnimationData.AseDataSlice = {
+			var slice : AnimationData.AnimationSlice = {
 				name : sliceChunk.name,
 				keys : [],
 			}
@@ -322,7 +322,7 @@ class AseImageExporter {
 	}
 
 	private static inline function getAseTags(file : ase.Ase) {
-		var tags : Array<elk.aseprite.AnimationData.AseDataTag> = [];
+		var tags : Array<elk.aseprite.AnimationData.AnimationTag> = [];
 		for (chunk in file.firstFrame.chunks) {
 			if( chunk.header.type != ase.types.ChunkType.TAGS ) continue;
 			var tagsChunk : ase.chunks.TagsChunk = cast chunk;
@@ -365,7 +365,7 @@ class AseImageExporter {
 		}
 
 		var colors : Array<UInt> = [];
-		var tags : Array<elk.aseprite.AnimationData.AseDataTag> = [];
+		var tags : Array<elk.aseprite.AnimationData.AnimationTag> = [];
 		for (frame in file.frames) for (chunk in frame.chunks) {
 			if( chunk.header.type == ase.types.ChunkType.OLD_PALETTE_04 ) {
 				var paletteChunk : OldPaleteChunk = cast chunk;
