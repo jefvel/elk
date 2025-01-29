@@ -5,18 +5,18 @@ package elk.net;
  */
 @:build(elk.net.MultiplayerHandlerBuildMacro.build())
 class MultiplayerHandler {
-	public static var instance(get, null): MultiplayerHandler;
-	static var _instance: MultiplayerHandler = null;
+	public static var instance(get, null) : MultiplayerHandler;
+	static var _instance : MultiplayerHandler = null;
 
-	public var host(default, set): hxbit.NetworkHost = null;
+	public var host(default, set) : hxbit.NetworkHost = null;
 
-	public var on_object_unregister: (o: hxbit.NetworkSerializable) -> Void;
+	public var on_object_unregister : (o : hxbit.NetworkSerializable) -> Void;
 
-	private var own_uid: String = null;
+	private var own_uid : String = null;
 
 	public function new() {}
 
-	public function set_own_uid(uid: String, client: hxbit.NetworkHost.NetworkClient) {
+	public function set_own_uid(uid : String, client : hxbit.NetworkHost.NetworkClient) {
 		own_uid = uid;
 	}
 
@@ -31,15 +31,15 @@ class MultiplayerHandler {
 	}
 
 	public function add_client(c) {
-		if (!clients.contains(c)) clients.push(c);
+		if( !clients.contains(c) ) clients.push(c);
 
-		if (c.uid == own_uid) {
+		if( c.uid == own_uid ) {
 			c.client = host.self;
 			c.client.ownerObject = c;
 			self = c;
 		}
 
-		if (on_client_connected != null) {
+		if( on_client_connected != null ) {
 			on_client_connected(c);
 		}
 	}
@@ -47,26 +47,26 @@ class MultiplayerHandler {
 	public function remove_client(c) {
 		clients.remove(c);
 		c.on_disconnect();
-		if (on_client_disconnected != null) on_client_disconnected(c);
+		if( on_client_disconnected != null ) on_client_disconnected(c);
 	}
 
-	public function on_unregister(c: hxbit.NetworkSerializable) {
-		if (on_object_unregister != null) on_object_unregister(c);
+	public function on_unregister(c : hxbit.NetworkSerializable) {
+		if( on_object_unregister != null ) on_object_unregister(c);
 		for (client in clients) {
-			if (client == c) {
+			if( client == c ) {
 				remove_client(client);
 				break;
 			}
 		}
 	}
 
-	function set_host(h: hxbit.NetworkHost) {
+	function set_host(h : hxbit.NetworkHost) {
 		h.onUnregister = on_unregister;
 		return this.host = h;
 	}
 
 	static function get_instance() {
-		if (_instance == null) _instance = new MultiplayerHandler();
+		if( _instance == null ) _instance = new MultiplayerHandler();
 		return _instance;
 	}
 }

@@ -8,6 +8,9 @@
   "classPath": "src/",
   "releasenote": "Initial release, everything is working correctly.",
   "contributors": ["jefvel"],
-  "dependencies": {},
+  "dependencies": {
+    "hxbit": "",
+    "heaps": ""
+  },
   "main": "tools.Main"
 }
