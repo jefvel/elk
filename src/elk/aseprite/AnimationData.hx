@@ -244,9 +244,9 @@ class AnimationData {
 		return res;
 	}
 
-	public static function load(entry : hxd.fs.FileEntry) : AnimationData {
+	public static function load(r : haxe.io.Input) : AnimationData {
 		var d = new AnimationData();
-		var r = new BytesInput(entry.getBytes());
+		// var r = new BytesInput(entry.getBytes());
 
 		d.width = r.readInt32();
 		d.height = r.readInt32();
@@ -272,8 +272,7 @@ class AnimationData {
 		return d;
 	}
 
-	public function writeToFile(destPath : String) {
-		var w = new haxe.io.BytesOutput();
+	public function writeToFile(w : haxe.io.Output) {
 		w.writeInt32(width);
 		w.writeInt32(height);
 		w.writeInt32(totalDuration);
@@ -293,8 +292,8 @@ class AnimationData {
 		w.writeInt32(slicesArray.length);
 		for (s in slicesArray) s.serialize(w);
 
-		w.flush();
-		hxd.File.saveBytes(destPath, w.getBytes());
-		w.close();
+		// w.flush();
+		// hxd.File.saveBytes(destPath, w.getBytes());
+		// w.close();
 	}
 }

@@ -1,5 +1,6 @@
 package elk.aseprite;
 
+import sys.io.FileOutput;
 import elk.util.BlendModes;
 import h3d.Vector4;
 import hxd.Pixels;
@@ -282,12 +283,20 @@ class AseImageExporter {
 
 		var png = bmpD.toPNG();
 
-		var fileOutName = '$srcDir/generated/$imageName.png';
+		// var fileOutName = '$srcDir/generated/$imageName.png';
+		var fileOutName = '${haxe.io.Path.directory(destPath)}/generated/$imageName.png';
 		var dir = haxe.io.Path.directory(fileOutName);
 		sys.FileSystem.createDirectory(dir);
 
-		sys.io.File.saveBytes(fileOutName, png);
-		info.writeToFile(destPath);
+		var output = new haxe.io.BytesOutput();
+		var f = sys.io.File.write(destPath);
+		f.writeBytes(png, 0, png.length);
+		// sys.io.File.saveBytes(fileOutName, png);
+		info.writeToFile(f);
+		var rr = sys.io.File.write(fileOutName);
+		info.writeToFile(rr);
+		rr.close();
+		f.close();
 	}
 
 	private static inline function readString(input : haxe.io.BytesInput) : String {
