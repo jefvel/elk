@@ -49,8 +49,7 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 
 					cb(resp);
 				});
-			}
-			catch (err) {
+			} catch (err) {
 				trace('handshake check error.');
 				unauthorized();
 			}

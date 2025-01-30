@@ -105,7 +105,7 @@ class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient
 
 		running = true;
 
-		Sys.println('Listening on $bind_address:$bind_port');
+		Sys.println('✅ Listening on $bind_address:$bind_port');
 	}
 
 	function get_player(c : hxbit.NetworkHost.NetworkClient) {
@@ -119,7 +119,6 @@ class Server<T : haxe.Constraints.Constructible<(hxbit.NetworkHost.NetworkClient
 
 	public function update(dt : Float) {
 		elapsed += dt;
-		// host.checkReferences();
 		if( running && host != null && elapsed > 0.2 ) {
 			elapsed = 0.0;
 			host.flush();
