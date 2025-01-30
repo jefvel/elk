@@ -12,6 +12,8 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 
 		validateHandshake = (req, resp, cb) -> {
 			function unauthorized() {
+				trace('UNAUTHOR');
+				trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
 				resp.code = 403;
 				resp.text = "Unauthorized";
 				resp.headers.set(hx.ws.HttpHeader.CONNECTION, "close");
