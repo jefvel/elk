@@ -14,12 +14,12 @@ import hx.ws.WebSocketSecureServer;
 import hxbit.NetworkHost;
 
 class WebSocketClient extends NetworkClient {
-	var socket: WebSocket;
+	var socket : WebSocket;
 
 	public function new(host, s) {
 		super(host);
 		this.socket = s;
-		if (s != null) s.onmessage = function(message) {
+		if( s != null ) s.onmessage = function(message) {
 			switch (message) {
 				case BytesMessage(content):
 					var bytes = content.readAllAvailableBytes();
@@ -29,16 +29,16 @@ class WebSocketClient extends NetworkClient {
 		}
 	}
 
-	override function error(msg: String) {
+	override function error(msg : String) {
 		socket.close();
 		super.error(msg);
 	}
 
-	override function send(bytes: haxe.io.Bytes) {
-		if (socket == null || socket.state == Closed) return;
+	override function send(bytes : haxe.io.Bytes) {
+		if( socket == null || socket.state == Closed ) return;
 		#if js
 		var data = bytes.getData();
-		if (data.byteLength != bytes.length) {
+		if( data.byteLength != bytes.length ) {
 			data = data.slice(0, bytes.length);
 		}
 		socket.send(data);
@@ -49,7 +49,7 @@ class WebSocketClient extends NetworkClient {
 
 	override function stop() {
 		super.stop();
-		if (socket != null) {
+		if( socket != null ) {
 			socket.close();
 			socket = null;
 		}
@@ -58,25 +58,24 @@ class WebSocketClient extends NetworkClient {
 
 private class WebSocketHostCommon extends NetworkHost {
 	public var connected(default, null) = false;
-	public var enableSound: Bool = true;
+	public var enableSound : Bool = true;
 
-	var web_socket: hx.ws.WebSocket;
-	var on_disconnect: Void -> Void = null;
+	var web_socket : hx.ws.WebSocket;
+	var on_disconnect : Void -> Void = null;
 
 	public function new() {
 		super();
-		MultiplayerHandler.instance.host = this;
 		isAuth = false;
 	}
 
 	function close() {
-		if (connected && on_disconnect != null) {
+		if( connected && on_disconnect != null ) {
 			on_disconnect();
 		}
 
 		connected = false;
 
-		if (web_socket != null) {
+		if( web_socket != null ) {
 			trace('closed socket.');
 			// If mid connection, socket might not close correctly.
 			// in this case, close the socket as soon as it connects.
@@ -85,8 +84,6 @@ private class WebSocketHostCommon extends NetworkHost {
 			web_socket = null;
 			sock.close();
 		}
-
-		MultiplayerHandler.instance.reset();
 	}
 
 	override public function dispose() {
@@ -94,7 +91,7 @@ private class WebSocketHostCommon extends NetworkHost {
 		close();
 	}
 
-	public function connect(address: String, ?protocols: Array<String>, ?onConnect: Bool -> Void, ?onDisconnect: Void -> Void) {
+	public function connect(address : String, ?protocols : Array<String>, ?onConnect : Bool -> Void, ?onDisconnect : Void -> Void) {
 		close();
 		on_disconnect = onDisconnect;
 
@@ -106,9 +103,9 @@ private class WebSocketHostCommon extends NetworkHost {
 		var successfully_connected = false;
 
 		web_socket.onerror = function(msg) {
-			if (!connected) {
+			if( !connected ) {
 				web_socket.onerror = function(_) {};
-				if (onConnect != null) onConnect(false);
+				if( onConnect != null ) onConnect(false);
 			} else throw msg;
 		};
 
@@ -116,13 +113,13 @@ private class WebSocketHostCommon extends NetworkHost {
 			web_socket.onerror = null;
 			connected = true;
 			successfully_connected = true;
-			if (StringTools.contains(address, "127.0.0.1")) enableSound = false;
+			if( StringTools.contains(address, "127.0.0.1") ) enableSound = false;
 			clients = [self];
-			if (onConnect != null) onConnect(true);
+			if( onConnect != null ) onConnect(true);
 		}
 
 		web_socket.onclose = function() {
-			if (!successfully_connected && onConnect != null) {
+			if( !successfully_connected && onConnect != null ) {
 				onConnect(false);
 			}
 			close();
@@ -140,12 +137,12 @@ private class WebSocketHostCommon extends NetworkHost {
 
 #if (sys || hxnodejs)
 class WebSocketHandlerClient extends NetworkClient {
-	public var socket: WebSocketHandler;
+	public var socket : WebSocketHandler;
 
 	public function new(host, s) {
 		super(host);
 		this.socket = s;
-		if (s != null) {
+		if( s != null ) {
 			s.onmessage = function(message) {
 				try {
 					switch (message) {
@@ -155,8 +152,7 @@ class WebSocketHandlerClient extends NetworkClient {
 
 						case StrMessage(content):
 					}
-				}
-				catch (e) {
+				} catch (e) {
 					trace(e);
 					trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
 					stop();
@@ -165,36 +161,36 @@ class WebSocketHandlerClient extends NetworkClient {
 		}
 	}
 
-	override function error(msg: String) {
+	override function error(msg : String) {
 		socket.close();
 		super.error(msg);
 	}
 
-	override function send(bytes: haxe.io.Bytes) {
-		if (socket == null || socket.state == Closed) return;
+	override function send(bytes : haxe.io.Bytes) {
+		if( socket == null || socket.state == Closed ) return;
 		socket.send(bytes);
 	}
 
 	override public function stop() {
 		super.stop();
-		if (socket != null) {
+		if( socket != null ) {
 			socket.close();
 		}
 	}
 }
 
 class WebSocketHost extends WebSocketHostCommon {
-	var server: WebSocketServer<elk.newgrounds.NGWebSocketHandler>;
+	var server : WebSocketServer<elk.newgrounds.NGWebSocketHandler>;
 
 	override function close() {
 		super.close();
-		if (server != null) {
+		if( server != null ) {
 			server.stop();
 			server = null;
 		}
 	}
 
-	public function wait(host: String, port: Int, ?onConnected: NetworkClient -> Void, ?onDisconnected: NetworkClient -> Void) {
+	public function wait(host : String, port : Int, ?onConnected : NetworkClient -> Void, ?onDisconnected : NetworkClient -> Void) {
 		close();
 		isAuth = false;
 		self = new WebSocketHandlerClient(this, null);
@@ -204,12 +200,12 @@ class WebSocketHost extends WebSocketHostCommon {
 			var c = new WebSocketHandlerClient(this, client);
 			client.onopen = () -> {
 				pendingClients.push(c);
-				if (onConnected != null) {
+				if( onConnected != null ) {
 					MainLoop.runInMainThread(() -> onConnected(c));
 				}
 				client.onclose = () -> {
 					c.stop();
-					if (onDisconnected != null) {
+					if( onDisconnected != null ) {
 						MainLoop.runInMainThread(() -> onDisconnected(c));
 					}
 					client.onclose = null;
@@ -227,7 +223,7 @@ class WebSocketHost extends WebSocketHostCommon {
 }
 #else
 class WebSocketHost extends WebSocketHostCommon {
-	public function wait(host: String, port: Int, ?onConnected: NetworkClient -> Void) {
+	public function wait(host : String, port : Int, ?onConnected : NetworkClient -> Void) {
 		throw "Can't host websocket server in browser.";
 	}
 }

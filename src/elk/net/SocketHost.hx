@@ -1,5 +1,8 @@
 package elk.net;
 
+import hxbit.NetworkHost;
+import hxd.net.Socket;
+
 /*
  * Copyright (C)2015-2016 Nicolas Cannasse
  *
@@ -21,13 +24,10 @@ package elk.net;
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#if !hxbit
-#error "Using SocketHost requires compiling with -lib hxbit"
-#end
-import hxbit.NetworkHost;
-
 class SocketClient extends NetworkClient {
 	var socket : Socket;
+
+	public dynamic function onClosed() {}
 
 	public function new(host, s) {
 		super(host);
@@ -55,6 +55,7 @@ class SocketClient extends NetworkClient {
 		if( socket != null ) {
 			socket.close();
 			socket = null;
+			onClosed();
 		}
 	}
 }
@@ -91,9 +92,18 @@ class SocketHost extends NetworkHost {
 			if( !connected ) {
 				socket.onError = function(_) {};
 				if( onConnect != null ) onConnect(false);
-			} else throw msg;
+			} else {
+				if( onDisconnect != null ) {
+					onDisconnect();
+				}
+			}
 		};
-		self = new SocketClient(this, socket);
+
+		var client = new SocketClient(this, socket);
+		client.onClosed = () -> {
+			if( onDisconnect != null ) onDisconnect();
+		}
+		self = client;
 		socket.connect(host, port, function() {
 			connected = true;
 			if( host == "127.0.0.1" ) enableSound = false;
@@ -102,7 +112,7 @@ class SocketHost extends NetworkHost {
 		});
 	}
 
-	public function wait(host : String, port : Int, ?onConnected : NetworkClient -> Void) {
+	public function wait(host : String, port : Int, ?onConnected : NetworkClient -> Void, ?onDisconnect : NetworkClient -> Void) {
 		close();
 		isAuth = false;
 		socket = new Socket();
@@ -111,8 +121,12 @@ class SocketHost extends NetworkHost {
 			var c = new SocketClient(this, s);
 			pendingClients.push(c);
 			s.onError = function(_) c.stop();
+			c.onClosed = () -> {
+				if( onDisconnect != null ) onDisconnect(c);
+			}
 			if( onConnected != null ) onConnected(c);
 		});
+
 		isAuth = true;
 	}
 

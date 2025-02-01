@@ -44,8 +44,6 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 	function _init() {
 		connected = true;
-		this.is_self = MultiplayerHandler.instance.get_own_uid() == uid;
-		MultiplayerHandler.instance.add_client(cast this);
 	}
 
 	public function alive() {
