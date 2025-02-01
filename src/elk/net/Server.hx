@@ -46,7 +46,9 @@ class Server {
 		#end
 
 		#if true
-		host.setLogger((t) -> trace(t));
+		host.setLogger((t) -> {
+			// trace(t);
+		});
 		#end
 
 		if( offline_server ) {

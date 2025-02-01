@@ -48,7 +48,7 @@ class Client {
 
 				#if (!release && !js)
 				host.setLogger(t -> {
-					trace(t);
+					// trace(t);
 				});
 				#end
 

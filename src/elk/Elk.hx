@@ -12,8 +12,15 @@ import elk.entity.EntityManager;
 import elk.sound.SoundHandler;
 import h3d.Engine;
 
+enum AppType {
+	App;
+	Dedicated;
+}
+
 class Elk extends hxd.App {
 	public static var instance : Elk = null;
+
+	public static var type : AppType = App;
 
 	public var time : Float = 0.0;
 
@@ -48,8 +55,8 @@ class Elk extends hxd.App {
 		return loaded_assets;
 
 	public function new(tickRate = 60, pixelSize = 2) {
-		super();
 		instance = this;
+		super();
 
 		Process.tickRate = tickRate;
 		this.pixelSize = pixelSize;

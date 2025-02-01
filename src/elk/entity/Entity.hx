@@ -1,17 +1,23 @@
 package elk.entity;
 
-class Entity extends h2d.Object {
+@:keepSub
+class Entity {
 	// public var x: Float = 0.;
 	var _prevX = 0.;
 	// public var y: Float = 0.;
 	var _prevY = 0.;
-	public var z: Float = 0.;
+
+	public var z : Float = 0.;
+
 	var _prevZ = 0.;
 
-	public var interpX(get, null): Float;
-	public var interpY(get, null): Float;
-	public var interpZ(get, null): Float;
-	
+	public var x = 0.0;
+	public var y = 0.0;
+
+	public var interpX(get, null) : Float;
+	public var interpY(get, null) : Float;
+	public var interpZ(get, null) : Float;
+
 	public var ax = 0.;
 	public var ay = 0.;
 	public var az = 0.;
@@ -19,22 +25,21 @@ class Entity extends h2d.Object {
 	public var vx = 0.;
 	public var vy = 0.;
 	public var vz = 0.;
-	
-	override function onAdd() {
-		Elk.instance.entities.add(this);
-		super.onAdd();
+
+	public function new() {
+		elk.Elk.instance.entities.add(this);
 	}
-	
-	override function onRemove() {
+
+	public function remove() {
 		Elk.instance.entities.remove(this);
-		super.onRemove();
 	}
-	
+
 	public var friction(default, set) = 1.01;
+
 	var frictionDirty = true;
 	var _fixedFriction = 1.0;
 
-	public function tick(dt: Float) {
+	public function tick(dt : Float) {
 		var fric = 1 / (1 + (dt * friction));
 
 		vx += ax * dt;
@@ -52,16 +57,14 @@ class Entity extends h2d.Object {
 		az *= fric;
 	}
 
-	public function render() {
-		
-	}
+	public function render() {}
 
 	public inline function preTick() {
 		_prevX = x;
 		_prevY = y;
 		_prevZ = z;
 	}
-	
+
 	inline function get_interpX() {
 		var g = elk.Process.currentTickElapsed;
 		return hxd.Math.lerp(_prevX, x, g);
