@@ -10,30 +10,30 @@ enum DatabaseType {
 }
 
 typedef DatabaseOptions = {
-	var type: DatabaseType;
-	var ?file: String;
+	var type : DatabaseType;
+	var ?file : String;
 
 	// MySQL
-	var ?database: String;
-	var ?user: String;
-	var ?pass: String;
-	var ?socket: String;
-	var ?port: Int;
-	var ?host: String;
+	var ?database : String;
+	var ?user : String;
+	var ?pass : String;
+	var ?socket : String;
+	var ?port : Int;
+	var ?host : String;
 }
 
-final default_options: DatabaseOptions = {
-	type: SQLite,
+final default_options : DatabaseOptions = {
+	type : SQLite,
 }
 
 #if sys
 class Database {
-	var type: DatabaseType = SQLite;
+	var type : DatabaseType = SQLite;
 
-	var connection: Connection;
-	var migrations: Migrations;
+	var connection : Connection;
+	var migrations : Migrations;
 
-	public function new(?options: DatabaseOptions) {
+	public function new(?options : DatabaseOptions) {
 		options = options ?? default_options;
 		switch (options.type) {
 			case SQLite:
@@ -44,31 +44,31 @@ class Database {
 
 		migrations = new Migrations(connection);
 		migrations.migrate('db/migrations');
-		Sys.println('Initialized DB');
+		Sys.println('✅ Connected to DB');
 	}
 
-	function init_sqlite(file_name: String) {
+	function init_sqlite(file_name : String) {
 		var dir = haxe.io.Path.directory(file_name);
 		sys.FileSystem.createDirectory(dir);
 		connection = sys.db.Sqlite.open(file_name);
 	}
 
-	function init_mysql(options: DatabaseOptions) {
+	function init_mysql(options : DatabaseOptions) {
 		trace('Connectiing to db..');
 		trace(options);
 		connection = sys.db.Mysql.connect({
-			host: options.host,
-			socket: options.socket,
-			user: options.user,
-			database: options.database,
-			pass: options.pass,
-			port: options.port,
+			host : options.host,
+			socket : options.socket,
+			user : options.user,
+			database : options.database,
+			pass : options.pass,
+			port : options.port,
 		});
 		trace('Connected.');
 	}
 
 	public function close() {
-		if (connection == null) return;
+		if( connection == null ) return;
 		connection.close();
 		connection = null;
 		Sys.println("Closed DB connection.");
@@ -76,7 +76,7 @@ class Database {
 }
 #else
 class Database {
-	public function new(?options: DatabaseOptions) {}
+	public function new(?options : DatabaseOptions) {}
 
 	public function close() {}
 }

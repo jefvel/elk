@@ -5,13 +5,17 @@ class EntityManager extends elk.Process {
 
 	public var entities : Array<Entity> = [];
 
+	public dynamic function onAdded(e : Entity) {}
+
 	public function new() {
 		super();
 		instance = this;
 	}
 
 	public function add(e : Entity) {
+		if( entities.contains(e) ) return;
 		entities.push(e);
+		onAdded(e);
 	}
 
 	public function remove(e : Entity) {
