@@ -29,7 +29,7 @@ class Client {
 		host = null;
 	}
 
-	public function connect(address : String, port : Int) {
+	public function connect(address : String) {
 		if( host != null ) {
 			dispose();
 		}
@@ -54,7 +54,7 @@ class Client {
 
 				#if use_websockets
 				var protocol = useTLS ? 'wss' : 'ws';
-				var addr = '$protocol://$address:$port';
+				var addr = '$protocol://$address';
 				host.connect(addr, websocketProtocols, (connected : Bool) -> {
 				#else
 				host.connect(address, port, (connected : Bool) -> {

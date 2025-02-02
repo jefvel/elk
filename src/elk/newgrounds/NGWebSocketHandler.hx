@@ -11,8 +11,6 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 		super(s);
 
 		validateHandshake = (req, resp, cb) -> {
-			return cb(resp);
-
 			function unauthorized() {
 				trace('UNAUTHOR');
 				trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
@@ -24,6 +22,7 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 			}
 
 			resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, 'auth_token');
+			return cb(resp);
 
 			try {
 				var protocols = req.headers.get(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL);
