@@ -1,11 +1,13 @@
 package elk.entity;
 
+import elk.util.Observable;
+
 class EntityManager extends elk.Process {
 	public static var instance : EntityManager;
 
 	public var entities : Array<Entity> = [];
-
-	public dynamic function onAdded(e : Entity) {}
+	public var onEntityAdded : Observable<Entity> = new Observable();
+	public var onEntityRemoved : Observable<Entity> = new Observable();
 
 	public function new() {
 		super();
@@ -15,11 +17,13 @@ class EntityManager extends elk.Process {
 	public function add(e : Entity) {
 		if( entities.contains(e) ) return;
 		entities.push(e);
-		onAdded(e);
+		onEntityAdded.emit(e);
 	}
 
 	public function remove(e : Entity) {
-		entities.remove(e);
+		if( entities.remove(e) ) {
+			onEntityRemoved.emit(e);
+		}
 	}
 
 	public override function tick(dt : Float) {

@@ -23,7 +23,7 @@ class WebSocketClient extends NetworkClient {
 			switch (message) {
 				case BytesMessage(content):
 					var bytes = content.readAllAvailableBytes();
-					processMessagesData(bytes, 0, bytes.length);
+					haxe.MainLoop.runInMainThread(() -> processMessagesData(bytes, 0, bytes.length));
 				case StrMessage(content):
 			}
 		}
@@ -148,7 +148,7 @@ class WebSocketHandlerClient extends NetworkClient {
 					switch (message) {
 						case BytesMessage(content):
 							var bytes = content.readAllAvailableBytes();
-							processMessagesData(bytes, 0, bytes.length);
+							haxe.MainLoop.runInMainThread(() -> processMessagesData(bytes, 0, bytes.length));
 
 						case StrMessage(content):
 					}
@@ -162,7 +162,7 @@ class WebSocketHandlerClient extends NetworkClient {
 	}
 
 	override function error(msg : String) {
-		socket.close();
+		if( socket != null ) socket.close();
 		super.error(msg);
 	}
 

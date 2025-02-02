@@ -27,7 +27,7 @@ class Entity {
 	public var vz = 0.;
 
 	public function new() {
-		elk.Elk.instance.entities.add(this);
+		Elk.instance.entities.add(this);
 		reset();
 	}
 

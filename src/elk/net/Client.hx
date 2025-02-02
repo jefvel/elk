@@ -57,7 +57,8 @@ class Client {
 				var addr = '$protocol://$address';
 				host.connect(addr, websocketProtocols, (connected : Bool) -> {
 				#else
-				host.connect(address, port, (connected : Bool) -> {
+				var split = address.split(":");
+				host.connect(split[0], Std.parseInt(split[1]), (connected : Bool) -> {
 				#end
 					if( !connected ) {
 						onConnectionFailure();

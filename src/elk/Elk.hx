@@ -24,6 +24,8 @@ class Elk extends hxd.App {
 
 	public var time : Float = 0.0;
 
+	public var paused = false;
+
 	public var pixelSize(default, set) = 2;
 
 	public var window_scale(default, set) = #if js 1.0 #else 1.5 #end;
@@ -197,7 +199,7 @@ class Elk extends hxd.App {
 	public override function update(dt : Float) {
 		super.update(dt);
 		time += dt;
-		Process._runUpdate(dt);
+		@:privateAccess Process._runUpdate(dt);
 
 		#if hot_reload
 		hl.Api.checkReload();

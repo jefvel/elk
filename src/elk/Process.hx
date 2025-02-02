@@ -1,7 +1,16 @@
 package elk;
 
+enum ProcessMode {
+	Pausable;
+	WhenPaused;
+	Always;
+	Disabled;
+}
+
 class Process {
 	static var PROCESSES : Array<Process> = [];
+
+	public var mode : ProcessMode = Pausable;
 
 	var _paused = false;
 
@@ -46,13 +55,15 @@ class Process {
 	public static var timeScale = 1.0;
 	public static var currentTickElapsed = 0.;
 
-	public static function _runUpdate(dt : Float) {
+	private static function _runUpdate(dt : Float) {
 		var scaledDt = dt * timeScale;
 		accumulatedTime += scaledDt;
 		currentTickElapsed = hxd.Math.clamp(accumulatedTime / frameTime);
 
+		var paused = elk.Elk.instance.paused;
+
 		for (p in PROCESSES) {
-			if( !p._paused ) {
+			if( p.canRun(paused) ) {
 				p.preUpdate();
 			}
 		}
@@ -65,14 +76,14 @@ class Process {
 
 			accumulatedTime -= frameTime;
 			for (p in PROCESSES) {
-				if( !p._paused ) {
+				if( p.canRun(paused) ) {
 					p.tick(frameTime);
 				}
 			}
 		}
 
 		for (p in PROCESSES) {
-			if( !p._paused ) {
+			if( p.canRun(paused) ) {
 				p.update(scaledDt);
 			}
 		}
@@ -88,5 +99,16 @@ class Process {
 		rate = hxd.Math.iclamp(rate, 1, 999);
 		frameTime = 1 / rate;
 		return tickRate = rate;
+	}
+
+	inline private function canRun(rootPaused : Bool) {
+		if( _paused ) return false;
+
+		return switch (mode) {
+			case Always: true;
+			case Disabled: false;
+			case Pausable: !rootPaused;
+			case WhenPaused: rootPaused;
+		}
 	}
 }
