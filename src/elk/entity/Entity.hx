@@ -28,10 +28,15 @@ class Entity {
 
 	public function new() {
 		elk.Elk.instance.entities.add(this);
+		reset();
 	}
 
 	public function remove() {
 		Elk.instance.entities.remove(this);
+	}
+
+	function reset() {
+		ax = ay = az = vx = vy = vz = x = y = z = 0.0;
 	}
 
 	public var friction(default, set) = 1.01;

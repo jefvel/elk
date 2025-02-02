@@ -24,7 +24,7 @@ class Client {
 
 	public function dispose() {
 		if( host == null ) return;
-		onDisconnected();
+		haxe.MainLoop.runInMainThread(onDisconnected);
 		host.dispose();
 		host = null;
 	}
@@ -64,11 +64,11 @@ class Client {
 						return;
 					}
 
-					onConnected();
+					haxe.MainLoop.runInMainThread(onConnected);
 					trace('connected to server.');
 				},
 				function() {
-					onDisconnected();
+					haxe.MainLoop.runInMainThread(onDisconnected);
 					trace('disconnected from server.');
 				});
 
