@@ -44,7 +44,7 @@ class Database {
 
 		migrations = new Migrations(connection);
 		migrations.migrate('db/migrations');
-		Sys.println('✅ Connected to DB');
+		Sys.println('⚡ Initialized DB');
 	}
 
 	function init_sqlite(file_name : String) {
