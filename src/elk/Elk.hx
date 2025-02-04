@@ -23,6 +23,7 @@ class Elk extends hxd.App {
 	public static var type : AppType = App;
 
 	public var time : Float = 0.0;
+	public var scaledTime : Float = 0.0;
 
 	public var paused = false;
 
@@ -199,10 +200,19 @@ class Elk extends hxd.App {
 	public override function update(dt : Float) {
 		super.update(dt);
 		time += dt;
+		scaledTime += dt * timeScale;
 		@:privateAccess Process._runUpdate(dt);
 
 		#if hot_reload
 		hl.Api.checkReload();
+		#end
+
+		#if sys
+		if( Sys.systemName() == "Mac" && hxd.Key.isDown(hxd.Key.LEFT_WINDOW_KEY) ) {
+			if( hxd.Key.isPressed(hxd.Key.Q) ) {
+				hxd.System.exit();
+			}
+		}
 		#end
 	}
 
