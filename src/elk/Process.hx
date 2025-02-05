@@ -37,6 +37,7 @@ class Process {
 	}
 
 	function init() {
+		hxd.Timer.useManualFrameCount = true;
 		PROCESSES.push(this);
 	}
 
@@ -73,7 +74,6 @@ class Process {
 		while (accumulatedTime >= frameTime) {
 			currentTick++;
 			hxd.Timer.frameCount = currentTick;
-
 			accumulatedTime -= frameTime;
 			for (p in PROCESSES) {
 				if( p.canRun(paused) ) {

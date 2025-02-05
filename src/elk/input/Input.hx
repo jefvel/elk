@@ -8,7 +8,30 @@ enum InputMethod {
 	Controller;
 }
 
-class InputHandler {
+class Input {
+	public static var instance(get, null) : Input;
+
+	static function get_instance() {
+		if( instance == null ) instance = new Input();
+		return instance;
+	}
+
+	public static var disableInput = false;
+
+	function new() {}
+
+	public static inline function isKeyDown(key : Int) {
+		return !disableInput && hxd.Key.isDown(key);
+	}
+
+	public static inline function isKeyPressed(key : Int) {
+		return !disableInput && hxd.Key.isPressed(key);
+	}
+
+	public static inline function isKeyReleased(key : Int) {
+		return !disableInput && hxd.Key.isReleased(key);
+	}
+
 	public static inline function getAxis(negative_key : Int, positive_key : Int) {
 		return (hxd.Key.isDown(positive_key) ? 1 : 0) - (hxd.Key.isDown(negative_key) ? 1 : 0);
 	}

@@ -1,5 +1,7 @@
 package elk;
 
+import elk.input.Input;
+import hxd.res.DefaultFont;
 import hxd.fs.MultiFileSystem;
 import hxd.fs.EmbedFileSystem;
 import hxd.Window;
@@ -25,6 +27,8 @@ class Elk extends hxd.App {
 	public var time : Float = 0.0;
 	public var scaledTime : Float = 0.0;
 
+	public var input : Input;
+
 	public var paused = false;
 
 	public var pixelSize(default, set) = 2;
@@ -37,6 +41,8 @@ class Elk extends hxd.App {
 	public var entities : EntityManager;
 	public var states : GameStateHandler;
 	public var sounds : SoundHandler;
+
+	public var console : h2d.Console;
 
 	/**
 	 * automatically sets scalemode
@@ -97,10 +103,16 @@ class Elk extends hxd.App {
 		entities = new EntityManager();
 		sounds = new SoundHandler();
 
+		input = Input.instance;
+
 		initResources();
 		elk.castle.CastleDB.init();
 
 		initRenderer();
+
+		console = new h2d.Console(DefaultFont.get(), s2d);
+		console.shortKeyChar = '§'.charCodeAt(0);
+		console.show();
 	}
 
 	public function on_load_progress(progress : Float) {}
@@ -199,6 +211,9 @@ class Elk extends hxd.App {
 
 	public override function update(dt : Float) {
 		super.update(dt);
+		if( console?.isActive() ) {
+			s2d.addChild(console);
+		}
 		time += dt;
 		scaledTime += dt * timeScale;
 		@:privateAccess Process._runUpdate(dt);
