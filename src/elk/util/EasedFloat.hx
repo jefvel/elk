@@ -1,10 +1,10 @@
 package elk.util;
 
 class EasedFloat {
-	public var value(get, set): Float;
+	public var value(get, set) : Float;
 
 	public var easeTime = 0.3;
-	public var easeFunction: (Float) -> Float = M.expoOut;
+	public var easeFunction : (Float) -> Float = M.expoOut;
 
 	public var timeScale = 1.0;
 
@@ -16,34 +16,34 @@ class EasedFloat {
 
 	var internalValue = 0.;
 
-	public function new(initial: Float = 0., easeTime = 0.3) {
+	public function new(initial : Float = 0., easeTime = 0.3) {
 		this.easeTime = easeTime;
 		setImmediate(initial);
 	}
 
-	public function setImmediate(value: Float) {
+	public function setImmediate(value : Float) {
 		targetValue = from = value;
 		changeTime = easeTime;
 	}
 
 	function set_value(v) {
-		if (v == targetValue) {
+		if( v == targetValue ) {
 			return v;
 		}
 
 		from = targetValue;
 		targetValue = v;
 
-		changeTime = hxd.Timer.lastTimeStamp;
+		changeTime = elk.Elk.instance.scaledTime;
 
 		return v;
 	}
 
 	function get_value() {
-		var t = hxd.Timer.lastTimeStamp - changeTime;
+		var t = elk.Elk.instance.scaledTime - changeTime;
 		t *= timeScale;
 
-		if (t > easeTime) {
+		if( t > easeTime ) {
 			return targetValue;
 		}
 

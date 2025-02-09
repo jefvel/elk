@@ -11,6 +11,8 @@ class Server {
 	public var on_client_connected : (NetworkClient) -> Void;
 	public var on_client_disconnected : (NetworkClient) -> Void;
 
+	public var flush_interval = 1.0 / 10.0;
+
 	var max_users = 100;
 	var bind_address = '0.0.0.0';
 	var bind_port = 9999;
@@ -107,7 +109,7 @@ class Server {
 
 	public function update(dt : Float) {
 		elapsed += dt;
-		if( running && host != null && elapsed > 0.2 ) {
+		if( running && host != null && elapsed > flush_interval ) {
 			elapsed = 0.0;
 			host.flush();
 		}

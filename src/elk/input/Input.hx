@@ -11,12 +11,12 @@ enum InputMethod {
 class Input {
 	public static var instance(get, null) : Input;
 
+	public static var disableInput = false;
+
 	static function get_instance() {
 		if( instance == null ) instance = new Input();
 		return instance;
 	}
-
-	public static var disableInput = false;
 
 	function new() {}
 
