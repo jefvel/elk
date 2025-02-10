@@ -2,8 +2,6 @@ package elk.aseprite;
 
 #if (sys || nodejs)
 class AsepriteConvert extends hxd.fs.Convert {
-	static var asepritePath : String = null;
-
 	function new() {
 		super("aseprite,ase", "asedata"); // converts .aseprite files to .asedata
 	}

@@ -38,6 +38,10 @@ class Input {
 
 	public static function getVector(left_key : Int, right_key : Int, up_key : Int, down_key : Int, ?point : Point) {
 		if( point == null ) point = new Point();
+		if( disableInput ) {
+			point.set();
+			return point;
+		}
 		point.x = getAxis(left_key, right_key);
 		point.y = getAxis(up_key, down_key);
 		point.normalize();

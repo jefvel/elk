@@ -213,6 +213,9 @@ class Elk extends hxd.App {
 		super.update(dt);
 		if( console?.isActive() ) {
 			s2d.addChild(console);
+			Input.disableInput = true;
+		} else {
+			Input.disableInput = false;
 		}
 		time += dt;
 		scaledTime += dt * timeScale;
