@@ -11,7 +11,7 @@ class Server {
 	public var on_client_connected : (NetworkClient) -> Void;
 	public var on_client_disconnected : (NetworkClient) -> Void;
 
-	public var flush_interval = 1.0 / 10.0;
+	public var flush_interval = 1.0 / 4.0;
 
 	var max_users = 100;
 	var bind_address = '0.0.0.0';
