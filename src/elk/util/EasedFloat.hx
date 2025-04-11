@@ -16,6 +16,8 @@ class EasedFloat {
 
 	var internalValue = 0.;
 
+	public var ignoreTimeScale = false;
+
 	public function new(initial : Float = 0., easeTime = 0.3) {
 		this.easeTime = easeTime;
 		setImmediate(initial);
@@ -34,13 +36,13 @@ class EasedFloat {
 		from = targetValue;
 		targetValue = v;
 
-		changeTime = elk.Elk.instance.scaledTime;
+		changeTime = ignoreTimeScale ? elk.Elk.instance.time : elk.Elk.instance.scaledTime;
 
 		return v;
 	}
 
 	function get_value() {
-		var t = elk.Elk.instance.scaledTime - changeTime;
+		var t = (ignoreTimeScale ? elk.Elk.instance.time : elk.Elk.instance.scaledTime) - changeTime;
 		t *= timeScale;
 
 		if( t > easeTime ) {

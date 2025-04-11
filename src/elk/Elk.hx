@@ -33,7 +33,7 @@ class Elk extends hxd.App {
 
 	public var pixelSize(default, set) = 2;
 
-	public var window_scale(default, set) = #if js 1.0 #else 1.5 #end;
+	public var window_scale(default, set) = #if js 1.0 #else 1.0 #end;
 
 	public var tickRate(get, set) : Int;
 	public var timeScale(get, set) : Float;
@@ -112,7 +112,6 @@ class Elk extends hxd.App {
 
 		console = new h2d.Console(DefaultFont.get(), s2d);
 		console.shortKeyChar = '§'.charCodeAt(0);
-		console.show();
 	}
 
 	public function on_load_progress(progress : Float) {}

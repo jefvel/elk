@@ -49,6 +49,7 @@ class Entity {
 
 		vx += ax * dt;
 		vy += ay * dt;
+
 		x += vx * dt;
 		y += vy * dt;
 		z += vz * dt;

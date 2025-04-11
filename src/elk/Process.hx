@@ -12,6 +12,8 @@ class Process {
 
 	public var mode : ProcessMode = Pausable;
 
+	public var ignoreTimeScale = false;
+
 	var _paused = false;
 
 	public var priority = 0;
@@ -84,7 +86,8 @@ class Process {
 
 		for (p in PROCESSES) {
 			if( p.canRun(paused) ) {
-				p.update(scaledDt);
+				if( p.ignoreTimeScale ) p.update(dt);
+				else p.update(scaledDt);
 			}
 		}
 

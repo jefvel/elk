@@ -126,6 +126,7 @@ class ResTools {
 
 				loader.onLoaded = (data) -> {
 					total_loaded += data.length;
+					trace('loaded pak $data');
 					pak.addPak(new hxd.fmt.pak.FileSystem.FileInput(data));
 					if( ++pak_index == $v{maxPaks} ) {
 						hxd.Res.loader = new hxd.res.Loader(new MultiFileSystem([pak, embedded_fs]));
