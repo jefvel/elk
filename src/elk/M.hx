@@ -64,6 +64,11 @@ class M {
 		return from + d * s;
 	}
 
+	public static inline function lerpDt(from : Float, to : Float, dt : Float, halfTime : Float) {
+		var dd = (-dt / halfTime);
+		return to + (from - to) * Math.exp(dd);
+	}
+
 	public static inline function clamp(x : Float, lower = 0., upper = 1.) {
 		if( x < lower ) return lower;
 		if( x > upper ) return upper;

@@ -13,12 +13,16 @@ class Input {
 
 	public static var disableInput = false;
 
+	public var gamepads : GamepadHandler;
+
 	static function get_instance() {
 		if( instance == null ) instance = new Input();
 		return instance;
 	}
 
-	function new() {}
+	function new() {
+		gamepads = new GamepadHandler();
+	}
 
 	public static inline function isKeyDown(key : Int) {
 		return !disableInput && hxd.Key.isDown(key);
