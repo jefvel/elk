@@ -13,7 +13,9 @@ class Input {
 
 	public static var disableInput = false;
 
+	#if !disableGamepads
 	public var gamepads : GamepadHandler;
+	#end
 
 	static function get_instance() {
 		if( instance == null ) instance = new Input();
@@ -21,7 +23,9 @@ class Input {
 	}
 
 	function new() {
+		#if !disableGamepads
 		gamepads = new GamepadHandler();
+		#end
 	}
 
 	public static inline function isKeyDown(key : Int) {
