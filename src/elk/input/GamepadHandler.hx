@@ -1,5 +1,6 @@
 package elk.input;
 
+#if !disableGamepads
 import hxd.Pad;
 
 class GamepadHandler extends Process {
@@ -134,3 +135,4 @@ class GamepadHandler extends Process {
 		return isActive() && pad.yAxis > dz;
 	}
 }
+#end
