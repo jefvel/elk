@@ -21,7 +21,11 @@ class NGWebSocketHandler extends hx.ws.WebSocketHandler {
 				cb(resp);
 			}
 
-			resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, 'auth_token');
+			if( StringTools.endsWith(req.uri, 'healthz') || StringTools.endsWith(req.uri, 'livez') ) {
+				resp.code = 200;
+			}
+
+			// resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, 'auth_token');
 			return cb(resp);
 
 			try {
