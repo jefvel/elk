@@ -34,6 +34,12 @@ class NGWebSocketHandler {
 				return unauthorized();
 			}
 
+			if( StringTools.endsWith(req.uri, 'healthz') || StringTools.endsWith(req.uri, 'livez') ) {
+				resp.code = 200;
+			}
+
+			resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, 'auth_token');
+
 			if( session == null || session.length == 0 ) {
 				return unauthorized();
 			}
