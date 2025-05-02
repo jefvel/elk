@@ -180,7 +180,7 @@ class WebSocketHandlerClient extends NetworkClient {
 }
 
 class WebSocketHost extends WebSocketHostCommon {
-	var server : WebSocketServer<elk.newgrounds.NGWebSocketHandler>;
+	var server : WebSocketServer;
 
 	override function close() {
 		super.close();

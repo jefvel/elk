@@ -1,7 +1,6 @@
 package elk.net;
 
 import hxbit.NetworkHost.NetworkClient;
-import elk.newgrounds.NGWebSocketHandler;
 import elk.net.MultiplayerClient;
 
 class Server {

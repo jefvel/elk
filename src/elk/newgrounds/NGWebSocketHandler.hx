@@ -3,60 +3,58 @@ package elk.newgrounds;
 import elk.newgrounds.ValidateNGSession;
 
 #if sys
-class NGWebSocketHandler extends hx.ws.WebSocketHandler {
-	public var username(default, null) : String = null;
-	public var session(default, null) : String = null;
+class NGWebSocketHandler {
+	public static function validate_incoming_session(client : hx.ws.Handler, req : HttpRequest, res : HttpResponse, cb : (HttpResponse) -> Void) {
+		function unauthorized() {
+			trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
+			resp.code = 403;
+			resp.text = "Unauthorized";
+			resp.headers.set(hx.ws.HttpHeader.CONNECTION, "close");
+			resp.headers.set(hx.ws.HttpHeader.X_WEBSOCKET_REJECT_REASON, 'Unauthorized');
+			cb(resp);
+		}
 
-	public function new(s : hx.ws.SocketImpl) {
-		super(s);
+		resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, 'auth_token');
 
-		validateHandshake = (req, resp, cb) -> {
-			function unauthorized() {
-				trace('UNAUTHOR');
-				trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
-				resp.code = 403;
-				resp.text = "Unauthorized";
-				resp.headers.set(hx.ws.HttpHeader.CONNECTION, "close");
-				resp.headers.set(hx.ws.HttpHeader.X_WEBSOCKET_REJECT_REASON, 'Unauthorized');
-				cb(resp);
+		try {
+			var protocols = req.headers.get(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL);
+			if( protocols == null ) return unauthorized();
+
+			var split = protocols.split(',').map(s -> StringTools.trim(s));
+			var type = split[0];
+			if( type != 'auth_token' ) {
+				return unauthorized();
 			}
 
-			resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, 'auth_token');
-			return cb(resp);
+			var hashed = split[1];
+			var split = haxe.crypto.Base64.urlDecode(hashed).toString().split(':');
+			var username = split[0];
+			var session = split[1];
+			if( username == null || username.length == 0 ) {
+				return unauthorized();
+			}
 
-			try {
-				var protocols = req.headers.get(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL);
-				if( protocols == null ) return unauthorized();
+			if( session == null || session.length == 0 ) {
+				return unauthorized();
+			}
 
-				var split = protocols.split(',').map(s -> StringTools.trim(s));
-				var type = split[0];
-				if( type != 'auth_token' ) {
+			ValidateNGSession(username, session, function(valid) {
+				if( !valid ) {
 					return unauthorized();
 				}
 
-				var hashed = split[1];
-				var split = haxe.crypto.Base64.urlDecode(hashed).toString().split(':');
-				var username = split[0];
-				var session = split[1];
+				// this.username = username;
+				// this.session = session;
+				return cb(resp);
 
-				ValidateNGSession(username, session, function(valid) {
-					if( !valid ) {
-						// return unauthorized();
-					}
+				resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, type);
 
-					this.username = username;
-					this.session = session;
-					return cb(resp);
-
-					resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, type);
-
-					cb(resp);
-				});
-			} catch (err) {
-				trace('handshake check error.');
-				unauthorized();
-			}
-		};
+				cb(resp);
+			});
+		} catch (err) {
+			trace('handshake check error.');
+			unauthorized();
+		}
 	}
 
 	/**
