@@ -12,7 +12,6 @@ import hx.ws.WebSocketSecureServer;
 #error "Using SocketHost requires compiling with -lib hxbit"
 #end
 import hxbit.NetworkHost;
-
 class WebSocketClient extends NetworkClient {
 	var socket : WebSocket;
 
@@ -179,8 +178,37 @@ class WebSocketHandlerClient extends NetworkClient {
 	}
 }
 
+import hx.ws.SocketImpl;
+import hx.ws.WebSocketHandler;
+import hx.ws.Types;
+
+class MyHandler extends WebSocketHandler {
+	public function new(s : SocketImpl) {
+		super(s);
+		onopen = function() {
+			trace(id + ". OPEN");
+		}
+		onclose = function() {
+			trace(id + ". CLOSE");
+		}
+		onmessage = function(message : MessageType) {
+			switch (message) {
+				case BytesMessage(content):
+					trace(content.readAllAvailableBytes());
+				case StrMessage(content):
+					var str = "echo: " + content;
+					trace(str);
+					send(str);
+			}
+		}
+		onerror = function(error) {
+			trace(id + ". ERROR: " + error);
+		}
+	}
+}
+
 class WebSocketHost extends WebSocketHostCommon {
-	var server : WebSocketServer;
+	var server : WebSocketServer<MyHandler>;
 
 	override function close() {
 		super.close();
