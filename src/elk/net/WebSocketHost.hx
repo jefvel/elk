@@ -7,11 +7,14 @@ import hx.ws.Types;
 import hx.ws.WebSocketServer;
 import hx.ws.WebSocketHandler;
 import hx.ws.WebSocketSecureServer;
+import hx.ws.SocketImpl;
+import hx.ws.Types;
 #end
 #if !hxbit
 #error "Using SocketHost requires compiling with -lib hxbit"
 #end
 import hxbit.NetworkHost;
+
 class WebSocketClient extends NetworkClient {
 	var socket : WebSocket;
 
@@ -177,10 +180,6 @@ class WebSocketHandlerClient extends NetworkClient {
 		}
 	}
 }
-
-import hx.ws.SocketImpl;
-import hx.ws.WebSocketHandler;
-import hx.ws.Types;
 
 class MyHandler extends WebSocketHandler {
 	public function new(s : SocketImpl) {

@@ -1,10 +1,12 @@
 package elk.newgrounds;
 
+#if sys
+import hx.ws.HttpResponse;
+import hx.ws.HttpRequest;
 import elk.newgrounds.ValidateNGSession;
 
-#if sys
 class NGWebSocketHandler {
-	public static function validate_incoming_session(client : hx.ws.Handler, req : HttpRequest, res : HttpResponse, cb : (HttpResponse) -> Void) {
+	public static function validate_incoming_session(client : hx.ws.Handler, req : HttpRequest, resp : HttpResponse, cb : (HttpResponse) -> Void) {
 		function unauthorized() {
 			trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
 			resp.code = 403;
@@ -69,16 +71,18 @@ class NGWebSocketHandler {
 	 * @param client 
 	 */
 	public static function get_session_info(client : hxbit.NetworkHost.NetworkClient) {
-		if( client is elk.net.WebSocketHost.WebSocketHandlerClient ) {
-			var cl = cast(client, elk.net.WebSocketHost.WebSocketHandlerClient);
-			if( cl.socket is elk.newgrounds.NGWebSocketHandler ) {
-				var casted = cast(cl.socket, elk.newgrounds.NGWebSocketHandler);
-				return {
-					username : casted.username,
-					session_id : casted.session,
+		/*
+			if( client is elk.net.WebSocketHost.WebSocketHandlerClient ) {
+				var cl = cast(client, elk.net.WebSocketHost.WebSocketHandlerClient);
+				if( cl.socket is elk.newgrounds.NGWebSocketHandler ) {
+					var casted = cast(cl.socket, elk.newgrounds.NGWebSocketHandler);
+					return {
+						username : casted.username,
+						session_id : casted.session,
+					}
 				}
 			}
-		}
+		 */
 
 		return null;
 	}
