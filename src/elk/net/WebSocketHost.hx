@@ -8,6 +8,8 @@ import hx.ws.WebSocketServer;
 import hx.ws.WebSocketHandler;
 import hx.ws.WebSocketSecureServer;
 import hx.ws.SocketImpl;
+import hx.ws.HttpResponse;
+import hx.ws.HttpRequest;
 import hx.ws.Types;
 #end
 #if !hxbit
