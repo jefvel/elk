@@ -8,7 +8,7 @@ class WebGenerator {
 		return null;
 	}
 
-	static function val(name:String) {
+	static function val(name : String) {
 		return Context.definedValue(name);
 	}
 
@@ -17,12 +17,12 @@ class WebGenerator {
 		function getRec(path) {
 			for (f in sys.FileSystem.readDirectory(path)) {
 				var file = path + "/" + f;
-				if (sys.FileSystem.isDirectory(file)) {
+				if( sys.FileSystem.isDirectory(file) ) {
 					getRec(file);
 					continue;
 				}
 				var tmpl = file.substr(10);
-				templates.push({file: tmpl, data: sys.io.File.getContent(file)});
+				templates.push({file : tmpl, data : sys.io.File.getContent(file)});
 			}
 		}
 		getRec("templates");
@@ -35,22 +35,23 @@ class WebGenerator {
 		var game_file_hash = haxe.crypto.Sha1.make(sys.io.File.getBytes('$build_dir/game.js')).toHex();
 
 		var context = {
-			windowTitle: val("windowTitle"),
-			gameFile: 'game.js?h=${game_file_hash}',
-			additionalCss: "",
-			twitterSite: val("twitterSite"),
-			twitterCreator: val("twitterCreator"),
-			ogUrl: val("ogUrl"),
-			ogDescription: val("ogDescription"),
-			ogImage: val("ogImage"),
-			backgroundColor: val("backgroundColor"),
+			windowTitle : val("windowTitle"),
+			gameFile : 'game.js?h=${game_file_hash}',
+			additionalCss : "",
+			twitterSite : val("twitterSite"),
+			twitterCreator : val("twitterCreator"),
+			ogUrl : val("ogUrl"),
+			ogDescription : val("ogDescription"),
+			ogImage : val("ogImage"),
+			metaDescription : val("metaDescription"),
+			backgroundColor : val("backgroundColor"),
 		};
 
 		final fixedWindow = val("windowFixed");
 
-		if (fixedWindow != null) {
+		if( fixedWindow != null ) {
 			final sizes = val("windowSize");
-			if (sizes == null) {
+			if( sizes == null ) {
 				throw "windowFixed defined without setting windowSize";
 			}
 
@@ -70,26 +71,25 @@ class WebGenerator {
 		var ignoredFiles = ["bullet.js"];
 
 		var interp = new hscript.Interp();
-		for (f in Reflect.fields(context))
-			interp.variables.set(f, Reflect.field(context, f));
+		for (f in Reflect.fields(context)) interp.variables.set(f, Reflect.field(context, f));
 		for (t in templates) {
 			var templateable = false;
 			for (templateExtension in templateableFiles) {
-				if (StringTools.endsWith(t.file, templateExtension)) {
+				if( StringTools.endsWith(t.file, templateExtension) ) {
 					templateable = true;
 					break;
 				}
 			}
 
 			for (ignored in ignoredFiles) {
-				if (t.file == ignored) {
+				if( t.file == ignored ) {
 					templateable = false;
 					break;
 				}
 			}
 
-			var data:String;
-			if (templateable) {
+			var data : String;
+			if( templateable ) {
 				data = ~/::([^:]+)::/g.map(t.data, function(r) {
 					var script = r.matched(1);
 					var expr = new hscript.Parser().parseString(script);
@@ -104,7 +104,7 @@ class WebGenerator {
 			dir.pop();
 			try
 				sys.FileSystem.createDirectory('$build_dir/${dir.join("/")}')
-			catch (e:Dynamic) {};
+			catch (e : Dynamic) {};
 			sys.io.File.saveContent('$build_dir/$file', data);
 		}
 
