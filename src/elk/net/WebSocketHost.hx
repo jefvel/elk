@@ -187,7 +187,6 @@ class MyHandler extends WebSocketHandler {
 	public function new(s : SocketImpl) {
 		super(s);
 		validateHandshake = function(req : HttpRequest, res : HttpResponse, cb : (HttpResponse) -> Void) {
-			res.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, 'auth_token');
 			cb(res);
 		}
 
