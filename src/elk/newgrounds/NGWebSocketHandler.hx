@@ -28,9 +28,11 @@ class NGWebSocketHandler {
 			}
 
 			var hashed = split[1];
-			var split = haxe.crypto.Base64.urlDecode(hashed).toString().split(':');
-			var username = split[0];
-			var session = split[1];
+
+			var split = DecodeConnectionHash(hashed);
+
+			var username = split.username;
+			var session = split.password;
 			if( username == null || username.length == 0 ) {
 				return unauthorized();
 			}
