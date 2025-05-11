@@ -6,9 +6,8 @@ import hx.ws.HttpRequest;
 import elk.newgrounds.ValidateNGSession;
 
 class NGWebSocketHandler {
-	public static function validate_incoming_session(client : hx.ws.Handler, req : HttpRequest, resp : HttpResponse, cb : (HttpResponse) -> Void) {
+	public static function validateHandshake(client : hx.ws.Handler, req : HttpRequest, resp : HttpResponse, cb : (HttpResponse) -> Void) {
 		function unauthorized() {
-			trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
 			resp.code = 403;
 			resp.text = "Unauthorized";
 			resp.headers.set(hx.ws.HttpHeader.CONNECTION, "close");
@@ -51,9 +50,8 @@ class NGWebSocketHandler {
 					return unauthorized();
 				}
 
-				// this.username = username;
-				// this.session = session;
-				return cb(resp);
+				client.metadata.set('username', username);
+				client.metadata.set('session', session);
 
 				resp.headers.set(hx.ws.HttpHeader.SEC_WEBSOCKET_PROTOCOL, type);
 
@@ -71,18 +69,16 @@ class NGWebSocketHandler {
 	 * @param client 
 	 */
 	public static function get_session_info(client : hxbit.NetworkHost.NetworkClient) {
-		/*
-			if( client is elk.net.WebSocketHost.WebSocketHandlerClient ) {
-				var cl = cast(client, elk.net.WebSocketHost.WebSocketHandlerClient);
-				if( cl.socket is elk.newgrounds.NGWebSocketHandler ) {
-					var casted = cast(cl.socket, elk.newgrounds.NGWebSocketHandler);
-					return {
-						username : casted.username,
-						session_id : casted.session,
-					}
+		if( client is elk.net.WebSocketHost.WebSocketHandlerClient ) {
+			var cl = cast(client, elk.net.WebSocketHost.WebSocketHandlerClient);
+			var metadata = cl.socket.metadata;
+			if( metadata.exists('session_id') && metadata.exists('username') ) {
+				return {
+					username : metadata.get('username'),
+					session_id : metadata.get('session_id'),
 				}
 			}
-		 */
+		}
 
 		return null;
 	}
