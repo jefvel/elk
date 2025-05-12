@@ -4,7 +4,7 @@ import hxbit.NetworkHost.NetworkClient;
 
 @:keepSub
 class MultiplayerClient implements hxbit.NetworkSerializable {
-	@:s @:notMutable public var uid : String;
+	@:s @:notMutable public var uid : String = null;
 
 	public var connected(default, null) = false;
 	public var client : NetworkClient = null;
@@ -13,8 +13,8 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 	var host : hxbit.NetworkHost;
 
-	public function new(client : NetworkClient, host : hxbit.NetworkHost) {
-		uid = elk.util.Uuid.v4();
+	public function new(client : NetworkClient, host : hxbit.NetworkHost, customUid : String = null) {
+		uid = customUid ?? elk.util.Uuid.v4();
 
 		this.host = host;
 		this.client = client;
