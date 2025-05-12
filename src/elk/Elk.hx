@@ -156,7 +156,12 @@ class Elk extends hxd.App {
 			return;
 		}
 
-		s2d.scaleMode = ScaleMode.Stretch(w, h);
+		var scl = 1.0;
+		#if js
+		scl = @:privateAccess hxd.Window.getInstance().getPixelRatio();
+		#end
+
+		s2d.scaleMode = ScaleMode.Stretch(Std.int(w / scl), Std.int(h / scl));
 
 		this.windowWidth = w;
 		this.windowHeight = h;
@@ -197,7 +202,7 @@ class Elk extends hxd.App {
 
 		#if js
 		// This causes the game to not be super small on high DPI mobile screens
-		hxd.Window.getInstance().useScreenPixels = false;
+		// hxd.Window.getInstance().useScreenPixels = false;
 		#end
 
 		onResize();
