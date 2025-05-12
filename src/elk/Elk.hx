@@ -197,7 +197,7 @@ class Elk extends hxd.App {
 
 		#if js
 		// This causes the game to not be super small on high DPI mobile screens
-		hxd.Window.getInstance().useScreenPixels = false;
+		// hxd.Window.getInstance().useScreenPixels = false;
 		#end
 
 		onResize();
