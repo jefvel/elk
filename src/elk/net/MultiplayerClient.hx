@@ -32,7 +32,8 @@ class MultiplayerClient implements hxbit.NetworkSerializable {
 
 	public function networkAllow(op : hxbit.NetworkSerializable.Operation, propId : Int, client : hxbit.NetworkSerializable) : Bool {
 		var allow = client == this;
-		if( propId == this.networkPropUid.toInt() ) return false;
+		var propOp = op == SetField;
+		if( propOp && propId == this.networkPropUid.toInt() ) return false;
 		return allow;
 	}
 
