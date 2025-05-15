@@ -1,64 +1,47 @@
 package elk.graphics.shader;
 
-class DitherShader extends hxsl.Shader {
+class DitherShader extends h3d.shader.ScreenShader {
 	static var SRC = {
-		@param var bayer2: Array<Float, 4>;
-		@param var bayer4: Array<Float, 16>;
-		@param var bayer8: Array<Float, 64>;
-		
-		var calculatedUV: Vec2;
-		var pixelColor: Vec4;
-		
-		function getBayer2(x: Int, y: Int): Float {
-			return 0.5;
-			//return bayer2[(x % 2) + (y % 2) * 2] * (1. / 4.) - 0.5;
-		}
-		
-		inline function getBayer4(x: Int, y: Int): Float {
-			return 0.5;
-			//return bayer2[(x % 4) + (y % 4) * 4] * (1. / 16.) - 0.5;
-		}
-
-		inline function getBayer8(x: Int, y: Int): Float {
-			return 0.5;
-			//return bayer2[(x % 8) + (y % 8) * 8] * (1. / 64.) - 0.5;
-		}
-
+		@param var texture : Sampler2D;
+		@param var screenSize : Vec2;
+		@global var ditherMatrix : Sampler2D;
+		@global var time : Float;
+		@param var mask : Sampler2D;
+		@param var maskMatA : Vec3;
+		@param var maskMatB : Vec3;
+		@param var smoothAlpha : Bool;
+		@param var bias : Float;
+		@param var offset : Vec2;
+		@:import h3d.shader.NoiseLib;
 		function fragment() {
-			var x = int(calculatedUV.x * 32);
-			var y = int(calculatedUV.y * 32);
-			var b1 = getBayer2(x, y);
-			var b2 = getBayer2(x, y);
-			var b3 = getBayer2(x, y);
-			b1 += bayer2[int(calculatedUV.x) % 2];
-			pixelColor.rgb = vec3(b1, b2, b3);
+			noiseSeed = 3;
+			var pixel : Vec4 = texture.get(calculatedUV);
+			var texSize = screenSize / vec2(8);
+
+			var vv = (fragCoord.xy + offset) / screenSize;
+
+			var uv = vec3(input.uv, 1);
+			var k = mask.get(vec2(uv.dot(maskMatA), uv.dot(maskMatB)));
+			var alpha = k.a; // smoothAlpha ? k.a : float(k.a > 0);
+
+			var threshold = ditherMatrix.get(vv * texSize); //
+			var t1 = time * 0.1;
+			var t2 = time * 0.3;
+			var nsPos = fragCoord.xy / screenSize.xx * 2.0 + vec2(t1, t1 * 0.9);
+			var ns = snoise(nsPos);
+			var nsPos2 = fragCoord.xy / screenSize.yy * 8.0 - vec2(t2 * 0.2, t2);
+			var ns2 = snoise(nsPos2);
+			var lum = k.a; // dot(vec3(0.2126, 0.7152, 0.0722), k.rgb);
+			var no = abs(ns * 0.5 + ns2 * 0.13) * 0.1;
+
+			if( lum < 0.98 ) lum -= no;
+
+			pixelColor = pixel;
+			if( lum * 1.02 < threshold.r + bias ) {
+				pixelColor.a = 0.0;
+			}
+
+			pixelColor.rgb *= k.rgb * pixelColor.a;
 		}
-	} 
-	
-	public function new() {
-		super();
-
-		bayer2 = [
-			0, 2,
-			3, 1
-		];
-
-		bayer4 = [
-			0, 8, 2, 10,
-			12, 4, 14, 6,
-			3, 11, 1, 9,
-			15, 7, 13, 5,
-		];
-		
-		bayer8 = [
-			0, 32, 8, 40, 2, 34, 10, 42,
-			48, 16, 56, 24, 50, 18, 58, 26,  
-			12, 44,  4, 36, 14, 46,  6, 38, 
-			60, 28, 52, 20, 62, 30, 54, 22,  
-			3, 35, 11, 43,  1, 33,  9, 41,  
-			51, 19, 59, 27, 49, 17, 57, 25, 
-			15, 47,  7, 39, 13, 45,  5, 37, 
-			63, 31, 55, 23, 61, 29, 53, 21,
-		];
 	}
 }
