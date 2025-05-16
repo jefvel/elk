@@ -240,6 +240,7 @@ class Elk extends hxd.App {
 
 	override function render(e : Engine) {
 		@:privateAccess s3d.ctx.elapsedTime *= timeScale;
+		var elapsed = @:privateAccess s3d.ctx.elapsedTime;
 
 		e.pushTarget(buf);
 		e.clear(e.backgroundColor, 1);
@@ -248,7 +249,7 @@ class Elk extends hxd.App {
 
 		s2d.render(e);
 
-		if( entities != null ) entities.render();
+		if( entities != null ) entities.render(elapsed);
 		drawCalls = e.drawCalls;
 	}
 

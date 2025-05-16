@@ -35,7 +35,7 @@ class EntityManager extends elk.Process {
 		}
 	}
 
-	public function render() {
-		for (e in entities) e.render();
+	public function render(elapsed : Float) {
+		for (e in entities) e.render(elapsed);
 	}
 }

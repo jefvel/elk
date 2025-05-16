@@ -26,12 +26,19 @@ class Entity {
 	public var vy = 0.;
 	public var vz = 0.;
 
+	public var owner(default, set) : h2d.Object = null;
+
+	function set_owner(s : h2d.Object) {
+		return owner = s;
+	}
+
 	public function new() {
 		Elk.instance.entities.add(this);
 		reset();
 	}
 
 	public function remove() {
+		if( owner != null ) owner.remove();
 		Elk.instance.entities.remove(this);
 	}
 
@@ -63,7 +70,7 @@ class Entity {
 		az *= fric;
 	}
 
-	public function render() {}
+	public function render(dt : Float) {}
 
 	public inline function preTick() {
 		_prevX = x;
