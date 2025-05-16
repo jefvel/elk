@@ -248,8 +248,8 @@ class Elk extends hxd.App {
 		e.popTarget();
 
 		s2d.render(e);
-
 		if( entities != null ) entities.render(elapsed);
+
 		drawCalls = e.drawCalls;
 	}
 
