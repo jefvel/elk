@@ -92,6 +92,10 @@ class Input {
 		if( e.kind == EPush ) {
 			if( e.touchId != null && touchId == null ) {
 				touchId = e.touchId;
+				var win = hxd.Window.getInstance();
+				var ratio = elk.s2d.width / win.width;
+				mouseX = e.relX * ratio;
+				mouseY = e.relY * ratio;
 				return true;
 			}
 		}
