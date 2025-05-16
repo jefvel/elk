@@ -103,7 +103,7 @@ class Elk extends hxd.App {
 		entities = new EntityManager();
 		sounds = new SoundHandler();
 
-		input = Input.instance;
+		input = Input.init(this);
 
 		initResources();
 		elk.castle.CastleDB.init();

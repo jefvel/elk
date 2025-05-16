@@ -13,19 +13,34 @@ class Input {
 
 	public static var disableInput = false;
 
+	#if js
+	public var touchId = null;
+	#else
+	public var touchId = 0;
+	#end
+
 	#if !disableGamepads
 	public var gamepads : GamepadHandler;
 	#end
 
 	static function get_instance() {
-		if( instance == null ) instance = new Input();
 		return instance;
 	}
 
-	function new() {
+	var elk : Elk = null;
+
+	function new(elk : Elk) {
 		#if !disableGamepads
 		gamepads = new GamepadHandler();
 		#end
+		this.elk = elk;
+
+		hxd.Window.getInstance().addEventTarget(handleEvent);
+	}
+
+	public static function init(elk : Elk) {
+		if( instance == null ) instance = new Input(elk);
+		return instance;
 	}
 
 	public static inline function isKeyDown(key : Int) {
@@ -54,5 +69,39 @@ class Input {
 		point.y = getAxis(up_key, down_key);
 		point.normalize();
 		return point;
+	}
+
+	public var mouseX : Float = 0.0;
+	public var mouseY : Float = 0.0;
+
+	function handleEvent(e : hxd.Event) {
+		if( e.kind == EMove ) {
+			#if js
+			if( e.touchId == null || e.touchId == touchId ) {
+			#end
+				var win = hxd.Window.getInstance();
+				var ratio = elk.s2d.width / win.width;
+				mouseX = e.relX * ratio;
+				mouseY = e.relY * ratio;
+				return true;
+			#if js
+			}
+			#end
+		}
+		#if js
+		if( e.kind == EPush ) {
+			if( e.touchId != null && touchId == null ) {
+				touchId = e.touchId;
+				return true;
+			}
+		}
+		if( e.kind == ERelease || e.kind == EReleaseOutside ) {
+			if( e.touchId == touchId ) {
+				touchId = null;
+				return true;
+			}
+		}
+		#end
+		return false;
 	}
 }
