@@ -21,6 +21,12 @@ class Animation {
 	public var pause = false;
 	public var loop = true;
 
+	public var frameCount(get, null) : Int;
+
+	function get_frameCount() {
+		return data?.frames.length ?? 0;
+	}
+
 	var elapsedTime = 0.;
 	var elapsedFrameTime = 0.;
 
