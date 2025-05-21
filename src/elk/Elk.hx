@@ -225,7 +225,7 @@ class Elk extends hxd.App {
 		scaledTime += dt * timeScale;
 		@:privateAccess Process._runUpdate(dt);
 
-		#if hot_reload
+		#if (hot_reload && sys)
 		hl.Api.checkReload();
 		#end
 

@@ -124,4 +124,8 @@ class M {
 			-10 * t) * Math.sin((t - (ELASTIC_PERIOD / (2 * Math.PI) * Math.asin(1 / ELASTIC_AMPLITUDE))) * (2 * Math.PI) / ELASTIC_PERIOD)
 			+ 1);
 	}
+
+	public static inline function timestamp() {
+		return #if sys Sys.time() #elseif js js.lib.Date.now() * 0.001 #else haxe.Date.now().getTime() #end;
+	}
 }
