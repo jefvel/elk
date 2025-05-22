@@ -127,7 +127,7 @@ class Elk extends hxd.App {
 			'web', //
 		);
 		return;
-		#elseif (debug && hl)
+		#elseif (debug && hl && !use_embed)
 		hxd.Res.initLocal();
 		#if live_reload
 		hxd.res.Resource.LIVE_UPDATE = true;
