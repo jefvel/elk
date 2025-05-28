@@ -8,7 +8,7 @@ function GenerateConnectionHash(username : String, password : String) {
 }
 
 function DecodeConnectionHash(hashed : String) {
-	var split = haxe.crypto.Base64.urlDecode(hashed).toString().split(':');
+	var split = haxe.crypto.Base64.decode(hashed).toString().split(':');
 	return {
 		username : split[0],
 		password : split[1],
