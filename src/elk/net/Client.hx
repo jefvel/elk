@@ -79,6 +79,7 @@ class Client {
 			} catch (e)
 			{
 				trace(e);
+				throw e;
 			}
 		#if (target.threaded)
 		});
